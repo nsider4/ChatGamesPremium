@@ -1,0 +1,4 @@
+name: ChatGames
+version: '${project.version}'
+main: org.nsider.chatgames.ChatGames
+api-version: '1.13'
