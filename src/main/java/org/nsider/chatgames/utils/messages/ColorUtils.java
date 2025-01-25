@@ -1,0 +1,56 @@
+package org.nsider.chatgames.utils.messages;
+
+import org.bukkit.ChatColor;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Utility class for handling color-related operations.
+ * Provides methods for colorizing messages in Minecraft using both Minecraft formatting codes and hex color codes.
+ */
+public class ColorUtils {
+
+    /**
+     * Colorizes a message, translating Minecraft color codes (&) and hex color codes (for Minecraft 1.16+).
+     *
+     * @param message the message to be colorized
+     * @param mcVersion the version of Minecraft
+     * @return the colorized message
+     */
+    public String colorizeMessage(String message, int mcVersion) {
+        //If the Minecraft version is 1.16 or higher, translate hex color codes
+        if (mcVersion >= 16) {
+            return translateHexColors(message);
+        }
+        return message.replace("&", "§");
+    }
+
+    /**
+     * Translates hex color codes in the form of "#RRGGBB" into Minecraft's color codes.
+     * For example: #FF5733 becomes "&x&f&f&5&7&3&3".
+     *
+     * @param message the message containing hex color codes
+     * @return the message with hex colors translated to Minecraft color codes
+     */
+    private String translateHexColors(String message) {
+        Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
+        Matcher matcher = pattern.matcher(message);
+
+        while (matcher.find()) {
+            String hexCode = message.substring(matcher.start(), matcher.end());
+            String replaceSharp = hexCode.replace('#', 'x');
+
+            char[] ch = replaceSharp.toCharArray();
+            StringBuilder builder = new StringBuilder("");
+            for (char c : ch) {
+                builder.append("&").append(c);
+            }
+
+            message = message.replace(hexCode, builder.toString());
+            matcher = pattern.matcher(message);
+        }
+
+        return ChatColor.translateAlternateColorCodes('&', message);
+    }
+}
