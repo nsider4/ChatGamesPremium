@@ -1,4 +1,4 @@
-package org.nsider.chatgames.utils;
+package org.nsider.chatgames.utils.gameplay;
 
 import com.google.common.base.Enums;
 import com.google.common.cache.Cache;

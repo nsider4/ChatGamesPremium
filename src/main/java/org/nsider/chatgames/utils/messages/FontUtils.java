@@ -12,7 +12,7 @@ public class FontUtils {
      * Enum representing the default font information for various characters.
      * Stores the character and its width (in pixels).
      */
-    public enum DefaultFontInfo {
+    protected enum DefaultFontInfo {
         A('A', 5),
         a('a', 5),
         B('B', 5),
@@ -110,14 +110,14 @@ public class FontUtils {
         SPACE(' ', 3),
         DEFAULT('a', 4);
 
-        private char character;
-        private int length;
+        private final char character;
+        private final int length;
 
         /**
          * Constructor for DefaultFontInfo enum.
          *
          * @param character the character
-         * @param length the width of the character
+         * @param length    the width of the character
          */
         DefaultFontInfo(char character, int length) {
             this.character = character;
@@ -130,7 +130,7 @@ public class FontUtils {
          * @return the character
          */
         public char getCharacter() {
-            return this.character;
+            return character;
         }
 
         /**
@@ -139,7 +139,7 @@ public class FontUtils {
          * @return the width of the character
          */
         public int getLength() {
-            return this.length;
+            return length;
         }
 
         /**
@@ -150,7 +150,9 @@ public class FontUtils {
          */
         public static DefaultFontInfo getDefaultFontInfo(char c) {
             for (DefaultFontInfo dFI : DefaultFontInfo.values()) {
-                if (dFI.getCharacter() == c) return dFI;
+                if (dFI.getCharacter() == c) {
+                    return dFI;
+                }
             }
             return DefaultFontInfo.DEFAULT;
         }
@@ -163,7 +165,7 @@ public class FontUtils {
      * @param s the string to calculate the width of
      * @return the total width of the string
      */
-    public int getWidthOfString(String s) {
+    protected static int getWidthOfString(String s) {
         String cleanString = ChatColor.stripColor(s);
         int width = 0;
 

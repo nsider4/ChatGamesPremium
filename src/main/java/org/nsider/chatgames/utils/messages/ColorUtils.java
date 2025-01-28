@@ -1,6 +1,7 @@
 package org.nsider.chatgames.utils.messages;
 
 import org.bukkit.ChatColor;
+import org.nsider.chatgames.ChatGames;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +12,12 @@ import java.util.regex.Pattern;
  */
 public class ColorUtils {
 
+    private static ChatGames plugin;
+
+    protected static void initialize(ChatGames plugin) {
+        ColorUtils.plugin = plugin;
+    }
+
     /**
      * Colorizes a message, translating Minecraft color codes (&) and hex color codes (for Minecraft 1.16+).
      *
@@ -18,7 +25,7 @@ public class ColorUtils {
      * @param mcVersion the version of Minecraft
      * @return the colorized message
      */
-    public String colorizeMessage(String message, int mcVersion) {
+    protected static String colorizeMessage(String message, int mcVersion) {
         //If the Minecraft version is 1.16 or higher, translate hex color codes
         if (mcVersion >= 16) {
             return translateHexColors(message);
@@ -33,7 +40,7 @@ public class ColorUtils {
      * @param message the message containing hex color codes
      * @return the message with hex colors translated to Minecraft color codes
      */
-    private String translateHexColors(String message) {
+    private static String translateHexColors(String message) {
         Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
         Matcher matcher = pattern.matcher(message);
 
