@@ -4,11 +4,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.annotations.Nonnull;
 import org.nsider.chatgames.database.Errors;
 import org.nsider.chatgames.utils.database.DatabaseUtils;
 import org.nsider.chatgames.utils.database.QueryUtils;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -40,6 +42,36 @@ public class ValueQueries {
     }
 
     /**
+     * Retrieves the points for a given player.
+     *
+     * @param paramPlayer The player whose points are to be retrieved. Must not be null.
+     * @return The points of the player, or 0 if the player does not exist or an error occurs.
+     */
+    public static int getPlayerPoints(@Nonnull OfflinePlayer paramPlayer) {
+        if (paramPlayer == null) {
+            plugin.getLogger().warning("Player is null in getPlayerPoints. Unable to retrieve points.");
+            return 0;
+        }
+
+        ManagementQueries.createPlayerIfNotExists(paramPlayer);
+
+        String sql = "SELECT POINTS FROM " + tableName + " WHERE UUID = ?";
+        int points = 0;
+
+        try (Connection connection = getConnection();
+             ResultSet resultSet = QueryUtils.executeQuery(connection, sql, paramPlayer.getUniqueId().toString())) {
+
+            if (resultSet.next()) {
+                points = resultSet.getInt("POINTS");
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Error getting player points", e);
+        }
+
+        return points;
+    }
+
+    /**
      * Retrieves the fastest time of a player.
      * @param player The player whose fastest time is to be retrieved.
      * @return The fastest time of the player.
@@ -49,7 +81,9 @@ public class ValueQueries {
 
         double fastest = 0;
         String sql = "SELECT fastest FROM " + tableName + " WHERE UUID = ?";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
             if (rs.next()) {
                 fastest = rs.getDouble("fastest");
             }
@@ -67,7 +101,9 @@ public class ValueQueries {
     public static boolean getPlayerToggle(Player player) {
         boolean toggle = true;
         String sql = "SELECT toggled FROM " + tableName + " WHERE UUID = ?";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
             if (rs.next()) {
                 toggle = rs.getBoolean("toggled");
             }
@@ -86,7 +122,9 @@ public class ValueQueries {
     public static boolean getPlayerToggleSound(Player player) {
         boolean toggle = true;
         String sql = "SELECT sound FROM " + tableName + " WHERE UUID = ?";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
             if (rs.next()) {
                 toggle = rs.getBoolean("sound");
             }
@@ -103,7 +141,9 @@ public class ValueQueries {
     public static int getTotalPoints() {
         String sql = "SELECT SUM(POINTS) FROM " + tableName;
         int totalPoints = 0;
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql)) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql)) {
             if (rs.next()) {
                 totalPoints = rs.getInt(1);
             }
@@ -121,7 +161,10 @@ public class ValueQueries {
     public static String getPlayerAtPosition(int spot) {
         String playerName = "";
         String sql = "SELECT UUID FROM " + tableName + " ORDER BY POINTS DESC LIMIT 1 OFFSET ?";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, spot - 1)) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, spot - 1)) {
+
             if (rs.next()) {
                 String uuidString = rs.getString("UUID");
                 UUID uuid = UUID.fromString(uuidString);
@@ -144,7 +187,10 @@ public class ValueQueries {
     public static String getPointsAtPosition(int spot) {
         String points = "";
         String sql = "SELECT POINTS FROM " + tableName + " ORDER BY POINTS DESC LIMIT 1 OFFSET ?";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, spot - 1)) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, spot - 1)) {
+
             if (rs.next()) {
                 points = String.valueOf(rs.getInt("POINTS"));
             }
@@ -162,7 +208,10 @@ public class ValueQueries {
     public static String getPlayerAtPositionFastest(int spot) {
         String playerName = "";
         String sql = "SELECT UUID FROM " + tableName + " ORDER BY fastest ASC LIMIT 1 OFFSET ?";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, spot - 1)) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, spot - 1)) {
+
             if (rs.next()) {
                 String uuidString = rs.getString("UUID");
                 UUID uuid = UUID.fromString(uuidString);
@@ -185,7 +234,10 @@ public class ValueQueries {
     public static double getFastestAtPosition(int spot) {
         double fastest = 0;
         String sql = "SELECT fastest FROM " + tableName + " ORDER BY fastest ASC LIMIT 1 OFFSET ?";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, spot - 1)) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, spot - 1)) {
+
             if (rs.next()) {
                 fastest = rs.getDouble("fastest");
             }
@@ -203,7 +255,10 @@ public class ValueQueries {
     public static int getPlayerPointsPosition(OfflinePlayer player) {
         int position = -1;
         String sql = "SELECT COUNT(*) AS position FROM " + tableName + " WHERE POINTS > (SELECT POINTS FROM " + tableName + " WHERE UUID = ?)";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
+
             if (rs.next()) {
                 position = rs.getInt("position") + 1;
             }
@@ -221,7 +276,10 @@ public class ValueQueries {
     public static int getPlayerFastestPosition(OfflinePlayer player) {
         int position = -1;
         String sql = "SELECT COUNT(*) AS position FROM " + tableName + " WHERE fastest < (SELECT fastest FROM " + tableName + " WHERE UUID = ?)";
-        try (Connection connection = getConnection(); ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
+
+        try (Connection connection = getConnection();
+             ResultSet rs = QueryUtils.executeQuery(connection, sql, player.getUniqueId().toString())) {
+
             if (rs.next()) {
                 position = rs.getInt("position") + 1;
             }
@@ -230,5 +288,4 @@ public class ValueQueries {
         }
         return position;
     }
-
 }

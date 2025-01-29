@@ -1,11 +1,29 @@
 package org.nsider.chatgames;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.nsider.chatgames.config.ConfigManager;
+import org.nsider.chatgames.database.DataHandler;
+import org.nsider.chatgames.database.HikariDatabase;
+import org.nsider.chatgames.database.enums.StorageType;
+import org.nsider.chatgames.games.builder.GameAlgorithms;
+import org.nsider.chatgames.games.builder.GameBuilder;
+import org.nsider.chatgames.games.manager.GameConfigManager;
+import org.nsider.chatgames.games.manager.GameManager;
+import org.nsider.chatgames.games.utils.GameUtils;
 
 import java.io.File;
 
 public final class ChatGames extends JavaPlugin {
+
+    @Getter private GameAlgorithms gameAlgorithms;
+    @Getter private DataHandler dataHandler;
+    @Getter private GameBuilder gameBuilder;
+    @Getter private GameConfigManager gameConfigManager;
+    @Getter private GameUtils gameUtils;
+    @Getter private GameManager gameManager;
+    @Getter private boolean isPlaceHolderAPIEnabled = false;
 
     @Override
     public void onEnable() {
@@ -14,6 +32,11 @@ public final class ChatGames extends JavaPlugin {
             saveDefaultConfig();
         }
 
+        this.gameAlgorithms = new GameAlgorithms(this);
+        this.gameBuilder = new GameBuilder(this);
+        this.gameConfigManager = new GameConfigManager(this);
+        this.gameUtils = new GameUtils(this);
+        this.gameManager = new GameManager(this);
 
         if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceHolderHook(this).register();
@@ -21,7 +44,14 @@ public final class ChatGames extends JavaPlugin {
             this.isPlaceHolderAPIEnabled = true;
         }
 
-        versionUtils.correctConfigs(getConfig(), getConfigManager().getChatRaces());
+        if(this.getConfig().getString("Storage").equalsIgnoreCase("MySQL")) {
+            this.dataHandler = new HikariDatabase(this, StorageType.MySQL);
+        } else if (this.getConfig().getString("Storage").equalsIgnoreCase("SQLite")) {
+            this.dataHandler = new HikariDatabase(this, StorageType.SQLite);
+        }
+        this.dataHandler.initialize();
+
+        VersionUtils.correctConfigs(getConfig(), ConfigManager.getChatRaces());
         checkForUpdate();
         if(getConfig().getInt("time_minutes") != -1) { //DO IN THE OTHER CLASS
             mainTask.enable();

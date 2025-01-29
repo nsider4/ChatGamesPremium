@@ -2,8 +2,7 @@ package org.nsider.chatgames.utils.messages;
 
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.utils.gameplay.Game;
-import org.nsider.chatgames.utils.gameplay.GameType;
+import org.nsider.chatgames.games.Game;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,7 +42,7 @@ public class TextMatchUtils {
      * @param plugin      the plugin instance
      * @return true if a match is found, false otherwise
      */
-    protected static boolean textEqualsWord(Player player, String chatTextRaw, Game game, ChatGames plugin) {
+    public static boolean textEqualsWord(Player player, String chatTextRaw, Game game, ChatGames plugin) {
         String chatText = cleanChatInput(chatTextRaw);
         List<String> answers = extractAnswers(game.getAnswer());
 

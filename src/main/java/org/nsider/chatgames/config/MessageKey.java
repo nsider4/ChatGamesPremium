@@ -9,12 +9,92 @@ public enum MessageKey {
     CONFIG_RELOADED(
             "messages",
             "config_reloaded",
-            "&aConfiguration reloaded successfully."
+            "&cMessage has not been configured"
     ),
-    SELECTION_NONE_TO_CLEAR(
-            "regions/RegionConfig",
-            "messages.selection_none_to_clear.message",
-            "&eYou have no selection to clear."
+    UNKNOWN_COMMAND(
+            "messages",
+            "unknown_command",
+            "&cMessage has not been configured"
+    ),
+    NOT_ENOUGH_PERMISSIONS(
+            "messages",
+            "not_enough_permissions",
+            "&cMessage has not been configured"
+    ),
+    CANNOT_START_DISABLED(
+            "messages",
+            "cannot_start_from_disabled",
+            "&cMessage has not been configured"
+    ),
+    PLAYER_ONLY_COMMAND(
+            "messages",
+            "player_only_command",
+            "&cMessage has not been configured"
+    ),
+    WRONG_CASE(
+            "messages",
+            "wrong_case",
+            "&cMessage has not been configured"
+    ),
+    PLAYER_DELETED(
+            "messages",
+            "player_deleted",
+            "&cMessage has not been configured"
+    ),
+    PLAYER_NOT_FOUND(
+            "messages",
+            "player_not_found",
+            "&cMessage has not been configured"
+    ),
+    NUMBER_NOT_FOUND(
+            "messages",
+            "number_not_found_commands",
+            "&cMessage has not been configured"
+    ),
+    POINTS_ADDED(
+            "messages",
+            "points_added",
+            "&cMessage has not been configured"
+    ),
+    POINTS_REMOVED(
+            "messages",
+            "points_removed",
+            "&cMessage has not been configured"
+    ),
+    POINTS_SET(
+            "messages",
+            "points_set",
+            "&cMessage has not been configured"
+    ),
+    PLAYER_POINTS(
+            "messages",
+            "player_points",
+            "&cMessage has not been configured"
+    ),
+    IN_COOLDOWN(
+            "messages",
+            "in_cooldown",
+            "&cMessage has not been configured"
+    ),
+    GAME_STARTED(
+            "messages",
+            "game_started",
+            "&cMessage has not been configured"
+    ),
+    TYPE_NOT_FOUND(
+            "messages",
+            "type_not_found",
+            "&cMessage has not been configured"
+    ),
+    INVALID_ARGUMENTS(
+            "messages",
+            "invalid_arguments",
+            "&cMessage has not been configured"
+    ),
+    CANT_LOG_LOCAL(
+            "messages",
+            "cant_log_local",
+            "&cMessage has not been configured"
     );
 
     private final String fileName;

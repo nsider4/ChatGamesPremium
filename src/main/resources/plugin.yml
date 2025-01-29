@@ -1,4 +1,52 @@
-name: ChatGames
-version: '${project.version}'
+name: ChatGames-Premium
+author: Nsider
+version: 1.9.9
 main: org.nsider.chatgames.ChatGames
 api-version: '1.13'
+softdepend: [PlaceholderAPI]
+
+
+commands:
+  chatgames:
+    description: Main command
+    aliases: [chatgame]
+    usage: /<command>
+
+
+permissions:
+  chatgames.start.<type>:
+    description: Allows starting a specific type of event.
+    default: op
+  chatgames.start.*:
+    description: Allows starting any event type.
+    default: op
+  chatgames.top:
+    description: Allows viewing the top players by points.
+    default: true
+  chatgames.fastesttop:
+    description: Allows viewing the fastest players.
+    default: true
+  chatgames.play:
+    description: Allows playing chat games. Optional permission.
+    default: true
+  chatgames.toggle:
+    description: Allows toggling games on or off.
+    default: true
+  chatgames.togglesound:
+    description: Allows toggling sound effects for games. Optional permission.
+    default: true
+  chatgames.help:
+    description: Allows accessing help commands.
+    default: true
+  chatgames.reload:
+    description: Allows reloading the configuration files.
+    default: op
+  chatgames.toggleAll:
+    description: Allows toggling all games on or off.
+    default: op
+  chatgames.remove:
+    description: Allows removing a player from the database.
+    default: op
+  chatgames.logs:
+    description: Allows viewing logs.
+    default: op

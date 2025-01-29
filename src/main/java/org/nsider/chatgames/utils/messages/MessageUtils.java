@@ -64,6 +64,20 @@ public class MessageUtils {
         }
     }
 
+    public static String removePercentSymbols(String msg) {
+        if(msg.contains("%") && !msg.startsWith("$ ")) {
+            String[] split = msg.split("%");
+            for (int i = 0; i < split.length; i++) {
+                if(i % 2 != 0) {
+                    msg = msg.replaceAll(split[i], "");
+                }
+            }
+            msg = msg.replaceAll("%", "");
+        }
+
+        return msg;
+    }
+
     /**
      * Checks if the player's input matches the expected answer in the game.
      *

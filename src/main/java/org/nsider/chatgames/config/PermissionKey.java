@@ -4,14 +4,64 @@ package org.nsider.chatgames.config;
  * Enum representing plugin permissions with their descriptions and default values.
  */
 public enum PermissionKey {
-    GLOBAL_ELYTRA_BLOCK_OVERRIDE(
-            "globalelytrablock.override",
-            "Overrides the Elytra block when it is in use. Only works when Elytra block is enabled.",
+    START_TYPE(
+            "chatgames.start.<type>",
+            "Allows starting a specific type of event.",
             "op"
     ),
-    REGION_MANAGE(
-            "elytratweaks.region.manage",
-            "Allows players to select and manage regions.",
+    START_ALL(
+            "chatgames.start.*",
+            "Allows starting any event type.",
+            "op"
+    ),
+    TOP(
+            "chatgames.top",
+            "Allows viewing the top players by points.",
+            "true"
+    ),
+    FASTEST_TOP(
+            "chatgames.fastesttop",
+            "Allows viewing the fastest players.",
+            "true"
+    ),
+    PLAY(
+            "chatgames.play",
+            "Allows playing chat games. Optional permission.",
+            "true"
+    ),
+    TOGGLE(
+            "chatgames.toggle",
+            "Allows toggling games on or off.",
+            "true"
+    ),
+    TOGGLE_SOUND(
+            "chatgames.togglesound",
+            "Allows toggling sound effects for games. Optional permission.",
+            "true"
+    ),
+    HELP(
+            "chatgames.help",
+            "Allows accessing help commands.",
+            "true"
+    ),
+    RELOAD(
+            "chatgames.reload",
+            "Allows reloading the configuration files.",
+            "op"
+    ),
+    TOGGLE_ALL(
+            "chatgames.toggleAll",
+            "Allows toggling all games on or off.",
+            "op"
+    ),
+    REMOVE(
+            "chatgames.remove",
+            "Allows removing a player from the database.",
+            "op"
+    ),
+    LOGS(
+            "chatgames.logs",
+            "Allows viewing logs.",
             "op"
     );
 

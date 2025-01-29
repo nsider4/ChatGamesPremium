@@ -1,5 +1,7 @@
 package org.nsider.chatgames.config;
 
+import org.nsider.chatgames.utils.messages.MessageUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +40,7 @@ public class Messages {
      */
     private void loadMessages() {
         for (MessageKey key : MessageKey.values()) {
-            YamlConfig config = getConfig(key.getFileName());
+            YamlConfig config = getConfig();
             if (config == null) continue;
             String message = config.getString(key.getPath(), key.getDefaultValue());
             messages.put(key, MessageUtils.color(message));
@@ -69,24 +71,10 @@ public class Messages {
     /**
      * Get the appropriate configuration file by name.
      *
-     * @param fileName The name of the file to retrieve.
      * @return The YamlConfig object for the file, or null if not found.
      */
-    private YamlConfig getConfig(String fileName) {
-        switch (fileName.toLowerCase()) {
-            case "messages":
-                return ConfigManager.getMessagesConfig();
-            case "GlobalElytraBlock":
-                return ConfigManager.getGlobalElytraBlock();
-            case "PerWorldElytra":
-                return ConfigManager.getPerWorldElytra();
-            case "FireworkBoost":
-                return ConfigManager.getFireworkBoost();
-            case "RiptideBoost":
-                return ConfigManager.getRiptideBoost();
-            default:
-                return null;
-        }
+    private YamlConfig getConfig() {
+        return ConfigManager.getMessagesConfig();
     }
 
     /**

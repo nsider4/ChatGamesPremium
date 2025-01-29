@@ -9,6 +9,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Bukkit;
 import lombok.Getter;
 import org.nsider.chatgames.database.Errors;
+import org.nsider.chatgames.utils.database.DatabaseUtils;
 import org.nsider.chatgames.utils.database.QueryUtils;
 import org.nsider.chatgames.ChatGames;
 
@@ -58,7 +59,7 @@ public class ManagementQueries {
      * @throws SQLException If there is an error obtaining the connection.
      */
     private static Connection getConnection() throws SQLException {
-        return plugin.getDataHandler().getConnection();
+        return DatabaseUtils.getConnection();
     }
 
     /**
