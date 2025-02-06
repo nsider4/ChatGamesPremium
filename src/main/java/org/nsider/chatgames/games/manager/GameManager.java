@@ -9,8 +9,10 @@ import org.nsider.chatgames.database.queries.UpdateQueries;
 import org.nsider.chatgames.database.queries.ValueQueries;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.games.Game;
+import org.nsider.chatgames.games.GameController;
 import org.nsider.chatgames.games.builder.algorithms.RandomCharacterGenerator;
 import org.nsider.chatgames.games.manager.messages.*;
+import org.nsider.chatgames.utils.management.TimeUtils;
 
 import java.util.List;
 
@@ -70,8 +72,12 @@ public class GameManager {
     }
 
     public void endGame() {
-        plugin.getExpirationTask().cancel();
+        TimeUtils.stopTimer();
+        TimeUtils.setLastTimer(0.00);
+        GameController.clearResults();
         plugin.setInGame(false);
+        this.game = null;
+        plugin.getExpirationTask().cancel();
     }
 
     public void generateNewClickableKey() {

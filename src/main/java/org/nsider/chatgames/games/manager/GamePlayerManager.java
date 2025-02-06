@@ -27,6 +27,10 @@ public class GamePlayerManager {
         return !disabledWorlds.contains(player.getWorld().getName());
     }
 
+    public int getOnlinePlayers() {
+        return Bukkit.getOnlinePlayers().size();
+    }
+
     public boolean checkMinimumPlayersOnline(int minimum) {
         int unableToPlay = 0;
 

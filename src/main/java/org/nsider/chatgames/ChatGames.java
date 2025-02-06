@@ -1,6 +1,7 @@
 package org.nsider.chatgames;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.nsider.chatgames.config.ConfigManager;
@@ -12,6 +13,8 @@ import org.nsider.chatgames.games.builder.GameBuilder;
 import org.nsider.chatgames.games.manager.GameConfigManager;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.utils.GameUtils;
+import org.nsider.chatgames.races.RaceBuilder;
+import org.nsider.chatgames.utils.management.LogUtils;
 
 import java.io.File;
 
@@ -23,7 +26,10 @@ public final class ChatGames extends JavaPlugin {
     @Getter private GameConfigManager gameConfigManager;
     @Getter private GameUtils gameUtils;
     @Getter private GameManager gameManager;
+    @Getter private LogUtils logUtils;
+    @Getter private RaceBuilder raceBuilder;
     @Getter private boolean isPlaceHolderAPIEnabled = false;
+    @Getter @Setter private boolean inGame = false;
 
     @Override
     public void onEnable() {
@@ -36,7 +42,9 @@ public final class ChatGames extends JavaPlugin {
         this.gameBuilder = new GameBuilder(this);
         this.gameConfigManager = new GameConfigManager(this);
         this.gameUtils = new GameUtils(this);
+        this.logUtils = new LogUtils(this);
         this.gameManager = new GameManager(this);
+        this.raceBuilder = new RaceBuilder(this);
 
         if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceHolderHook(this).register();

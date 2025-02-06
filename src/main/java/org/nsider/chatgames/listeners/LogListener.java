@@ -130,7 +130,7 @@ public class LogListener implements Listener {
      * Writes logs to a local file.
      */
     private void writeLogToFile(String logMessage) {
-        File logFile = plugin.getLogHandler().getLogFile();
+        File logFile = plugin.getLogUtils().getLogFile();
         if (logFile == null) {
             Bukkit.getLogger().severe("Log file is not defined in the gamelog configuration.");
             return;

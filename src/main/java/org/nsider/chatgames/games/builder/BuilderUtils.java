@@ -70,8 +70,4 @@ public class BuilderUtils {
         }
         return correctAnswerBuilder.toString();
     }
-
-    private static String color(ChatGames plugin, String message) {
-        return MessageUtils.color(message);
-    }
 }
