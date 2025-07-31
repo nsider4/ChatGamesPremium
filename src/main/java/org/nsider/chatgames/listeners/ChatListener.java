@@ -69,12 +69,11 @@ public class ChatListener implements Listener {
      * Processes the actions for a winning player.
      *
      * @param player The winning player.
-     * @param game   The current game.
+     * @param game   The current game.        TopManager.addPoint(player, 1);
      */
     private void processWinner(Player player, Game game) {
         plugin.getGameUtils().addWinner(player);
         plugin.getGameUtils().giveRewards(game.getGameConfigName(), player);
-        TopManager.addPoint(player, 1);
 
         handleFastestTyper(player);
         notifyAdditionalWinners(player, game);

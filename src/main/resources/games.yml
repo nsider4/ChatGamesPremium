@@ -1,0 +1,184 @@
+#############################
+######    CHATGAMES    ######
+#############################
+unscramble:
+  enable: true
+  winners: 1
+
+  case-sensitive: true
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&b%selection%'
+  subtitleMessage: '&aUnscramble'
+
+unreverse:
+  enable: true
+  winners: 1
+
+  case-sensitive: true
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #Leave the following 2 empty to disable them
+  titleMessage: '&b%selection%'
+  subtitleMessage: '&aUnreverse'
+
+reaction:
+  enable: true
+  winners: 1
+
+  case-sensitive: true
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&b%selection%'
+  subtitleMessage: '&aWrite'
+
+guess_the_number:
+  enable: true
+  winners: 1
+  #Don't change this
+  case-sensitive: false
+
+  lower-limit: 1
+  upper-limit: 20
+
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&b%selection%'
+  subtitleMessage: '&aWrite'
+
+shoppinglist:
+  enable: true
+  winners: 1
+
+  case-sensitive: false
+
+  listLength: 3
+
+  #The time users will have to memorize, solve, write, etc in seconds.
+  timeToMemorize: 7
+
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #Leave the following 2 empty to disable them
+  titleMessage: '&bMemorize'
+  subtitleMessage: '&aShopping List'
+
+clickable:
+  enable: true
+  winners: 1
+
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&eClick the Text'
+  subtitleMessage: '&fYou have &e%timeToGuess%s'
+
+fillout:
+  enable: true
+  winners: 1
+
+  #This represents the percentage of hidden letters in the fillout game. Values can range from 1 to 100. Low numbers means less letters hidden.
+  difficulty: 30
+  case-sensitive: true
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&b%selection%'
+  subtitleMessage: '&aFill Out'
+
+hoverable:
+  enable: true
+  winners: 1
+
+  case-sensitive: true
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&eHover the Text'
+  subtitleMessage: '&fYou have &e%timeToGuess%s'
+
+#In this game, a string of the length specified will be created with random characters
+random:
+  enable: true
+  winners: 1
+
+  case-sensitive: true
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #The length of the string that will randomly generate for this game. Range format <lower>-<higher>. If you want only one length use the same number on both sides
+  lengthRange: 6-8
+  #Types available: ALPHA (letters), ALPHANUMERIC (letters and numbers), NUMERIC (numbers), SYMBOLIC (symbols),
+  #LOWERCASE_ALPHA (all lowercase letters), UPPERCASE_ALPHA (all uppercase letters), HEXADECIMAL (hexadecimal chars: 0123456789ABCDEF)
+  #CUSTOM (Uses whatever is at 'custom_characters')
+  character_type: ALPHANUMERIC
+  #Only if type is "CUSTOM" this line will be used
+  custom_characters: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&b%selection%'
+  subtitleMessage: '&aWrite'
+
+math:
+  enable: true
+  winners: 1
+
+  #Don't change this
+  case-sensitive: false
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #Difficulty random number ranges:
+  #1 - (1-9)
+  #2 - (1-99)
+  #3 - (1-999)
+  #4 - (1-9999)
+  #5 - (1-99999)
+  difficulty: 2
+  #Operators to use, the four listed are the ones available, you can remove if you don't want to use all of them. Always leave at least 1
+  operators:
+    - '+'
+    - '-'
+    - 'x'
+    - '/'
+
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&b%selection%'
+  subtitleMessage: '&aSolve'
+
+variable:
+  enable: true
+  winners: 1
+
+  #Don't change this
+  case-sensitive: false
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&bSOLVE'
+  subtitleMessage: '&aFor &7`&b%symbol%&7`'
+
+  #The range of the random result number
+  result-min: 20
+  result-max: 100
+
+  toGet: '✗'
+  #Here are some other symbols you can use to add: ✪❃✿✠❂♫♪❦♡♤♢✦☾☽✹
+  data:
+    - '✯;10'
+    - '♛;15'
+    - '❅;20'
+    - '♫;25'
+
+trivia:
+  enable: true
+  winners: 1
+
+  case-sensitive: false
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&bTRIVIA'
+  subtitleMessage: '&aCheck Chat!'

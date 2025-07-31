@@ -24,7 +24,7 @@ public class MathQuestionGenerator {
                     numberBuilder.append(expression.charAt(i++));
                 }
                 numbers.push(Double.parseDouble(numberBuilder.toString()));
-                i--; // Step back after the inner loop
+                i--; //Step back after the inner loop
             } else if (isOperator(currentChar)) {
                 while (!operations.isEmpty() && precedence(currentChar) <= precedence(operations.peek())) {
                     numbers.push(applyOperation(operations.pop(), numbers.pop(), numbers.pop()));

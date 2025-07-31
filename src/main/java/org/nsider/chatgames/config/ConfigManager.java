@@ -1,10 +1,11 @@
 package org.nsider.chatgames.config;
 
 import lombok.Getter;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.nsider.chatgames.ChatGames;
 
 /**
- * Manages all configuration files and messages for the ElytraTweaks plugin.
+ * Manages all configuration files and messages for the ChatGames plugin.
  * This class is responsible for initializing and reloading configuration files,
  * as well as providing access to various configuration data used throughout the plugin.
  */
@@ -13,26 +14,31 @@ public class ConfigManager {
     private static ChatGames plugin;
 
     @Getter private static Messages messages;
-
+    @Getter private static FileConfiguration config;
     @Getter private static MessagesConfig MessagesConfig;
     @Getter private static Words Words;
     @Getter private static Rewards Rewards;
-    @Getter private static ChatRaces ChatRaces;
+    @Getter private static Races Races;
+    @Getter private static Games Games;
+    @Getter private static Addons Addons;
 
 
     /**
      * Initializes the configuration manager and loads the configuration files.
      *
-     * @param plugin The instance of the ElytraTweaks plugin to be used for loading configurations.
+     * @param plugin The instance of the ChatGames plugin to be used for loading configurations.
      */
     public static void initialize(ChatGames plugin) {
         ConfigManager.plugin = plugin;
         messages = new Messages();
 
+        config = plugin.getConfig();
         MessagesConfig = new MessagesConfig();
         Words = new Words();
         Rewards = new Rewards();
-        ChatRaces = new ChatRaces();
+        Races = new Races();
+        Games = new Games();
+        Addons = new Addons();
     }
 
     /**
@@ -43,9 +49,11 @@ public class ConfigManager {
     public static boolean reload() {
         plugin.reloadConfig();
         return MessagesConfig.reload()
+                && Games.reload()
+                && Addons.reload()
                 && Words.reload()
                 && Rewards.reload()
-                && ChatRaces.reload();
+                && Races.reload();
     }
 
 
@@ -60,6 +68,23 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Configuration file for firework boost settings.
+     */
+    public static class Games extends YamlConfig {
+        public Games() {
+            super(plugin, "games");
+        }
+    }
+
+    /**
+     * Configuration file for firework boost settings.
+     */
+    public static class Addons extends YamlConfig {
+        public Addons() {
+            super(plugin, "add-ons");
+        }
+    }
 
     /**
      * Configuration file for global Elytra block settings.
@@ -82,9 +107,9 @@ public class ConfigManager {
     /**
      * Configuration file for firework boost settings.
      */
-    public static class ChatRaces extends YamlConfig {
-        public ChatRaces() {
-            super(plugin, "chatRaces");
+    public static class Races extends YamlConfig {
+        public Races() {
+            super(plugin, "races");
         }
     }
 }

@@ -1,0 +1,82 @@
+#############################
+######    SETTINGS    #######
+#############################
+check-update: true
+
+#These translations are for plugin sided things such as material and entity names that are used for races. 118 Language Types Supported!
+#IT WILL ONLY TRANSLATE THOSE THINGS, CUSTOMIZABLE MESSAGES(messages.yml) HAVE TO BE CHANGED MANUALLY.
+#
+#See the ID for your language here: https://github.com/nsider4/mine-translator/blob/main/language_names.txt
+#
+#CHANGES ARE REGISTERED ONLY ON RESTART
+lang: 'en_us'
+
+#Storage type, available: SQLite or MySQL
+Storage: 'SQLite'
+
+#The name of the table that will contain all ChatGames data
+table_name: 'chatgames'
+
+SQLite:
+  Filename: 'chatgames-data'
+
+MySQL:
+  host: 'localhost'
+  port: '3306'
+  user: 'root'
+  password: 'password'
+  database: 'chatgame'
+  connection-parameters: '?autoReconnect=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8'
+  Pool-Settings:
+    max-pool-size: 10
+    min-idle: 10
+    max-lifetime: 180000
+    keep-alive-time: 60000
+    time-out: 20000
+
+disabled-worlds:
+  - 'example_world'
+
+prefix: '&c&lC&d&lH&b&lA&a&lT &6&lG&e&lA&a&lM&c&lE&b&lS'
+
+#Only players with 'chatgames.start.*' will be able to start even when this is false
+allow_starting_from_disabled: true
+
+#If false, it won't cancel the message that is normally not sent when a user guesses the correct option
+cancel-message-when-winning: true
+
+#The minimum amount of players that have to be online in order for the chat event to start
+min_players_online: 1
+
+#The time it will take for a random game to be picked again.
+#The value -1 will disable the task, this will disable the task COMPLETELY, with this in -1 you can't use randomDelay either
+time_minutes: 25
+
+#If this is enabled, everytime a game ends, it will create a random number from 'randomDelay.minimum' to the number in 'randomDelay.limit' as a delay for the next game
+#Enabling this will ignore 'time_minutes' value unless it's -1 since there will be no task.
+randomDelay:
+  enable: false
+  #Time unit, the other possible value is 'seconds', if you do change it, it's recommended to make the minimum higher than the 'timeToGuess_seconds' for a game
+  timeUnit: 'minutes'
+  minimum: 1
+  limit: 25
+
+
+#Turning this off will mean that chatgames.play permission will not be necessary to show the games
+use-permission-toplay: false
+
+#In false, it will only count players who have the 'chatgames.play' command meaning they are able to play.
+#In true, it will count all online players except vanished players.
+count-all-players: false
+
+#In true, it will create a top for the fastest typers(/chatgames fastest). Otherwise, in false, this top type will be off.
+fastest-typers-top: true
+
+#Sound to send to players when a chat event starts!
+GameSounds:
+  volume: 0.5
+  #LEAVE ANY OF THESE EMPTY TO DISABLE THEM
+  win: 'minecraft:entity.experience_orb.pickup'
+  game-start: 'minecraft:entity.player.levelup'
+  time-expired: 'minecraft:entity.villager.no'
+  wrong-case: 'minecraft:block.note_block.bass'

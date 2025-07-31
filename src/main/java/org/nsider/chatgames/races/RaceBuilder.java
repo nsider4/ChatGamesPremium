@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.bukkit.Material;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.races.setup.RaceDataLoader;
+import org.nsider.chatgames.races.setup.RaceMessageSender;
 import org.nsider.chatgames.races.setup.RaceStarter;
 import org.nsider.chatgames.races.validator.EntityValidator;
 import org.nsider.chatgames.races.validator.MaterialValidator;
@@ -41,7 +43,7 @@ public class RaceBuilder {
         this.entityValidator = new EntityValidator(plugin);
         this.raceStarter = new RaceStarter(plugin, materialValidator, entityValidator, raceUtils);
         this.raceDataLoader = new RaceDataLoader(plugin);
-        this.raceMessageSender = new RaceMessageSender(plugin);
+        this.raceMessageSender = new RaceMessageSender(plugin, raceUtils);
     }
 
     public void startRace(GameType type) {

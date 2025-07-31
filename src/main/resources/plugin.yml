@@ -1,6 +1,6 @@
 name: ChatGames-Premium
 author: Nsider
-version: 1.9.9
+version: 2.0.0
 main: org.nsider.chatgames.ChatGames
 api-version: '1.13'
 softdepend: [PlaceholderAPI]
