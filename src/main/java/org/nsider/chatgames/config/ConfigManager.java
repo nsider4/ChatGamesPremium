@@ -21,6 +21,7 @@ public class ConfigManager {
     @Getter private static Races Races;
     @Getter private static Games Games;
     @Getter private static Addons Addons;
+    @Getter private static Milestones Milestones;
 
 
     /**
@@ -39,6 +40,7 @@ public class ConfigManager {
         Races = new Races();
         Games = new Games();
         Addons = new Addons();
+        Milestones = new Milestones();
     }
 
     /**
@@ -53,14 +55,15 @@ public class ConfigManager {
                 && Addons.reload()
                 && Words.reload()
                 && Rewards.reload()
-                && Races.reload();
+                && Races.reload()
+                && Milestones.reload();
     }
 
 
     //Nested static classes for each configuration file
 
     /**
-     * Configuration file for messages used in the plugin.
+     * Configuration file for words used in each word game
      */
     public static class Words extends YamlConfig {
         public Words() {
@@ -69,7 +72,7 @@ public class ConfigManager {
     }
 
     /**
-     * Configuration file for firework boost settings.
+     * Configuration file for game settings
      */
     public static class Games extends YamlConfig {
         public Games() {
@@ -78,7 +81,7 @@ public class ConfigManager {
     }
 
     /**
-     * Configuration file for firework boost settings.
+     * Configuration file for additional features
      */
     public static class Addons extends YamlConfig {
         public Addons() {
@@ -87,7 +90,7 @@ public class ConfigManager {
     }
 
     /**
-     * Configuration file for global Elytra block settings.
+     * Configuration file for rewards
      */
     public static class Rewards extends YamlConfig {
         public Rewards() {
@@ -96,7 +99,7 @@ public class ConfigManager {
     }
 
     /**
-     * Configuration file for per-world Elytra settings.
+     * Configuration file for plugin messages
      */
     public static class MessagesConfig extends YamlConfig {
         public MessagesConfig() {
@@ -105,11 +108,20 @@ public class ConfigManager {
     }
 
     /**
-     * Configuration file for firework boost settings.
+     * Configuration file for race settings
      */
     public static class Races extends YamlConfig {
         public Races() {
             super(plugin, "races");
+        }
+    }
+
+    /**
+     * Configuration file for milestones
+     */
+    public static class Milestones extends YamlConfig {
+        public Milestones() {
+            super(plugin, "milestones");
         }
     }
 }

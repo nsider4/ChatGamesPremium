@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.ConfigManager;
 
 /**
  * Utility class for handling version-related operations.
@@ -52,7 +53,7 @@ public class VersionUtils {
             raceConfig.set("fish.data", null);
             raceConfig.set("fish.data.RAW_FISH", codData);
             plugin.saveConfig();
-            plugin.getConfigManager().getChatRaces().save();
+            ConfigManager.getRaces().save();
         }
     }
 }

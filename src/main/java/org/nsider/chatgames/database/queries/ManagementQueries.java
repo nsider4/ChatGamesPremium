@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 import java.util.function.Consumer;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Bukkit;
 import lombok.Getter;
 import org.nsider.chatgames.database.Errors;
+import org.nsider.chatgames.player.PlayerMainData;
 import org.nsider.chatgames.utils.database.DatabaseUtils;
 import org.nsider.chatgames.utils.database.QueryUtils;
 import org.nsider.chatgames.ChatGames;
@@ -113,6 +115,60 @@ public class ManagementQueries {
             }
         });
     }
+
+    /**
+     * Retrieves the player's stored ChatGames data synchronously.
+     *
+     * @param player Offline player
+     * @return PlayerMainData instance with stored values
+     */
+    public static PlayerMainData getPlayerData(OfflinePlayer player) {
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE UUID = ?")) {
+
+            preparedStatement.setString(1, player.getUniqueId().toString());
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    int points = resultSet.getInt("POINTS");
+                    boolean toggled = resultSet.getBoolean("toggled");
+                    boolean sound = resultSet.getBoolean("sound");
+                    double fastest = resultSet.getDouble("fastest");
+
+                    return new PlayerMainData(points, toggled, sound, fastest);
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Error fetching player data", e);
+        }
+
+        return null;
+    }
+
+    /**
+     * Updates a player's main data (points, toggled, sound, fastest).
+     *
+     * @param uuid     UUID of the player
+     * @param points   New points value
+     * @param toggled  New toggled value
+     * @param sound    New sound preference
+     * @param fastest  New fastest time
+     */
+    public static void updatePlayerData(UUID uuid, int points, boolean toggled, boolean sound, double fastest) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try (Connection connection = getConnection();
+                 PreparedStatement ps = connection.prepareStatement(
+                         "UPDATE " + tableName + " SET POINTS = ?, toggled = ?, sound = ?, fastest = ? WHERE UUID = ?")) {
+
+                QueryUtils.executeUpdate(ps, points, toggled, sound, fastest, uuid.toString());
+
+            } catch (SQLException e) {
+                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+            }
+        });
+    }
+
+
 
     /**
      * Builds the SQL insert statement based on the storage type.
