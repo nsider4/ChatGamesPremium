@@ -17,10 +17,11 @@ public class GameSoundManager {
         if (toggleSound) {
             String soundType = plugin.getGameConfigManager().getGameSound(type);
             float volume = plugin.getGameConfigManager().getGameSoundVolume();
+            float pitch = plugin.getGameConfigManager().getGameSoundPitch();
 
             if (!soundType.isEmpty()) {
                 try {
-                    player.playSound(player.getLocation(), soundType, volume, volume);
+                    player.playSound(player.getLocation(), soundType, volume, pitch);
                 } catch (IllegalArgumentException e) {
                     plugin.getLogger().warning("Invalid sound type: " + soundType);
                 }

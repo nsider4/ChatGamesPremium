@@ -2,7 +2,7 @@ package org.nsider.chatgames.utils.management;
 
 import org.bukkit.Bukkit;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.io.*;
 import java.util.ArrayDeque;

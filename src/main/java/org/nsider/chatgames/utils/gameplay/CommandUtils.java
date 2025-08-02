@@ -3,8 +3,8 @@ package org.nsider.chatgames.utils.gameplay;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
 import org.nsider.chatgames.utils.messages.MessageUtils;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.util.List;
 

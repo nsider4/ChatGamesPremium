@@ -5,10 +5,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
 import org.nsider.chatgames.database.enums.DatabaseDriver;
 import org.nsider.chatgames.database.enums.JDBCUrlPrefix;
 import org.nsider.chatgames.database.enums.StorageType;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.io.File;
 import java.io.IOException;

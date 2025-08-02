@@ -110,6 +110,16 @@ public class MessageUtils {
     }
 
     /**
+     * Colors a list of messages by applying the color codes to each string in the list.
+     *
+     * @param messages the list of messages to colorize
+     * @return the list of colorized messages
+     */
+    public static List<String> colorList(List<String> messages) {
+        return messages.stream().map(MessageUtils::color).collect(Collectors.toList());
+    }
+
+    /**
      * Logs a message at the specified level.
      *
      * @param level the log level (e.g., INFO, WARNING)

@@ -71,6 +71,10 @@
             <name>Lumine Releases</name>
             <url>https://mvn.lumine.io/repository/maven-public/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -91,6 +95,12 @@
             <artifactId>placeholderapi</artifactId>
             <version>2.11.3</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.nsider4</groupId>
+            <artifactId>InventoryManager</artifactId>
+            <version>1.1.2</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>

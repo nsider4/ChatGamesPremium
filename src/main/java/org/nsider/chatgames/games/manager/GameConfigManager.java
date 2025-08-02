@@ -46,6 +46,10 @@ public class GameConfigManager {
         return (float) plugin.getConfig().getDouble("GameSounds.volume", 0.5);
     }
 
+    public float getGameSoundPitch() {
+        return (float) plugin.getConfig().getDouble("GameSounds.pitch", 1.0);
+    }
+
     public String getGameSound(String type) {
         return plugin.getConfig().getString("GameSounds." + type, "");
     }

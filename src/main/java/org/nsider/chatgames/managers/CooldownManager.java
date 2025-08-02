@@ -1,8 +1,8 @@
 package org.nsider.chatgames.managers;
 
 import org.bukkit.entity.Player;
-import org.nsider.chatgames.annotations.Nonnull;
 import org.nsider.chatgames.utils.management.TimeUtils;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.util.HashMap;
 import java.util.Map;

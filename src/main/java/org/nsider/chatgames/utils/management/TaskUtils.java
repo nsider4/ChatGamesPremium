@@ -3,8 +3,8 @@ package org.nsider.chatgames.utils.management;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
-import org.nsider.chatgames.annotations.Nullable;
+import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
 
 /**
  * Utility class to manage and schedule tasks for the plugin.

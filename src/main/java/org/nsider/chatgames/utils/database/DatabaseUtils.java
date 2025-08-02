@@ -1,9 +1,9 @@
 package org.nsider.chatgames.utils.database;
 
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
-import org.nsider.chatgames.annotations.Nullable;
 import org.nsider.chatgames.database.DataHandler;
+import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
 
 import java.sql.Connection;
 import java.sql.SQLException;

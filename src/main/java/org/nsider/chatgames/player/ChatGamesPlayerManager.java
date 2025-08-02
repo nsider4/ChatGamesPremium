@@ -3,9 +3,9 @@ package org.nsider.chatgames.player;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
 import org.nsider.chatgames.database.queries.ChallengeQueries;
 import org.nsider.chatgames.database.queries.ManagementQueries;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.util.Map;
 import java.util.UUID;

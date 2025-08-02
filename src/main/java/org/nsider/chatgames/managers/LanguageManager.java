@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.io.*;
 import java.net.URL;

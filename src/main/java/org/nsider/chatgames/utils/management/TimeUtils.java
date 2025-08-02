@@ -3,7 +3,7 @@ package org.nsider.chatgames.utils.management;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.nsider.chatgames.annotations.Nonnull;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.text.DecimalFormat;
 

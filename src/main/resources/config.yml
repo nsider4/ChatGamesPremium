@@ -75,8 +75,39 @@ fastest-typers-top: true
 #Sound to send to players when a chat event starts!
 GameSounds:
   volume: 0.5
+  pitch: 1.0
   #LEAVE ANY OF THESE EMPTY TO DISABLE THEM
   win: 'minecraft:entity.experience_orb.pickup'
   game-start: 'minecraft:entity.player.levelup'
   time-expired: 'minecraft:entity.villager.no'
   wrong-case: 'minecraft:block.note_block.bass'
+
+
+#Presets section
+active-preset: "none"
+
+presets:
+  weekend_set:
+    games:
+      - unscramble
+      - unreverse
+      - reaction
+
+  minimal_set:
+    games:
+      - reaction
+
+  full_rotation:
+    games:
+      - unscramble
+      - unreverse
+      - reaction
+      - guess_the_number
+      - shoppinglist
+      - clickable
+      - fillout
+      - hoverable
+      - random
+      - math
+      - variable
+      - trivia

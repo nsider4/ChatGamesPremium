@@ -2,7 +2,7 @@ package org.nsider.chatgames.other;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.nsider.chatgames.annotations.Nonnull;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.io.IOException;
 import java.io.InputStream;

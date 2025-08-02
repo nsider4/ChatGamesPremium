@@ -4,12 +4,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
+import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.YamlConfig;
 import org.nsider.chatgames.enums.TopType;
 import org.nsider.chatgames.utils.database.DatabaseUtils;
 import org.nsider.chatgames.utils.database.QueryUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,7 +51,7 @@ public class TopPlayerQueries {
      * @param top The type of top ranking (Points or Typers).
      */
     public static void sendTopMessage(@Nonnull CommandSender sender, @Nonnull TopType top) {
-        YamlConfig messages = plugin.getConfigManager().getMessages();
+        YamlConfig messages = ConfigManager.getMessagesConfig();
         String value;
         String order = "";
 

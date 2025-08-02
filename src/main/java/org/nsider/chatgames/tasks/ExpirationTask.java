@@ -4,12 +4,11 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
+import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.events.ChatGamesEndEvent;
+import org.nsider.chatgames.games.Game;
 import org.nsider.chatgames.utils.management.TaskUtils;
-import org.nsider.chatgamespremium.customevents.ChatGamesEndEvent;
-import org.nsider.chatgamespremium.enums.GameType;
-import org.nsider.chatgamespremium.games.Game;
-import org.nsider.chatgamespremium.games.GameHandler;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 /**
  * Handles the expiration logic for games and races.

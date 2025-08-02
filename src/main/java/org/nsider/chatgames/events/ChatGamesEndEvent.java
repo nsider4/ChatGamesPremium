@@ -8,11 +8,11 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.games.GameController;
 import org.nsider.chatgames.games.manager.GameUtility;
 import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.inventorymanager.extras.Nonnull;
 
 public class ChatGamesEndEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();

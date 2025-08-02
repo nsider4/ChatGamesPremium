@@ -2,15 +2,14 @@ package org.nsider.chatgames.tasks;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.scheduler.BukkitTask;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.annotations.Nonnull;
+import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.utils.management.TaskUtils;
-import org.nsider.chatgamespremium.enums.GameType;
+import org.nsider.inventorymanager.extras.Nonnull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.*;
 
 /**
  * Handles the primary task logic for managing and scheduling games.
@@ -28,6 +27,8 @@ public class MainTask {
     @Getter
     private BukkitTask task;
 
+    private String activePreset;
+
     /**
      * Constructs a new {@code MainTask}.
      *
@@ -36,6 +37,8 @@ public class MainTask {
     public MainTask(@Nonnull ChatGames instance) {
         this.plugin = instance;
         this.taskUtils = new TaskUtils(plugin);
+        this.activePreset = plugin.getConfig().getString("active-preset", null); //TODO CHANGE TO CONFIG VALUE ENUM
+        if(Objects.equals(this.activePreset, "none")) this.activePreset = null;
         reloadEnabledGames();
     }
 
@@ -66,10 +69,25 @@ public class MainTask {
     }
 
     /**
-     * Reloads the list of enabled games from the plugin's configuration.
+     * Reloads the list of enabled games from the plugin's configuration or active preset.
      */
     public void reloadEnabledGames() {
         enabledGames.clear();
+
+        if (activePreset != null && plugin.getConfig().isConfigurationSection("presets." + activePreset)) {
+            ConfigurationSection preset = plugin.getConfig().getConfigurationSection("presets." + activePreset);
+            if (preset != null) {
+                for (String key : preset.getStringList("games")) {
+                    try {
+                        GameType type = GameType.valueOf(key.toUpperCase());
+                        enabledGames.add(type);
+                    } catch (IllegalArgumentException ignored) {}
+                }
+                return;
+            }
+        }
+
+        //Default fallback if no preset or invalid
         for (GameType type : GameType.values()) {
             if (isEnabledInConfig(type)) {
                 enabledGames.add(type);
@@ -106,13 +124,11 @@ public class MainTask {
     private void selectAndStartGame() {
         boolean validGameChosen = false;
         while (!validGameChosen) {
-            int randomIndex = ThreadLocalRandom.current().nextInt(GameType.values().length);
-            GameType type = GameType.values()[randomIndex];
+            int randomIndex = new Random().nextInt(enabledGames.size());
+            GameType type = enabledGames.get(randomIndex);
 
-            if (enabledGames.contains(type)) {
-                validGameChosen = true;
-                Bukkit.getScheduler().runTask(plugin, () -> plugin.getGameManager().startGame(type));
-            }
+            validGameChosen = true;
+            Bukkit.getScheduler().runTask(plugin, () -> plugin.getGameManager().startGame(type));
         }
     }
 
@@ -128,5 +144,18 @@ public class MainTask {
                     plugin.getConfigManager().getChatRaces().getBoolean("enable-races");
         }
         return plugin.getConfig().getBoolean(type.toString().toLowerCase() + ".enable");
+    }
+
+    /**
+     * Sets a new preset and reloads the enabled games accordingly.
+     *
+     * @param presetName The name of the preset to apply.
+     */
+    public void applyPreset(String presetName) {
+        this.activePreset = presetName;
+        plugin.getConfig().set("active-preset", presetName);
+        plugin.saveConfig();
+        reloadEnabledGames();
+        restart();
     }
 }
