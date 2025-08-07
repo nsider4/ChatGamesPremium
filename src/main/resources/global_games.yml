@@ -1,0 +1,6 @@
+
+global_word:
+  enable: true
+  duration_seconds: 30
+  broadcast_prompt: "&eGlobal Game! Type &b%word% &eto join!"
+  chance_trigger_percent: 5

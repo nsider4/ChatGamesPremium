@@ -172,6 +172,47 @@ variable:
     - '❅;20'
     - '♫;25'
 
+sequence:
+  enable: true
+  winners: 1
+
+  #Don't change this
+  case-sensitive: false
+
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+
+  #Number of operations to include in the equation. For example, 3 -> "3 + 4 - x = 10"
+  number-of-operations: 3
+
+  #Allowed operators in the equation
+  operators:
+    - '+'
+    - '-'
+    - 'x'
+    - '/'
+
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&b%selection%'
+  subtitleMessage: '&aFind the missing value'
+
+memorize:
+  enable: true
+  winners: 1
+
+  case-sensitive: false
+
+  listLength: 3
+
+  #The time users will have to memorize, solve, write, etc in seconds.
+  timeToMemorize: 7
+
+  #The time users will have to guess, solve, write, etc in seconds.
+  timeToGuess_seconds: 20
+  #Leave the following 2 empty to disable them
+  titleMessage: '&bMemorize'
+  subtitleMessage: '&aTry remembering this list!'
+
 trivia:
   enable: true
   winners: 1

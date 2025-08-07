@@ -22,7 +22,9 @@ public class GameHandlerFactory {
                 return new GuessTheNumberHandler(plugin);
             case VARIABLE:
                 return new VariableGameHandler(plugin);
-            case SHOPPINGLIST:
+            case SEQUENCE:
+                return new SequenceGameHandler(plugin);
+            case MEMORIZE:
                 return new ShoppingListGameHandler(plugin);
             case HOVERABLE:
                 return new HoverableGameHandler(plugin);
