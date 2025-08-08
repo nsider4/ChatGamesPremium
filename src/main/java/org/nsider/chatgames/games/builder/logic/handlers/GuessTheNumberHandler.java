@@ -1,6 +1,8 @@
 package org.nsider.chatgames.games.builder.logic.handlers;
 
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.games.builder.logic.GameHandler;
 
 import java.util.Random;
@@ -16,10 +18,10 @@ public class GuessTheNumberHandler implements GameHandler<String[]> {
 
     @Override
     public String[] handle(String... args) {
-        int lowerLimit = plugin.getConfig().getInt("guess_the_number.lower-limit", 1);
-        int upperLimit = plugin.getConfig().getInt("guess_the_number.upper-limit", 20);
-        String selected = "";
-        String toReplace = "";
+        int lowerLimit = ConfigValue.getInt(ConfigPaths.GUESS_NUMBER_LOWER_LIMIT);
+        int upperLimit = ConfigValue.getInt(ConfigPaths.GUESS_NUMBER_UPPER_LIMIT);
+        String selected;
+        String toReplace;
 
         if (args.length > 1) {
             try {

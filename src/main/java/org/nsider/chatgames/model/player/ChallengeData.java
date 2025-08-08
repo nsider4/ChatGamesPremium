@@ -1,4 +1,4 @@
-package org.nsider.chatgames.player;
+package org.nsider.chatgames.model.player;
 
 import lombok.Getter;
 

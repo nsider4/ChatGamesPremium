@@ -60,8 +60,8 @@ public class Game {
                 return "variable";
             case GUESS_THE_NUMBER:
                 return "guess_the_number";
-            case SHOPPINGLIST:
-                return "shoppinglist";
+            case MEMORIZE:
+                return "memorize";
             case TRIVIA:
                 return "trivia";
             case HOVERABLE:

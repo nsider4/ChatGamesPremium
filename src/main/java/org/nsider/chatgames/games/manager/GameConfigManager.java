@@ -1,6 +1,9 @@
 package org.nsider.chatgames.games.manager;
 
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
+import org.nsider.chatgames.config.settings.ListConfigValue;
 
 import java.util.List;
 import java.util.Random;
@@ -13,44 +16,44 @@ public class GameConfigManager {
     }
 
     public int getGameWinners(String game) {
-        return plugin.getConfig().getInt(game + ".winners", 1);
+        return ConfigValue.getInt(ConfigPaths.valueOf(game.toUpperCase() + "_WINNERS"));
     }
 
     public long getNextGameDelay() {
-        if (plugin.getConfig().getBoolean("randomDelay.enable")) {
+        if (ConfigValue.getBoolean(ConfigPaths.RANDOM_DELAY_ENABLED)) {
             Random random = new Random();
-            int min = plugin.getConfig().getInt("randomDelay.minimum");
-            int max = plugin.getConfig().getInt("randomDelay.limit");
-            String unit = plugin.getConfig().getString("randomDelay.timeUnit", "seconds").toLowerCase();
+            int min = ConfigValue.getInt(ConfigPaths.RANDOM_DELAY_MIN);
+            int max = ConfigValue.getInt(ConfigPaths.RANDOM_DELAY_LIMIT);
+            String unit = ConfigValue.getString(ConfigPaths.RANDOM_DELAY_UNIT).toLowerCase();
 
             long delay = random.nextInt(max - min + 1) + min;
             return unit.equals("seconds") ? delay * 20L : delay * 20L * 60L;
         }
 
-        return plugin.getConfig().getInt("time_minutes") * 20L * 60L;
+        return ConfigValue.getInt(ConfigPaths.TIME_MINUTES) * 20L * 60L;
     }
 
     public List<String> getDisabledWorlds() {
-        return plugin.getConfig().getStringList("disabled-worlds");
+        return ListConfigValue.getStringList(ConfigPaths.DISABLED_WORLDS);
     }
 
     public boolean isPermissionRequiredToPlay() {
-        return plugin.getConfig().getBoolean("use-permission-toplay");
+        return ConfigValue.getBoolean(ConfigPaths.REQUIRE_PERMISSION_TO_PLAY);
     }
 
     public boolean countAllPlayers() {
-        return plugin.getConfig().getBoolean("count-all-players");
+        return ConfigValue.getBoolean(ConfigPaths.COUNT_ALL_PLAYERS);
     }
 
     public float getGameSoundVolume() {
-        return (float) plugin.getConfig().getDouble("GameSounds.volume", 0.5);
+        return (float) ConfigValue.getDouble(ConfigPaths.GAME_SOUND_VOLUME);
     }
 
     public float getGameSoundPitch() {
-        return (float) plugin.getConfig().getDouble("GameSounds.pitch", 1.0);
+        return (float) ConfigValue.getDouble(ConfigPaths.GAME_SOUND_PITCH);
     }
 
     public String getGameSound(String type) {
-        return plugin.getConfig().getString("GameSounds." + type, "");
+        return ConfigValue.getString(ConfigPaths.valueOf("SOUND_" + type.toUpperCase()));
     }
 }

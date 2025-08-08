@@ -18,7 +18,7 @@ public class BuilderUtils {
     }
 
     protected static boolean isSpecialGame(GameType type) {
-        return type == GameType.VARIABLE || type == GameType.CLICKABLE || type == GameType.HOVERABLE || type == GameType.SHOPPINGLIST;
+        return type == GameType.VARIABLE || type == GameType.CLICKABLE || type == GameType.HOVERABLE || type == GameType.MEMORIZE;
     }
 
     public static Collection<String> getWordsForGame(ChatGames plugin, GameType type) {

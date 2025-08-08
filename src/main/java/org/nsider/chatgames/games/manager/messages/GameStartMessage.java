@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.YamlConfig;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.games.manager.GameMessageManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 
@@ -18,18 +20,31 @@ public class GameStartMessage extends GameMessageManager {
         YamlConfig messages = ConfigManager.getMessagesConfig();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (plugin.getGameManager().worldEnabled(player) && plugin.getGameManager().gamesIsToggled(player)) {
-                GameSoundManager.playGameSound(player, "game-start");
+            if (!plugin.getGameManager().worldEnabled(player) || !plugin.getGameManager().gamesIsToggled(player)) {
+                continue;
+            }
 
-                sendListMessage(player, messages.getStringList(game + ".gameStartAnnouncement"),
-                        variable, word,
-                        "%timeToGuess%", "" + plugin.getConfig().getInt(game + ".timeToGuess_seconds"));
+            GameSoundManager.playGameSound(player, "game-start");
 
-                String titleMessage = plugin.getConfig().getString(game + ".titleMessage");
-                String subtitleMessage = plugin.getConfig().getString(game + ".subtitleMessage");
-                if (!titleMessage.isEmpty() && !subtitleMessage.isEmpty()) {
-                    player.sendTitle(color(titleMessage).replaceAll(variable, word), color(subtitleMessage).replaceAll(variable, word));
-                }
+            sendListMessage(
+                    player,
+                    messages.getStringList(game + ".gameStartAnnouncement"),
+                    variable,
+                    word,
+                    "%timeToGuess%",
+                    String.valueOf(ConfigValue.getInt(ConfigPaths.valueOf(game.toUpperCase() + "_TIME_TO_GUESS")))
+            );
+
+            String titleMessage = ConfigValue.getString(
+                    ConfigPaths.valueOf(game.toUpperCase() + "_TITLE_MESSAGE")
+            ).replace(variable, word);
+
+            String subtitleMessage = ConfigValue.getString(
+                    ConfigPaths.valueOf(game.toUpperCase() + "_SUBTITLE_MESSAGE")
+            ).replace(variable, word);
+
+            if (!titleMessage.isEmpty() && !subtitleMessage.isEmpty()) {
+                player.sendTitle(color(titleMessage), color(subtitleMessage));
             }
         }
     }

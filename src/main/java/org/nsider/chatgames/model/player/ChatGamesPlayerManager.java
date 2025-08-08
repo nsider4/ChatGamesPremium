@@ -1,10 +1,12 @@
-package org.nsider.chatgames.player;
+package org.nsider.chatgames.model.player;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.database.queries.ChallengeQueries;
+import org.nsider.chatgames.database.queries.FastestTimeQueries;
 import org.nsider.chatgames.database.queries.ManagementQueries;
+import org.nsider.chatgames.model.top.FastestData;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.util.Map;
@@ -34,18 +36,18 @@ public class ChatGamesPlayerManager {
             if(mainData == null) return;
             ChallengeData challengeData = ChallengeQueries.getChallengeData(player);
             if(challengeData == null) return;
-            ChatGamesPlayer data = getChatGamesPlayer(player, mainData, challengeData);
+            FastestData fastestData = FastestTimeQueries.getFastestData(player);
+            ChatGamesPlayer data = getChatGamesPlayer(player, mainData, challengeData, fastestData);
 
             cache.put(player.getUniqueId(), data);
         });
     }
 
-    private static @Nonnull ChatGamesPlayer getChatGamesPlayer(OfflinePlayer player, PlayerMainData mainData, ChallengeData challengeData) {
+    private static @Nonnull ChatGamesPlayer getChatGamesPlayer(OfflinePlayer player, PlayerMainData mainData, ChallengeData challengeData, FastestData fastestData) {
         ChatGamesPlayer data = new ChatGamesPlayer(player.getUniqueId());
         data.setPoints(mainData.getPoints());
         data.setToggled(mainData.isToggled());
         data.setSoundEnabled(mainData.isSoundEnabled());
-        data.setFastest(mainData.getFastest());
 
         data.setWinsToday(challengeData.getWinsToday());
         data.setRewardClaimed(challengeData.isRewardClaimed());
@@ -54,6 +56,8 @@ public class ChatGamesPlayerManager {
         data.setDailyStreak(challengeData.getDailyStreak());
         data.setGlobalStreak(challengeData.getGlobalStreak());
         data.setWeeklyWins(challengeData.getWeeklyWins());
+
+        data.setFastestData(fastestData);
 
         data.resetDailyIfNeeded();
         return data;
@@ -69,7 +73,7 @@ public class ChatGamesPlayerManager {
     public static void save(ChatGamesPlayer data) {
         UUID uuid = data.getUuid();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            ManagementQueries.updatePlayerData(uuid, data.getPoints(), data.isToggled(), data.isSoundEnabled(), data.getFastest());
+            ManagementQueries.updatePlayerData(uuid, data.getPoints(), data.isToggled(), data.isSoundEnabled());
             ChallengeQueries.updateChallengeProgress(uuid, data.getWinsToday(), data.isRewardClaimed(), data.getLastUpdated(),
                     data.getChallengeStreak(), data.getDailyStreak(), data.getGlobalStreak(), data.getWeeklyWins());
         });

@@ -5,9 +5,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.database.enums.DatabaseDriver;
 import org.nsider.chatgames.database.enums.JDBCUrlPrefix;
 import org.nsider.chatgames.database.enums.StorageType;
+import org.nsider.chatgames.database.queries.FastestTimeQueries;
+import org.nsider.chatgames.database.queries.ManagementQueries;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.io.File;
@@ -32,12 +36,6 @@ public class HikariDatabase implements DataHandler {
     private final StorageType storageType;
     private final String jdbcUrlPrefix;
 
-    /**
-     * Constructs a HikariDatabase instance.
-     *
-     * @param instance   The plugin instance.
-     * @param storageType The storage type (MySQL or SQLite).
-     */
     public HikariDatabase(ChatGames instance, StorageType storageType) {
         this.plugin = instance;
         this.storageType = storageType;
@@ -51,17 +49,13 @@ public class HikariDatabase implements DataHandler {
         }
     }
 
-    /**
-     * Initializes the HikariCP connection pool based on the plugin's configuration.
-     * Configures the connection details, pool settings, and database type (MySQL or SQLite).
-     */
     @Override
     public void initialize() {
         FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = config.getConfigurationSection(storageType.name());
 
         if (section == null) {
-            plugin.getLogger().warning("Failed to load database config. It seems that your config is broken. Please regenerate a new one.");
+            plugin.getLogger().warning("Failed to load database config.");
             return;
         }
 
@@ -78,11 +72,9 @@ public class HikariDatabase implements DataHandler {
         hikariConfig.setConnectionTimeout(section.getLong("Pool-Settings.time-out", 20000L));
         hikariConfig.setPoolName("ChatGamesHikariPool");
 
-        //Attempt to set keepalive time, ignoring error if method doesn't exist.
         try {
             hikariConfig.setKeepaliveTime(section.getLong("Pool-Settings.keep-alive-time", 60000L));
-        } catch (NoSuchMethodError ignored) {
-        }
+        } catch (NoSuchMethodError ignored) {}
 
         hikariConfig.setDataSourceProperties(getProperties());
         dataSource = new HikariDataSource(hikariConfig);
@@ -90,49 +82,35 @@ public class HikariDatabase implements DataHandler {
         setupDatabase();
     }
 
-    /**
-     * Builds the JDBC URL based on the storage type and configuration.
-     *
-     * @param section The configuration section for the current storage type.
-     * @return The constructed JDBC URL.
-     */
     private String buildJdbcUrl(ConfigurationSection section) {
         if (storageType == StorageType.SQLite) {
-            // For SQLite
-            String dbFile = section.getString("Filename");
+            String dbFile = ConfigValue.getString(ConfigPaths.SQLITE_FILENAME);
             File dataFolder = new File(plugin.getDataFolder(), dbFile + ".db");
-
             if (!dataFolder.exists()) {
-                try {
-                    dataFolder.createNewFile();
-                } catch (IOException e) {
-                    plugin.getLogger().log(Level.SEVERE, "File write error: " + dbFile + ".db");
+                try { dataFolder.createNewFile(); }
+                catch (IOException e) {
+                    plugin.getLogger().log(Level.SEVERE, "File write error: " + dataFolder.getName(), e);
                 }
             }
-
             return String.format(jdbcUrlPrefix + ":%s", dataFolder.getAbsolutePath());
         } else {
-            // For MySQL
             return String.format("%s://%s:%s/%s%s",
                     jdbcUrlPrefix,
-                    section.getString("host", "localhost"),
-                    section.getString("port", "3306"),
-                    section.getString("database", "minecraft"),
-                    section.getString("connection-parameters", "")
+                    ConfigValue.getString(ConfigPaths.MYSQL_HOST),
+                    ConfigValue.getString(ConfigPaths.MYSQL_PORT),
+                    ConfigValue.getString(ConfigPaths.MYSQL_DATABASE),
+                    ConfigValue.getString(ConfigPaths.MYSQL_CONNECTION_PARAMS)
             );
         }
     }
 
-    /**
-     * Sets up the database by establishing a connection and running any necessary setup SQL commands.
-     * Currently, this method only logs a success message but can be extended to execute database-specific setup commands.
-     */
     private void setupDatabase() {
         try (Connection connection = getConnection(); Statement s = connection.createStatement()) {
-            //TODO CREATE TABLES HERE
+            s.executeUpdate(ManagementQueries.getSQLiteCreateChatGamesTable());
+            s.executeUpdate(FastestTimeQueries.getSQLiteCreateFastestTimesTable());
             plugin.getLogger().info("Connected to the database successfully.");
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to initialize database, see error below:");
+            plugin.getLogger().severe("Failed to initialize database.");
             e.printStackTrace();
         }
     }

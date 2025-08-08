@@ -5,6 +5,8 @@ import lombok.Setter;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.database.queries.UpdateQueries;
 import org.nsider.chatgames.database.queries.ValueQueries;
 import org.nsider.chatgames.enums.GameType;
@@ -15,6 +17,7 @@ import org.nsider.chatgames.games.manager.messages.*;
 import org.nsider.chatgames.utils.management.TimeUtils;
 
 import java.util.List;
+import java.util.Random;
 
 public class GameManager {
     private final ChatGames plugin;
@@ -49,16 +52,16 @@ public class GameManager {
         gameStartComponentMessage.sendGameStartedComponent(game, component, variable);
     }
 
-    public void sendVariableMessages(List<String> game, List<String> list, String replace, String replacement, String replace1, String replacement1) {
+    public void sendVariableMessages(List<String> game, List<String> list,
+                                     String replace, String replacement,
+                                     String replace1, String replacement1) {
         variableMessage.sendVariableGameMessage(game, list, replace, replacement, replace1, replacement1);
     }
 
-    // Method to handle sending winner messages and displaying winner stats
     public void sendWinnerMessages() {
         winnerMessage.sendMessageForWinners();
     }
 
-    // Method to handle the memorization game logic and send corresponding messages
     public void startMemorizationGame(String displayList, String selected) {
         memorizationMessage.sendMemorizationStartMessage(displayList, selected);
     }
@@ -81,24 +84,23 @@ public class GameManager {
     }
 
     public void generateNewClickableKey() {
-        this.clickableKey = plugin.getGameAlgorithms().generateRandomCharacters(12, RandomCharacterGenerator.Type.ALPHANUMERIC);
+        this.clickableKey = plugin.getGameAlgorithms()
+                .generateRandomCharacters(12, RandomCharacterGenerator.Type.ALPHANUMERIC);
     }
 
     public boolean gamesIsToggled(Player player) {
-        if (plugin.getConfig().getBoolean("use-permission-toplay") && !player.hasPermission("chatgames.play")) {
+        if (ConfigValue.getBoolean(ConfigPaths.REQUIRE_PERMISSION_TO_PLAY) && !player.hasPermission("chatgames.play")) {
             return false;
-        } else {
-            return ValueQueries.getPlayerToggle(player);
         }
+        return ValueQueries.getPlayerToggle(player);
     }
 
     public boolean worldEnabled(Player player) {
-        for(String world : plugin.getGameConfigManager().getDisabledWorlds()) {
-            if(world.equalsIgnoreCase(player.getWorld().getName())) {
+        for (String world : plugin.getGameConfigManager().getDisabledWorlds()) {
+            if (world.equalsIgnoreCase(player.getWorld().getName())) {
                 return false;
             }
         }
-
         return true;
     }
 

@@ -15,21 +15,27 @@ import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.utils.GameUtils;
 import org.nsider.chatgames.races.RaceBuilder;
 import org.nsider.chatgames.utils.management.LogUtils;
+import org.nsider.chatgames.utils.management.TaskUtils;
 
 import java.io.File;
+import java.util.Random;
 
+@Getter
 public final class ChatGames extends JavaPlugin {
 
-    @Getter private GameAlgorithms gameAlgorithms;
-    @Getter private DataHandler dataHandler;
-    @Getter private GameBuilder gameBuilder;
-    @Getter private GameConfigManager gameConfigManager;
-    @Getter private GameUtils gameUtils;
-    @Getter private GameManager gameManager;
-    @Getter private LogUtils logUtils;
-    @Getter private RaceBuilder raceBuilder;
-    @Getter private boolean isPlaceHolderAPIEnabled = false;
-    @Getter @Setter private boolean inGame = false;
+    private final Random random = new Random();
+
+    private GameAlgorithms gameAlgorithms;
+    private DataHandler dataHandler;
+    private GameBuilder gameBuilder;
+    private GameConfigManager gameConfigManager;
+    private GameUtils gameUtils;
+    private TaskUtils taskUtils;
+    private GameManager gameManager;
+    private LogUtils logUtils;
+    private RaceBuilder raceBuilder;
+    private boolean isPlaceHolderAPIEnabled = false;
+    @Setter private boolean inGame = false;
 
     @Override
     public void onEnable() {
@@ -42,6 +48,7 @@ public final class ChatGames extends JavaPlugin {
         this.gameBuilder = new GameBuilder(this);
         this.gameConfigManager = new GameConfigManager(this);
         this.gameUtils = new GameUtils(this);
+        this.taskUtils = new TaskUtils(this);
         this.logUtils = new LogUtils(this);
         this.gameManager = new GameManager(this);
         this.raceBuilder = new RaceBuilder(this);

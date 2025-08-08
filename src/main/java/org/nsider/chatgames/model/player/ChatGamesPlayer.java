@@ -1,7 +1,8 @@
-package org.nsider.chatgames.player;
+package org.nsider.chatgames.model.player;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.nsider.chatgames.model.top.FastestData;
 import org.nsider.chatgames.utils.gameplay.MilestoneUtils;
 
 import java.time.LocalDate;
@@ -16,7 +17,6 @@ public class ChatGamesPlayer {
     @Setter private int previousPoints = 0;
     @Setter private boolean toggled;
     @Setter private boolean soundEnabled;
-    @Setter private double fastest;
 
     @Setter private int winsToday;
     @Setter private boolean rewardClaimed;
@@ -26,6 +26,8 @@ public class ChatGamesPlayer {
     @Setter private int dailyStreak;
     @Setter private int globalStreak;
     @Setter private int weeklyWins;
+
+    @Setter private FastestData fastestData;
 
     public ChatGamesPlayer(UUID uuid) {
         this.uuid = uuid;

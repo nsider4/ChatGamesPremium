@@ -39,6 +39,13 @@ public enum ConfigPaths {
             ConfigType.STRING
     ),
 
+    /** Name of the database table used to store all the data for fastest times. */
+    FASTEST_TIMES_TABLE(
+            ConfigManager.getConfig(),
+            "fastest_times_table",
+            ConfigType.STRING
+    ),
+
     /** SQLite database file name. */
     SQLITE_FILENAME(
             ConfigManager.getConfig(),
@@ -218,6 +225,13 @@ public enum ConfigPaths {
     GAME_SOUND_VOLUME(
             ConfigManager.getConfig(),
             "GameSounds.volume",
+            ConfigType.DOUBLE
+    ),
+
+    /** Global sound pitch used for all ChatGames sounds. */
+    GAME_SOUND_PITCH(
+            ConfigManager.getConfig(),
+            "GameSounds.pitch",
             ConfigType.DOUBLE
     ),
 
@@ -422,58 +436,58 @@ public enum ConfigPaths {
     ),
 
     /** Whether Shopping List game is enabled. */
-    SHOPPINGLIST_ENABLE(
+    MEMORIZE_ENABLE(
             ConfigManager.getGames(),
-            "shoppinglist.enable",
+            "memorize.enable",
             ConfigType.BOOLEAN
     ),
 
     /** Number of winners allowed in Shopping List game. */
-    SHOPPINGLIST_WINNERS(
+    MEMORIZE_WINNERS(
             ConfigManager.getGames(),
-            "shoppinglist.winners",
+            "memorize.winners",
             ConfigType.INTEGER
     ),
 
     /** Case sensitivity for Shopping List game. */
-    SHOPPINGLIST_CASE_SENSITIVE(
+    MEMORIZE_CASE_SENSITIVE(
             ConfigManager.getGames(),
-            "shoppinglist.case-sensitive",
+            "memorize.case-sensitive",
             ConfigType.BOOLEAN
     ),
 
     /** Number of items in the list for Shopping List game. */
-    SHOPPINGLIST_LIST_LENGTH(
+    MEMORIZE_LIST_LENGTH(
             ConfigManager.getGames(),
-            "shoppinglist.listLength",
+            "memorize.listLength",
             ConfigType.INTEGER
     ),
 
     /** Time to memorize items in Shopping List game. */
-    SHOPPINGLIST_TIME_TO_MEMORIZE(
+    MEMORIZE_TIME_TO_MEMORIZE(
             ConfigManager.getGames(),
-            "shoppinglist.timeToMemorize",
+            "memorize.timeToMemorize",
             ConfigType.INTEGER
     ),
 
     /** Time (in seconds) players have to guess in Shopping List game. */
-    SHOPPINGLIST_TIME_TO_GUESS(
+    MEMORIZE_TIME_TO_GUESS(
             ConfigManager.getGames(),
-            "shoppinglist.timeToGuess_seconds",
+            "memorize.timeToGuess_seconds",
             ConfigType.INTEGER
     ),
 
     /** Title message for Shopping List game round. */
-    SHOPPINGLIST_TITLE_MESSAGE(
+    MEMORIZE_TITLE_MESSAGE(
             ConfigManager.getGames(),
-            "shoppinglist.titleMessage",
+            "memorize.titleMessage",
             ConfigType.STRING
     ),
 
     /** Subtitle message for Shopping List game round. */
-    SHOPPINGLIST_SUBTITLE_MESSAGE(
+    MEMORIZE_SUBTITLE_MESSAGE(
             ConfigManager.getGames(),
-            "shoppinglist.subtitleMessage",
+            "memorize.subtitleMessage",
             ConfigType.STRING
     ),
 
@@ -772,6 +786,21 @@ public enum ConfigPaths {
             ConfigType.STRING
     ),
 
+
+    /** Title message for Variable game round. */
+    VARIABLE_TITLE_MESSAGE(
+            ConfigManager.getGames(),
+            "variable.titleMessage",
+            ConfigType.STRING
+    ),
+
+    /** Subtitle message for Variable game round. */
+    VARIABLE_SUBTITLE_MESSAGE(
+            ConfigManager.getGames(),
+            "variable.subtitleMessage",
+            ConfigType.STRING
+    ),
+
     /** Key‑value pairs used as data for Variable game (format: 'symbol;value'). */
     VARIABLE_DATA(
             ConfigManager.getGames(),
@@ -818,6 +847,55 @@ public enum ConfigPaths {
     TRIVIA_SUBTITLE_MESSAGE(
             ConfigManager.getGames(),
             "trivia.subtitleMessage",
+            ConfigType.STRING
+    ),
+
+    /** Whether Sequence game is enabled. */
+    SEQUENCE_ENABLE(
+            ConfigManager.getGames(),
+            "sequence.enable",
+            ConfigType.BOOLEAN
+    ),
+
+    /** Number of winners allowed in Sequence game. */
+    SEQUENCE_WINNERS(
+            ConfigManager.getGames(),
+            "sequence.winners",
+            ConfigType.INTEGER
+    ),
+
+    /** Time (in seconds) players have to solve in Sequence game. */
+    SEQUENCE_TIME_TO_GUESS(
+            ConfigManager.getGames(),
+            "sequence.timeToGuess_seconds",
+            ConfigType.INTEGER
+    ),
+
+    /** Number of operations to include in the equation. For example, 3 -> "3 + 4 - x = 10" */
+    SEQUENCE_OPERATIONS(
+            ConfigManager.getGames(),
+            "sequence.number-of-operations",
+            ConfigType.INTEGER
+    ),
+
+    /** Allowed operators in the equation */
+    SEQUENCE_OPERATORS(
+            ConfigManager.getGames(),
+            "sequence.operators",
+            ConfigType.LIST_STRING
+    ),
+
+    /** Title message for Sequence game round. */
+    SEQUENCE_TITLE_MESSAGE(
+            ConfigManager.getGames(),
+            "sequence.titleMessage",
+            ConfigType.STRING
+    ),
+
+    /** Subtitle message for Sequence game round. */
+    SEQUENCE_SUBTITLE_MESSAGE(
+            ConfigManager.getGames(),
+            "sequence.subtitleMessage",
             ConfigType.STRING
     ),
     /* -----------------------------------------END OF games.yml----------------------------------------- */

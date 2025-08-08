@@ -2,6 +2,8 @@ package org.nsider.chatgames.games.builder.algorithms;
 
 
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 
 public class RandomCharacterGenerator {
 
@@ -31,7 +33,7 @@ public class RandomCharacterGenerator {
             case HEXADECIMAL:
                 return "0123456789ABCDEF";
             case CUSTOM:
-                return plugin.getConfig().getString("random.custom_characters", "");
+                return ConfigValue.getString(ConfigPaths.RANDOM_CUSTOM_CHARACTERS);
             default:
                 throw new IllegalArgumentException("Unknown Type: " + type);
         }

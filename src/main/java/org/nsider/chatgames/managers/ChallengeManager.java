@@ -2,8 +2,8 @@ package org.nsider.chatgames.managers;
 
 import org.bukkit.Bukkit;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.player.ChatGamesPlayer;
-import org.nsider.chatgames.player.ChatGamesPlayerManager;
+import org.nsider.chatgames.model.player.ChatGamesPlayer;
+import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 
 import java.util.UUID;
 

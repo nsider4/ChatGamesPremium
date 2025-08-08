@@ -3,6 +3,9 @@ package org.nsider.chatgames.games.builder.algorithms;
 
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
+import org.nsider.chatgames.config.settings.ListConfigValue;
 import org.nsider.chatgames.games.utils.EquationResult;
 
 import java.util.ArrayList;
@@ -14,7 +17,7 @@ public class SymbolEquationCreator {
         List<Integer> numbers = new ArrayList<>();
         List<String> symbols = new ArrayList<>();
         List<String> message = new ArrayList<>();
-        List<String> variables = plugin.getConfig().getStringList("variable.data");
+        List<String> variables = ListConfigValue.getStringList(ConfigPaths.VARIABLE_DATA);
 
         populateSymbolsAndNumbers(numbers, symbols, message, variables);
 
@@ -54,9 +57,9 @@ public class SymbolEquationCreator {
     }
 
     private static int generateResult(ChatGames plugin) {
-        int min = plugin.getConfig().getInt("variable.result-min");
-        int max = plugin.getConfig().getInt("variable.result-max");
-        return (int) (Math.random() * (max - min + 1)) + min;
+        int min = ConfigValue.getInt(ConfigPaths.VARIABLE_RESULT_MIN);
+        int max = ConfigValue.getInt(ConfigPaths.VARIABLE_RESULT_MAX);
+        return plugin.getRandom().nextInt(max - min + 1) + min;
     }
 
     private static String formatFinalMessage(ChatGames plugin, List<String> symbols, int result) {

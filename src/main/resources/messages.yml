@@ -67,6 +67,17 @@ TypersTop:
   no_data_message: '&8[%prefix%&8] &cThere is no data yet! Win a chat game and be the fastest!'
   top_disabled_message: '&8[%prefix%&8] &cThis function is currently disabled!'
 
+GameTypersTop:
+  #You can leave empty if you want to disable a certain message out of all. (Excluding 'format' and 'player-stat-format')
+  header: '&b&m---------&e&lTOP FASTEST - %game%&b&m---------'
+  separators: ''
+  format: '&c%spot%. &f%player% &8| &e&l%time%&6s'
+  player-stat-format: '&7Your fastest time is &e&l%fastest_time%&6s'
+  footer: '&b&m------------------------------'
+
+  no_data_message: '&8[%prefix%&8] &cThere is no data yet! Win a chat game and be the fastest!'
+  top_disabled_message: '&8[%prefix%&8] &cThis function is currently disabled!'
+
 help_command:
   - '&7&m-------------------------------------------------'
   - '&e&l-ChatGames-'

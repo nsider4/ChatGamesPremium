@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.events.ChatGamesStartEvent;
@@ -118,10 +120,10 @@ public class LogListener implements Listener {
      * Logs messages to the console and/or a log file.
      */
     private void log(String logMessage) {
-        if (plugin.getConfig().getBoolean("log-console", true)) {
+        if (ConfigValue.getBoolean(ConfigPaths.LOG_TO_CONSOLE)) {
             plugin.getLogger().info(logMessage);
         }
-        if (plugin.getConfig().getBoolean("log-local", true)) {
+        if (ConfigValue.getBoolean(ConfigPaths.LOG_TO_FILE)) {
             writeLogToFile(logMessage);
         }
     }

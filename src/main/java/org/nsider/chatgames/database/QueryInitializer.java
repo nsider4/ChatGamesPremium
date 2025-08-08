@@ -1,10 +1,7 @@
 package org.nsider.chatgames.database;
 
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.database.queries.ManagementQueries;
-import org.nsider.chatgames.database.queries.TopPlayerQueries;
-import org.nsider.chatgames.database.queries.UpdateQueries;
-import org.nsider.chatgames.database.queries.ValueQueries;
+import org.nsider.chatgames.database.queries.*;
 import org.nsider.chatgames.utils.database.DatabaseUtils;
 
 /**
@@ -27,6 +24,7 @@ public class QueryInitializer {
         ManagementQueries.initialize(plugin);
         ValueQueries.initialize(plugin);
         UpdateQueries.initialize(plugin);
+        FastestTimeQueries.initialize(plugin);
         TopPlayerQueries.initialize(plugin);
     }
 }

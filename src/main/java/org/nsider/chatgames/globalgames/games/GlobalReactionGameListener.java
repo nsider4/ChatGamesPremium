@@ -9,7 +9,7 @@ import org.nsider.chatgames.ChatGames;
 import java.util.Set;
 import java.util.UUID;
 
-public class GlobalReactionGameListener implements Listener {
+public class GlobalReactionGameListener implements Listener { //TODO REGISTER LISTENER
     private final String promptWord;
     private final Set<UUID> participants;
     private final ChatGames plugin;

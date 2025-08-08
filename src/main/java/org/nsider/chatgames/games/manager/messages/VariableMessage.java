@@ -3,6 +3,8 @@ package org.nsider.chatgames.games.manager.messages;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.games.manager.GameMessageManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 import org.nsider.chatgames.utils.messages.MessageUtils;
@@ -16,7 +18,6 @@ public class VariableMessage extends GameMessageManager {
         super(plugin);
     }
 
-    // Send variable-based game messages to players
     public void sendVariableGameMessage(List<String> game, List<String> list, String replace, String replacement, String replace1, String replacement1) {
         List<String> messagesToSend = new ArrayList<>();
 
@@ -36,6 +37,10 @@ public class VariableMessage extends GameMessageManager {
             }
         }
 
+        String symbolToGet = ConfigValue.getString(ConfigPaths.VARIABLE_TO_GET_SYMBOL);
+        String titleMessage = ConfigValue.getString(ConfigPaths.VARIABLE_TITLE_MESSAGE).replaceAll("%symbol%", symbolToGet);
+        String subtitleMessage = ConfigValue.getString(ConfigPaths.VARIABLE_SUBTITLE_MESSAGE).replaceAll("%symbol%", symbolToGet);
+
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (plugin.getGameManager().worldEnabled(p) && plugin.getGameManager().gamesIsToggled(p)) {
                 GameSoundManager.playGameSound(p, "game-start");
@@ -44,8 +49,6 @@ public class VariableMessage extends GameMessageManager {
                     MessageUtils.sendMessage(p, color(message));
                 }
 
-                String titleMessage = plugin.getConfig().getString("variable.titleMessage").replaceAll("%symbol%", plugin.getConfig().getString("variable.toGet"));
-                String subtitleMessage = plugin.getConfig().getString("variable.subtitleMessage").replaceAll("%symbol%", plugin.getConfig().getString("variable.toGet"));
                 if (!titleMessage.isEmpty() && !subtitleMessage.isEmpty()) {
                     p.sendTitle(color(titleMessage), color(subtitleMessage));
                 }

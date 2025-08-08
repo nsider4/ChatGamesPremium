@@ -38,7 +38,7 @@ public class GameBuilder {
             }
         }
 
-        if (type != GameType.SHOPPINGLIST) {
+        if (type != GameType.MEMORIZE) {
             initGame(type, selected);
             plugin.getExpirationTask().timeExpiredTask(plugin.getGameManager().getGame().getGameConfigName());
         }

@@ -1,7 +1,8 @@
 package org.nsider.chatgames.games.builder.logic.handlers;
 
-
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.games.builder.algorithms.RandomCharacterGenerator;
 import org.nsider.chatgames.games.builder.logic.GameHandler;
 
@@ -14,7 +15,7 @@ public class RandomGameHandler implements GameHandler<String[]> {
 
     @Override
     public String[] handle(String... args) {
-        String lengthRange = plugin.getConfig().getString("random.lengthRange", "6-8");
+        String lengthRange = ConfigValue.getString(ConfigPaths.RANDOM_LENGTH_RANGE);
 
         if (args.length > 0) {
             try {
@@ -27,7 +28,7 @@ public class RandomGameHandler implements GameHandler<String[]> {
 
         String selected = plugin.getGameAlgorithms().generateRandomCharacters(
                 plugin.getGameAlgorithms().getRandomLength(lengthRange),
-                RandomCharacterGenerator.Type.valueOf(plugin.getConfig().getString("random.character_type"))
+                RandomCharacterGenerator.Type.valueOf(ConfigValue.getString(ConfigPaths.RANDOM_CHARACTER_TYPE))
         );
 
         return new String[]{selected, selected};

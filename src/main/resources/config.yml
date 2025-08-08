@@ -17,6 +17,9 @@ Storage: 'SQLite'
 #The name of the table that will contain all ChatGames data
 table_name: 'chatgames'
 
+#The name of the table that will contain all ChatGames fastest times
+fastest_times_table: 'chatgames_fastest_times'
+
 SQLite:
   Filename: 'chatgames-data'
 

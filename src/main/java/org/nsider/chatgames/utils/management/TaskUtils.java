@@ -47,8 +47,18 @@ public class TaskUtils {
      * @return The {@link BukkitTask} representing the scheduled task.
      */
     @Nonnull
-    public BukkitTask runSyncTask(@Nonnull Runnable task, long delay) {
+    public BukkitTask runSyncTaskLater(@Nonnull Runnable task, long delay) {
         return Bukkit.getScheduler().runTaskLater(plugin, task, delay);
+    }
+
+    /**
+     * Schedules a synchronous task to run with no delay.
+     *
+     * @param task The task to execute. Must not be null.
+     */
+    @Nonnull
+    public void runSyncTask(@Nonnull Runnable task) {
+        Bukkit.getScheduler().runTask(plugin, task);
     }
 
     /**

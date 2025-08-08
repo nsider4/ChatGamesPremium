@@ -4,6 +4,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.games.utils.PlayerResult;
@@ -22,19 +24,12 @@ public class DiscordListener implements Listener {
 
     @EventHandler
     public void onChatGamesEnd(ChatGamesEndEvent event) {
-        // Find the first-place winner and send the Discord message
         event.getWinners().stream()
                 .filter(result -> result.getPlace() == 1)
                 .findFirst()
                 .ifPresent(winner -> scheduleDiscordMessage(winner, event.getType()));
     }
 
-    /**
-     * Schedules the Discord winner announcement message asynchronously.
-     *
-     * @param winner The winner of the game.
-     * @param type   The game type.
-     */
     private void scheduleDiscordMessage(PlayerResult winner, GameType type) {
         new BukkitRunnable() {
             @Override
@@ -44,14 +39,8 @@ public class DiscordListener implements Listener {
         }.runTaskAsynchronously(plugin);
     }
 
-    /**
-     * Sends a winner announcement message to the configured Discord webhook.
-     *
-     * @param winner The player who won.
-     * @param type   The type of game they won.
-     */
     private void sendWinnerDiscordMessage(PlayerResult winner, GameType type) {
-        String webhookUrl = plugin.getConfig().getString("discord.webhook-url");
+        String webhookUrl = ConfigValue.getString(ConfigPaths.DISCORD_WEBHOOK_URL);
         if (webhookUrl == null || webhookUrl.isEmpty()) {
             plugin.getLogger().warning("Discord webhook URL is not configured.");
             return;
@@ -66,40 +55,32 @@ public class DiscordListener implements Listener {
         }
     }
 
-    /**
-     * Creates a configured Discord webhook with the winner's details.
-     *
-     * @param winner     The player who won.
-     * @param type       The type of game.
-     * @param webhookUrl The Discord webhook URL.
-     * @return A configured DiscordWebhook instance.
-     */
     private DiscordWebhook createDiscordWebhook(PlayerResult winner, GameType type, String webhookUrl) {
         DiscordWebhook webhook = new DiscordWebhook(webhookUrl);
 
-        webhook.setContent(plugin.getConfig().getString("discord.message-content"));
-        webhook.setAvatarUrl(plugin.getConfig().getString("discord.img-url"));
-        webhook.setUsername(plugin.getConfig().getString("discord.username"));
+        webhook.setContent(ConfigValue.getString(ConfigPaths.DISCORD_MESSAGE_CONTENT));
+        webhook.setAvatarUrl(ConfigValue.getString(ConfigPaths.DISCORD_IMAGE_URL));
+        webhook.setUsername(ConfigValue.getString(ConfigPaths.DISCORD_USERNAME));
         webhook.setTts(false);
 
         DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject()
-                .setTitle(plugin.getConfig().getString("discord.title"))
-                .setDescription(plugin.getConfig().getString("discord.description"))
+                .setTitle(ConfigValue.getString(ConfigPaths.DISCORD_TITLE))
+                .setDescription(ConfigValue.getString(ConfigPaths.DISCORD_DESCRIPTION))
                 .setColor(Color.RED)
                 .addField(
-                        plugin.getConfig().getString("discord.winner-field")
+                        ConfigValue.getString(ConfigPaths.DISCORD_WINNER_FIELD)
                                 .replace("%winner%", winner.getPlayer().getName())
                                 .replace("%time%", String.valueOf(winner.getTime())),
                         "",
                         true
                 )
                 .addField(
-                        plugin.getConfig().getString("discord.game-field")
+                        ConfigValue.getString(ConfigPaths.DISCORD_GAME_FIELD)
                                 .replace("%game%", type.name()),
                         "",
                         true
                 )
-                .setThumbnail(plugin.getConfig().getString("discord.img-url"));
+                .setThumbnail(ConfigValue.getString(ConfigPaths.DISCORD_IMAGE_URL));
 
         webhook.addEmbed(embed);
         return webhook;

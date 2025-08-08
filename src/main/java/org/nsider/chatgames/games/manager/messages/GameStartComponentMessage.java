@@ -7,6 +7,8 @@ import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.YamlConfig;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.games.manager.GameMessageManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 import org.nsider.chatgames.utils.messages.MessageUtils;
@@ -19,11 +21,14 @@ public class GameStartComponentMessage extends GameMessageManager {
         super(plugin);
     }
 
-    public void sendComponentGameMessage(Player player, TextComponent component, List<String> messages, String replace, String replacement, String variable) {
+    /**
+     * Sends a clickable component message when a game starts.
+     * Retains original behavior for message templates from messages.yml.
+     */
+    public void sendComponentGameMessage(Player player, TextComponent component, List<String> messages,
+                                         String replace, String replacement, String variable) {
         for (String msg : messages) {
-
             msg = msg.replaceAll(replace, replacement);
-
             boolean containsVariable = msg.contains(variable);
 
             if (plugin.isPlaceHolderAPIEnabled()) {
@@ -34,7 +39,7 @@ public class GameStartComponentMessage extends GameMessageManager {
                 msg = msg.replaceAll("<center>", "");
 
                 if (containsVariable) {
-                    if(msg.contains("%")) {
+                    if (msg.contains("%")) {
                         msg = color(msg.replaceAll(variable, ""));
                     }
                     MessageUtils.sendCenteredMessage(player, msg, component);
@@ -43,7 +48,7 @@ public class GameStartComponentMessage extends GameMessageManager {
                 }
             } else {
                 if (containsVariable) {
-                    if(msg.contains("%")) {
+                    if (msg.contains("%")) {
                         msg = color(msg.replaceAll(variable, ""));
                     }
                     TextComponent combinedComponent = new TextComponent(TextComponent.fromLegacyText(msg));
@@ -56,27 +61,45 @@ public class GameStartComponentMessage extends GameMessageManager {
         }
     }
 
+    /**
+     * Sends the game title, subtitle, and component to players.
+     * Title and subtitle are read via ConfigValue for config.yml values only;
+     * message templates (word-based config) are unaffected.
+     */
     public void sendGameStartedComponent(String game, TextComponent component, String variable) {
         YamlConfig messages = ConfigManager.getMessagesConfig();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (plugin.getGameManager().worldEnabled(player)) {
-                boolean isGameToggled = plugin.getGameManager().gamesIsToggled(player);
-                if (isGameToggled) {
-                    GameSoundManager.playGameSound(player, "game-start");
+            if (!plugin.getGameManager().worldEnabled(player)) {
+                continue;
+            }
+            if (!plugin.getGameManager().gamesIsToggled(player)) {
+                continue;
+            }
 
-                    sendComponentGameMessage(player,
-                            component,
-                            messages.getStringList(game + ".gameStartAnnouncement"),
-                            "%timeToGuess%", "" + plugin.getConfig().getInt(game + ".timeToGuess_seconds"),
-                            variable);
+            GameSoundManager.playGameSound(player, "game-start");
 
-                    String titleMessage = plugin.getConfig().getString(game + ".titleMessage").replaceAll("%timeToGuess%", "" + plugin.getConfig().getInt(game + ".timeToGuess_seconds"));
-                    String subtitleMessage = plugin.getConfig().getString(game + ".subtitleMessage").replaceAll("%timeToGuess%", "" + plugin.getConfig().getInt(game + ".timeToGuess_seconds"));
-                    if (!titleMessage.isEmpty() && !subtitleMessage.isEmpty()) {
-                        player.sendTitle(color(titleMessage), color(subtitleMessage));
-                    }
-                }
+            int timeToGuess = ConfigValue.getInt(ConfigPaths.valueOf(game.toUpperCase() + "_TIME_TO_GUESS"));
+
+            sendComponentGameMessage(
+                    player,
+                    component,
+                    messages.getStringList(game + ".gameStartAnnouncement"),
+                    "%timeToGuess%",
+                    "" + timeToGuess,
+                    variable
+            );
+
+            String titleKey = game.toUpperCase() + "_TITLE_MESSAGE";
+            String subtitleKey = game.toUpperCase() + "_SUBTITLE_MESSAGE";
+
+            String titleMessage = ConfigValue.getString(ConfigPaths.valueOf(titleKey))
+                    .replaceAll("%timeToGuess%", String.valueOf(timeToGuess));
+            String subtitleMessage = ConfigValue.getString(ConfigPaths.valueOf(subtitleKey))
+                    .replaceAll("%timeToGuess%", String.valueOf(timeToGuess));
+
+            if (!titleMessage.isEmpty() && !subtitleMessage.isEmpty()) {
+                player.sendTitle(color(titleMessage), color(subtitleMessage));
             }
         }
     }

@@ -1,5 +1,8 @@
 package org.nsider.chatgames.games.builder.algorithms;
 
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ListConfigValue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -67,7 +70,7 @@ public class MathQuestionGenerator {
     public static String[] generateMissingValueEquation(int numberOfOperations) {
         if (numberOfOperations < 1) numberOfOperations = 1;
 
-        String[] operators = {"+", "-", "x", "/"};
+        List<String> operators = ListConfigValue.getStringList(ConfigPaths.SEQUENCE_OPERATORS);
         List<String> values = new ArrayList<>();
         List<String> usedOperators = new ArrayList<>();
 
@@ -86,7 +89,7 @@ public class MathQuestionGenerator {
 
         // Fill operators randomly
         for (int i = 0; i < numberOfOperations; i++) {
-            usedOperators.add(operators[rand.nextInt(operators.length)]);
+            usedOperators.add(operators.get(rand.nextInt(operators.size() - 1)));
         }
 
         // Try to compute result, replacing 'x' temporarily with 0

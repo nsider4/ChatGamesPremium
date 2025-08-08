@@ -1,11 +1,10 @@
 // Adjusted: ChallengeQueries.java
 package org.nsider.chatgames.database.queries;
 
-import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.database.Errors;
-import org.nsider.chatgames.player.ChallengeData;
+import org.nsider.chatgames.model.player.ChallengeData;
 import org.nsider.chatgames.utils.database.DatabaseUtils;
 import org.nsider.chatgames.utils.database.QueryUtils;
 

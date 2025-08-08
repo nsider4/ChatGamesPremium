@@ -24,7 +24,7 @@ public class MemorizationGenerator {
      * @param listLength The number of items to include in the list.
      * @return A list of items to memorize.
      */
-    public List<String> generateShoppingList(int listLength) {
+    public static List<String> generateMemorizationList(int listLength) {
         List<String> items = new ArrayList<>(ConfigManager.getWords().getStringList("shoppinglist.items"));
 
         if (listLength > items.size()) {
@@ -42,7 +42,7 @@ public class MemorizationGenerator {
      * @param playerResponse The player's submitted response as a comma-separated string.
      * @return True if the player's response matches the shopping list in order, otherwise false.
      */
-    public boolean validateResponse(List<String> shoppingList, String playerResponse) {
+    public static boolean validateResponse(List<String> shoppingList, String playerResponse) {
         String[] items = playerResponse.split(",\\s*");
         List<String> playerList = new ArrayList<>();
         Collections.addAll(playerList, items);

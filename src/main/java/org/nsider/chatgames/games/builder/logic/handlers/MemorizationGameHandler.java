@@ -1,34 +1,36 @@
 package org.nsider.chatgames.games.builder.logic.handlers;
 
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.games.builder.algorithms.MemorizationGenerator;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.games.builder.logic.GameHandler;
 
 import java.util.List;
 
-/**
- * Game handler for the shopping list memory game.
- */
-public class MemorizationGameHandler implements GameHandler<String[]> {
+public class MemorizationGameHandler implements GameHandler<String> {
     private final ChatGames plugin;
-    private final MemorizationGenerator generator;
 
     public MemorizationGameHandler(ChatGames plugin) {
         this.plugin = plugin;
-        this.generator = new MemorizationGenerator(plugin);
     }
 
     @Override
-    public String[] handle(String... args) {
+    public String handle(String... args) {
+        int listLength;
         try {
-            int listLength = plugin.getConfig().getInt("shoppinglist.listLength", 3);
-            List<String> shoppingList = generator.generateShoppingList(listLength);
-
-            String answer = String.join(", ", shoppingList);
-            return new String[]{answer, answer};
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            listLength = args.length > 0
+                    ? Integer.parseInt(args[0])
+                    : ConfigValue.getInt(ConfigPaths.MEMORIZE_LIST_LENGTH);
+        } catch (NumberFormatException e) {
+            plugin.getLogger().warning("Invalid list length provided. Using default value from configuration.");
+            listLength = ConfigValue.getInt(ConfigPaths.MEMORIZE_LIST_LENGTH);
         }
+
+        List<String> shoppingList = plugin.getGameAlgorithms().generateMemorizationList(listLength);
+        String selected = String.join(", ", shoppingList);
+
+        plugin.getGameManager().startMemorizationGame(selected, selected);
+
+        return selected;
     }
 }

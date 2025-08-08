@@ -25,7 +25,7 @@ public class GameHandlerFactory {
             case SEQUENCE:
                 return new SequenceGameHandler(plugin);
             case MEMORIZE:
-                return new ShoppingListGameHandler(plugin);
+                return new MemorizationGameHandler(plugin);
             case HOVERABLE:
                 return new HoverableGameHandler(plugin);
             case CLICKABLE:
