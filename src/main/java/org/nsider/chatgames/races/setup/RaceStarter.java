@@ -53,7 +53,7 @@ public class RaceStarter {
                 return;
             }
 
-            race = getRaceType(raceName, validatedEntity, amount, new ArrayList<>(raceUtils.getRewardsForGame(raceName, entityTypeName, amount)));
+            plugin.getRaceBuilder().setRace(getRaceType(raceName, validatedEntity, amount, new ArrayList<>(raceUtils.getRewardsForGame(raceName, entityTypeName, amount))));
             startRace(raceName, amount);
         } catch (Exception e) {
             plugin.getLogger().log(Level.INFO, "Error while trying to start game", e);
@@ -75,7 +75,7 @@ public class RaceStarter {
                 return;
             }
 
-            race = getRaceType(raceName, material, amount, new ArrayList<>(raceUtils.getRewardsForGame(raceName, materialName, amount)));
+            plugin.getRaceBuilder().setRace(getRaceType(raceName, material, amount, new ArrayList<>(raceUtils.getRewardsForGame(raceName, materialName, amount))));
             startRace(raceName, amount);
         } catch (Exception e) {
             plugin.getLogger().log(Level.INFO, "Error while trying to start game", e);
@@ -113,9 +113,9 @@ public class RaceStarter {
         RaceHandler.addPlayersOnline();
         plugin.getRaceBuilder().setCurrentRace(game);
 
-        this.sendRaceStartedMessage(game, "%amount%", amount);
+        plugin.getRaceBuilder().getRaceMessageSender().sendRaceStartedMessage(game, "%amount%", amount);
 
-        plugin.getExpirationTask().timeExpiredTask(game);
+        plugin.getExpirationTask().scheduleExpirationTask(game);
 
         ChatGamesStartEvent startEvent = new ChatGamesStartEvent(plugin, GameType.valueOf(game.toUpperCase()));
         Bukkit.getScheduler().runTask(plugin , () -> plugin.getServer().getPluginManager().callEvent(startEvent));

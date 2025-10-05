@@ -5,7 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.scheduler.BukkitTask;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.games.manager.GameUtility;
 import org.nsider.chatgames.utils.management.TaskUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 
@@ -48,7 +50,7 @@ public class MainTask {
     public void enable() {
         taskUtils.cancelTask(task);
         taskEnabled = true;
-        long delayTicks = plugin.getGameManager().getNextGameDelay();
+        long delayTicks = plugin.getGameConfigManager().getNextGameDelay();
         task = taskUtils.runRepeatingAsyncTask(this::doTask, delayTicks, delayTicks);
     }
 
@@ -115,7 +117,7 @@ public class MainTask {
      */
     public boolean checkEnoughPlayers() {
         int minPlayers = plugin.getConfig().getInt("min_players_online");
-        return plugin.getGameManager().checkPlayersOnline(minPlayers);
+        return plugin.getGameManager().getGamePlayerManager().checkMinimumPlayersOnline(minPlayers);
     }
 
     /**
@@ -139,9 +141,9 @@ public class MainTask {
      * @return True if the game type is enabled, false otherwise.
      */
     private boolean isEnabledInConfig(@Nonnull GameType type) {
-        if (plugin.getGameManager().isRace(type)) {
-            return plugin.getConfigManager().getChatRaces().getBoolean(type.toString().toLowerCase() + ".enable") &&
-                    plugin.getConfigManager().getChatRaces().getBoolean("enable-races");
+        if (GameUtility.isRace(type)) {
+            return ConfigManager.getRaces().getBoolean(type.toString().toLowerCase() + ".enable") &&
+                    ConfigManager.getRaces().getBoolean("enable-races");
         }
         return plugin.getConfig().getBoolean(type.toString().toLowerCase() + ".enable");
     }

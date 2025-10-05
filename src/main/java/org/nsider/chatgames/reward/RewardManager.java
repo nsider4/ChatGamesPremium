@@ -132,8 +132,6 @@ public class RewardManager extends RandomReward {
             Bukkit.getOnlinePlayers().stream()
                     .filter(plugin.getGameManager()::worldEnabled)
                     .forEach(p -> p.sendMessage(MessageUtils.color(cmd.replace("[broadcast] ", ""))));
-        } else if (cmd.startsWith("[player_as_op]")) {
-            plugin.getCommandUtils().executeAsOp(player, cmd.replace("[player_as_op] ", ""));
         }
     }
 }

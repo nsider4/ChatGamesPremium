@@ -18,7 +18,7 @@ public class RaceDataLoader {
 
     public HashMap<String, List<Integer>> loadRace(String game) {
         HashMap<String, List<Integer>> mobData = new HashMap<>();
-        ConfigurationSection dataSection = ConfigManager.getChatRaces().getConfigurationSection(game + ".data");
+        ConfigurationSection dataSection = ConfigManager.getRaces().getConfigurationSection(game + ".data");
         if (dataSection == null) { return mobData; }
 
         for (String idName : dataSection.getKeys(false)) {

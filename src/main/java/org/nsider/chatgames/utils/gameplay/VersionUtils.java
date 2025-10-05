@@ -44,7 +44,7 @@ public class VersionUtils {
      * @param config The main configuration file.
      * @param raceConfig The race-specific configuration file.
      */
-    public void correctConfigs(FileConfiguration config, YamlConfiguration raceConfig) {
+    public static void correctConfigs(FileConfiguration config, YamlConfiguration raceConfig) {
         if(getMCVersion() <= 8) {
             config.set("GameSounds.win", "ORB_PICKUP");
             config.set("GameSounds.game-start", "LEVEL_UP");

@@ -62,6 +62,10 @@ public class GameManager {
         winnerMessage.sendMessageForWinners();
     }
 
+    public void sendTimeExpiredToWorlds(String answer, String game) {
+        winnerMessage.sendTimeExpiredToWorlds(answer, game);
+    }
+
     public void startMemorizationGame(String displayList, String selected) {
         memorizationMessage.sendMemorizationStartMessage(displayList, selected);
     }

@@ -7,6 +7,7 @@ import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.games.manager.GameMessageManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
+import org.nsider.chatgames.utils.messages.CenteredMessageUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class VariableMessage extends GameMessageManager {
                     .replaceAll(replace1, replacement1);
 
             if (msg.contains("<center>")) {
-                List<String> centeredMessages = MessageUtils.getCenteredMessage(newMsg.replaceAll("<center>", ""));
+                List<String> centeredMessages = CenteredMessageUtils.getCenteredMessage(newMsg.replaceAll("<center>", ""));
                 messagesToSend.addAll(centeredMessages);
             } else {
                 messagesToSend.add(newMsg);

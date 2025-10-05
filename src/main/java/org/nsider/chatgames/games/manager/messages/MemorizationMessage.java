@@ -47,7 +47,7 @@ public class MemorizationMessage extends GameMessageManager {
                     }
                     sendMemorizedMessage(player, displayList, timeToGuess);
                     plugin.getGameBuilder().initGame(GameType.MEMORIZE, selected);
-                    plugin.getExpirationTask().timeExpiredTask(plugin.getGameManager().getGame().getGameConfigName());
+                    plugin.getExpirationTask().scheduleExpirationTask(plugin.getGameManager().getGame().getGameConfigName());
                 }, timeToMemorize * 20L);
             }
         }

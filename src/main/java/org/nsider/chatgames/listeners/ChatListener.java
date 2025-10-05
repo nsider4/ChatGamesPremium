@@ -44,7 +44,7 @@ public class ChatListener implements Listener {
         Game currentGame = plugin.getGameManager().getGame();
         int maxWinners = plugin.getGameConfigManager().getGameWinners(currentGame.getGameConfigName());
 
-        if (ConfigValue.getBoolean(ConfigPaths.CANCEL_MESSAGE_WHEN_WINNING)) {
+        if (ConfigValue.getBoolean(ConfigPaths.CANCEL_MESSAGE_ON_WIN)) {
             event.setCancelled(true);
         }
 
@@ -69,9 +69,9 @@ public class ChatListener implements Listener {
     private void handleFastestTyper(Player player) {
         if (!ConfigValue.getBoolean(ConfigPaths.FASTEST_TYPERS_TOP)) return;
 
-        boolean isFaster = TopManager.isFasterThan(player, TimeUtils.getLastTimer());
+        boolean isFaster = TopManager.isFasterThan(player, plugin.getGameManager().getGame().getGameType(), TimeUtils.getLastTimer());
         if (isFaster) {
-            TopManager.setFastestTime(player, TimeUtils.getLastTimer());
+            TopManager.setFastestTime(player, plugin.getGameManager().getGame().getGameType(), TimeUtils.getLastTimer());
         }
     }
 
@@ -87,7 +87,7 @@ public class ChatListener implements Listener {
     }
 
     private void concludeGame(Game game) {
-        List<PlayerResult> results = GameController.getResults();
+        List<PlayerResult> results = (List<PlayerResult>) GameController.getResults().values();
         ChatGamesEndEvent gameEndEvent = new ChatGamesEndEvent(plugin, game.getGameType(), results);
 
         Bukkit.getScheduler().runTask(plugin, () -> {

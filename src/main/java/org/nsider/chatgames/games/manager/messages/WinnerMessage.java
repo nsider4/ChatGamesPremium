@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
+import org.nsider.chatgames.config.YamlConfig;
 import org.nsider.chatgames.games.GameController;
 import org.nsider.chatgames.games.manager.GameMessageManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
@@ -60,7 +61,7 @@ public class WinnerMessage extends GameMessageManager {
         int maxWinners = plugin.getConfig().getInt(plugin.getGameManager().getGame().getGameConfigName() + ".winners");
         boolean[] placeholdersUsed = new boolean[maxWinners + 1];
 
-        for (PlayerResult result : GameController.getResults()) {
+        for (PlayerResult result : GameController.getResults().values()) {
             int place = result.getPlace();
             int points = TopManager.getPoints(result.getPlayer());
 
@@ -90,6 +91,16 @@ public class WinnerMessage extends GameMessageManager {
         }
 
         return color(updatedMessage.toString());
+    }
+
+    public void sendTimeExpiredToWorlds(String answer, String game) {
+        YamlConfig messages = ConfigManager.getMessagesConfig();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            GameSoundManager.playGameSound(player, "time-expired");
+            if (plugin.getGameManager().worldEnabled(player))
+                sendListMessage(player, messages.getStringList(game + ".time_expired_message"), new String[] { "%timeToGuess%", "" + this.plugin
+                        .getConfig().getInt(game + ".timeToGuess_seconds"), "%correct_answer%", answer });
+        }
     }
 
     private void replacePlaceholder(StringBuilder message, String placeholder, String value) {
