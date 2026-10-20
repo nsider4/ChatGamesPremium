@@ -67,12 +67,10 @@ public class FastestTimeQueries {
         plugin.getTaskUtils().runAsyncTask(() -> {
             try (Connection connection = getConnection()) {
                 String checkSql = "SELECT fastest_time FROM " + tableName + " WHERE UUID = ? AND game_name = ?";
-                try (ResultSet rs = QueryUtils.executeQuery(connection, checkSql, player.getUniqueId().toString(), gameName)) {
-                    if (rs.next()) {
-                        double current = rs.getDouble("fastest_time");
-                        if (time >= current) return; //Not faster
-                    }
-                }
+                Double current = QueryUtils.query(connection, checkSql,
+                        rs -> rs.next() ? rs.getDouble("fastest_time") : null,
+                        player.getUniqueId().toString(), gameName);
+                if (current != null && time >= current) return; //Not faster
 
                 String upsert = "REPLACE INTO " + tableName + " (UUID, game_name, fastest_time) VALUES (?, ?, ?)";
                 try (PreparedStatement ps = connection.prepareStatement(upsert)) {
@@ -90,17 +88,19 @@ public class FastestTimeQueries {
 
         try (Connection conn = getConnection()) {
             String sql = "SELECT game_name, fastest_time FROM " + tableName + " WHERE UUID = ?";
-            try (ResultSet rs = QueryUtils.executeQuery(conn, sql, player.getUniqueId().toString())) {
+            bestOverall = QueryUtils.query(conn, sql, rs -> {
+                double best = Double.MAX_VALUE;
                 while (rs.next()) {
-                    GameType game = GameType.valueOf(rs.getString("game_name").toUpperCase());
+                    GameType game = GameType.fromName(rs.getString("game_name"));
+                    // Rows for games that no longer exist are skipped, not fatal
+                    if (game == null) continue;
                     double time = rs.getDouble("fastest_time");
                     perGame.put(game, time);
-                    if (time < bestOverall) {
-                        bestOverall = time;
-                    }
+                    best = Math.min(best, time);
                 }
-            }
-        } catch (SQLException | IllegalArgumentException e) {
+                return best;
+            }, player.getUniqueId().toString());
+        } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Error retrieving fastest data for player", e);
         }
 

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Manages all messages for the ElytraTweaks plugin. This includes loading
+ * Holds every message from messages.yml for the ChatGames plugin. This includes loading
  * messages from configuration files, replacing placeholders, and retrieving
  * formatted messages.
  */
@@ -39,9 +39,8 @@ public class Messages {
      * Load all messages from their respective configuration files.
      */
     private void loadMessages() {
+        YamlConfig config = ConfigManager.getMessagesConfig();
         for (MessageKey key : MessageKey.values()) {
-            YamlConfig config = getConfig();
-            if (config == null) continue;
             String message = config.getString(key.getPath(), key.getDefaultValue());
             messages.put(key, MessageUtils.color(message));
         }
@@ -66,30 +65,5 @@ public class Messages {
             message = message.replace(placeholder, value);
         }
         return message;
-    }
-
-    /**
-     * Get the appropriate configuration file by name.
-     *
-     * @return The YamlConfig object for the file, or null if not found.
-     */
-    private YamlConfig getConfig() {
-        return ConfigManager.getMessagesConfig();
-    }
-
-    /**
-     * Reload all message configurations.
-     *
-     * @return True if all configurations were reloaded successfully, false otherwise.
-     */
-    public boolean reloadMessages() {
-        messages.clear();
-        boolean success = ConfigManager.reload();
-
-        if (success) {
-            loadMessages();
-        }
-
-        return success;
     }
 }

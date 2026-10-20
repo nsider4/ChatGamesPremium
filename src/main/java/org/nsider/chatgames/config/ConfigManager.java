@@ -15,48 +15,63 @@ public class ConfigManager {
 
     @Getter private static Messages messages;
     @Getter private static FileConfiguration config;
-    @Getter private static MessagesConfig MessagesConfig;
-    @Getter private static Words Words;
-    @Getter private static Rewards Rewards;
-    @Getter private static Races Races;
-    @Getter private static Games Games;
-    @Getter private static Addons Addons;
-    @Getter private static Milestones Milestones;
+    @Getter private static MessagesConfig messagesConfig;
+    @Getter private static Words words;
+    @Getter private static Rewards rewards;
+    @Getter private static Races races;
+    @Getter private static Games games;
+    @Getter private static Addons addons;
+    @Getter private static Milestones milestones;
+    @Getter private static GlobalGames globalGames;
 
+    private ConfigManager() {}
 
     /**
-     * Initializes the configuration manager and loads the configuration files.
+     * Loads every configuration file, then the messages built from them.
+     * Must run before anything reads {@link org.nsider.chatgames.config.settings.ConfigPaths}.
      *
      * @param plugin The instance of the ChatGames plugin to be used for loading configurations.
      */
     public static void initialize(ChatGames plugin) {
         ConfigManager.plugin = plugin;
-        messages = new Messages();
+        plugin.saveDefaultConfig();
 
         config = plugin.getConfig();
-        MessagesConfig = new MessagesConfig();
-        Words = new Words();
-        Rewards = new Rewards();
-        Races = new Races();
-        Games = new Games();
-        Addons = new Addons();
-        Milestones = new Milestones();
+        messagesConfig = new MessagesConfig();
+        words = new Words();
+        rewards = new Rewards();
+        races = new Races();
+        games = new Games();
+        addons = new Addons();
+        milestones = new Milestones();
+        globalGames = new GlobalGames();
+
+        // Messages read messages.yml, so they are built last
+        messages = new Messages();
     }
 
     /**
-     * Reloads all configuration files.
+     * Reloads all configuration files and the messages built from them.
      *
      * @return true if all configurations were reloaded successfully, false otherwise.
      */
     public static boolean reload() {
         plugin.reloadConfig();
-        return MessagesConfig.reload()
-                && Games.reload()
-                && Addons.reload()
-                && Words.reload()
-                && Rewards.reload()
-                && Races.reload()
-                && Milestones.reload();
+        // reloadConfig() replaces the FileConfiguration instance
+        config = plugin.getConfig();
+
+        // Non-short-circuiting so one broken file doesn't stop the others reloading
+        boolean success = messagesConfig.reload()
+                & games.reload()
+                & addons.reload()
+                & words.reload()
+                & rewards.reload()
+                & races.reload()
+                & milestones.reload()
+                & globalGames.reload();
+
+        messages = new Messages();
+        return success;
     }
 
 
@@ -122,6 +137,15 @@ public class ConfigManager {
     public static class Milestones extends YamlConfig {
         public Milestones() {
             super(plugin, "milestones");
+        }
+    }
+
+    /**
+     * Configuration file for global games
+     */
+    public static class GlobalGames extends YamlConfig {
+        public GlobalGames() {
+            super(plugin, "global_games");
         }
     }
 }

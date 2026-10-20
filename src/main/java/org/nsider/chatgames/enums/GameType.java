@@ -1,6 +1,9 @@
 package org.nsider.chatgames.enums;
 
 import lombok.Getter;
+import org.nsider.inventorymanager.extras.Nullable;
+
+import java.util.Locale;
 
 /**
  * The type of game.
@@ -42,5 +45,24 @@ public enum GameType {
      */
     public boolean isMaterialRace() {
         return race && this != HUNT;
+    }
+
+    /**
+     * Looks a game up by enum name or config key, ignoring case.
+     * Accepts the 1.9.9 name "shoppinglist" for {@link #MEMORIZE}.
+     *
+     * @return the game, or null if the name matches none
+     */
+    @Nullable
+    public static GameType fromName(@Nullable String name) {
+        if (name == null) return null;
+        String normalized = name.trim().toLowerCase(Locale.ROOT);
+        if (normalized.equals("shoppinglist")) return MEMORIZE;
+        for (GameType type : values()) {
+            if (type.configKey.equals(normalized) || type.name().equalsIgnoreCase(normalized)) {
+                return type;
+            }
+        }
+        return null;
     }
 }

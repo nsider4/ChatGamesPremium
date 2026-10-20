@@ -30,9 +30,11 @@ import java.util.logging.Level;
  */
 public class HikariDatabase implements DataHandler {
 
+    private static final String LEGACY_MYSQL_DRIVER = "com.mysql.jdbc.Driver";
+
     private final ChatGames plugin;
     private HikariDataSource dataSource;
-    private final String driverClass;
+    private String driverClass;
     private final StorageType storageType;
     private final String jdbcUrlPrefix;
 
@@ -45,7 +47,12 @@ public class HikariDatabase implements DataHandler {
         try {
             Class.forName(this.driverClass);
         } catch (ClassNotFoundException e) {
-            plugin.getLogger().warning("No driver class found: " + driverClass);
+            // Servers before 1.16 bundle MySQL Connector 5.x, which only has the legacy class name
+            if (storageType == StorageType.MySQL && classExists(LEGACY_MYSQL_DRIVER)) {
+                this.driverClass = LEGACY_MYSQL_DRIVER;
+            } else {
+                plugin.getLogger().warning("No driver class found: " + driverClass);
+            }
         }
     }
 
@@ -66,8 +73,14 @@ public class HikariDatabase implements DataHandler {
         String jdbcUrl = buildJdbcUrl(section);
         hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setDriverClassName(driverClass);
-        hikariConfig.setMaximumPoolSize(section.getInt("Pool-Settings.max-pool-size", 10));
-        hikariConfig.setMinimumIdle(section.getInt("Pool-Settings.min-idle", 10));
+        if (storageType == StorageType.SQLite) {
+            // SQLite allows one writer at a time; extra pooled connections only cause SQLITE_BUSY errors
+            hikariConfig.setMaximumPoolSize(1);
+            hikariConfig.setMinimumIdle(1);
+        } else {
+            hikariConfig.setMaximumPoolSize(section.getInt("Pool-Settings.max-pool-size", 10));
+            hikariConfig.setMinimumIdle(section.getInt("Pool-Settings.min-idle", 10));
+        }
         hikariConfig.setMaxLifetime(section.getLong("Pool-Settings.max-lifetime", 180000L));
         hikariConfig.setConnectionTimeout(section.getLong("Pool-Settings.time-out", 20000L));
         hikariConfig.setPoolName("ChatGamesHikariPool");
@@ -80,6 +93,15 @@ public class HikariDatabase implements DataHandler {
         dataSource = new HikariDataSource(hikariConfig);
 
         setupDatabase();
+    }
+
+    private static boolean classExists(String name) {
+        try {
+            Class.forName(name);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     private String buildJdbcUrl(ConfigurationSection section) {

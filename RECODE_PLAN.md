@@ -40,8 +40,13 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - Hard rounds reveal the clues one at a time. Answering with fewer clues shown counts as a faster place.
     - Ships with about 60 Minecraft associations in `associations.yml`, at easy/medium/hard levels.
 - Players who are right except for capitalisation get a "wrong case" hint, with its own sound.
-- **Hints** *(new, my suggestion)*: if nobody has answered by a configurable % of the time, a hint is shown. Examples: Unscramble shows the first letter, Fill-out reveals one more letter, Word Association reveals the next clue.
-- **Countdown display** *(new, my suggestion)*: the time left is shown on a boss bar (1.9+) or the action bar (1.8). This can be switched off per game.
+- **Hints** *(new)*: fully configurable per game in `games.yml`:
+  - `hints.enable`
+  - `hints.after-percent`: when the first hint appears, e.g. 50% of the time
+  - `hints.max`: how many hints at most
+  - the hint text in `messages.yml`
+  - Examples: Unscramble shows the first letter, Fill-out reveals one more letter, Word Association reveals the next clue.
+- **Countdown on the action bar** *(new)*, configurable per game. It works on every version: the Spigot API on 1.12+, and XSeries' `ActionBar` on 1.8–1.11. There is no boss bar, because 1.8 doesn't have one.
 
 **Races (7)**
 - Hunt (kill mobs), Mine, Place, Fish, Eat, Craft, Smelt.
@@ -234,7 +239,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 | Word Association | new | step 9a |
 | Game events | new | step 9a |
 | More global games | new | step 9 |
-| Suggestions | | hints, countdown bar, weighted no-repeat rotation, anti-macro (steps 5, 9) |
+| Suggestions | | configurable hints, action-bar countdown, weighted no-repeat rotation, anti-macro (steps 5, 9) |
 
 **Other suggestions, not in scope unless you want them:**
 - monthly "seasons", where leaderboards reset with rewards for the top 3
@@ -584,7 +589,7 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
    - Fix bugs 7–16, award points and fastest times, wire milestones, add the time-expired message.
    - Replace the message classes with the `Msg` builder.
    - Generalise Memorize (content pools), add the new Sequence, and turn the old one into Math's missing-value mode.
-   - Add hints, the countdown bar, weighted no-repeat rotation and anti-macro.
+   - Add configurable hints, the action-bar countdown, weighted no-repeat rotation and anti-macro.
 6. **Commands + tab completion.** Port every 1.9.9 subcommand, then add `preset`, `challenge`/`claim` and per-game `fastest <game>`. Sync permissions in `plugin.yml`/`PermissionKey`.
 7. **PlaceholderAPI expansion.** Port the 1.9.9 placeholders and add new ones. Serve them from the cache, with no `.join()` on DB futures; 1.9.9 blocked the main thread there.
 8. **Races.**

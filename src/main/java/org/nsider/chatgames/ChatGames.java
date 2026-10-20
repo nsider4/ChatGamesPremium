@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.database.DataHandler;
@@ -24,7 +25,6 @@ import org.nsider.chatgames.tasks.MainTask;
 import org.nsider.chatgames.utils.management.LogUtils;
 import org.nsider.chatgames.utils.management.TaskUtils;
 
-import java.io.File;
 import java.util.Random;
 
 @Getter
@@ -54,10 +54,7 @@ public final class ChatGames extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        File config = new File(getDataFolder()+File.separator+"config.yml");
-        if (!config.exists()) {
-            saveDefaultConfig();
-        }
+        ConfigManager.initialize(this);
 
         this.expirationTask = new ExpirationTask(this);
         this.gameAlgorithms = new GameAlgorithms(this);

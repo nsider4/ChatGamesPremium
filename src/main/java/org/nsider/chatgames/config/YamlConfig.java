@@ -9,7 +9,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.nsider.chatgames.ChatGames;
 
 /**
- * Represents a YAML configuration file for the ElytraTweaks plugin.
+ * Represents a YAML configuration file for the ChatGames plugin.
  * It provides methods to load, save, and create the configuration file
  * as well as manage the default configuration resource.
  */
@@ -22,7 +22,7 @@ public class YamlConfig extends YamlConfiguration {
     /**
      * Constructs a new YamlConfig instance.
      *
-     * @param plugin the ElytraTweaks plugin instance
+     * @param plugin the ChatGames plugin instance
      * @param path the path to the configuration file (without the extension)
      */
     public YamlConfig(ChatGames plugin, String path) {

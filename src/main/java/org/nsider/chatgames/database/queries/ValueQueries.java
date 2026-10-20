@@ -1,7 +1,6 @@
 package org.nsider.chatgames.database.queries;
 
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
@@ -11,11 +10,14 @@ import org.nsider.chatgames.utils.database.QueryUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Level;
 
+/**
+ * Read-only queries against the main ChatGames table.
+ * These block on the database, so call them off the main thread.
+ */
 public class ValueQueries {
 
     private static ChatGames plugin;
@@ -39,38 +41,31 @@ public class ValueQueries {
         ManagementQueries.createPlayerIfNotExists(player);
 
         String sql = "SELECT POINTS FROM " + tableName + " WHERE UUID = ?";
-        try (Connection conn = getConnection();
-             ResultSet rs = QueryUtils.executeQuery(conn, sql, player.getUniqueId().toString())) {
-            if (rs.next()) {
-                return rs.getInt("POINTS");
-            }
+        try (Connection conn = getConnection()) {
+            return QueryUtils.query(conn, sql, rs -> rs.next() ? rs.getInt("POINTS") : 0,
+                    player.getUniqueId().toString());
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Error retrieving player points", e);
         }
         return 0;
     }
 
-    public static boolean getPlayerToggle(Player player) {
+    public static boolean getPlayerToggle(OfflinePlayer player) {
         String sql = "SELECT toggled FROM " + tableName + " WHERE UUID = ?";
-        try (Connection conn = getConnection();
-             ResultSet rs = QueryUtils.executeQuery(conn, sql, player.getUniqueId().toString())) {
-            if (rs.next()) {
-                return rs.getBoolean("toggled");
-            }
+        try (Connection conn = getConnection()) {
+            return QueryUtils.query(conn, sql, rs -> !rs.next() || rs.getBoolean("toggled"),
+                    player.getUniqueId().toString());
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
-            throw new RuntimeException("Error retrieving toggle state", e);
         }
         return true;
     }
 
-    public static boolean getPlayerToggleSound(Player player) {
+    public static boolean getPlayerToggleSound(OfflinePlayer player) {
         String sql = "SELECT sound FROM " + tableName + " WHERE UUID = ?";
-        try (Connection conn = getConnection();
-             ResultSet rs = QueryUtils.executeQuery(conn, sql, player.getUniqueId().toString())) {
-            if (rs.next()) {
-                return rs.getBoolean("sound");
-            }
+        try (Connection conn = getConnection()) {
+            return QueryUtils.query(conn, sql, rs -> !rs.next() || rs.getBoolean("sound"),
+                    player.getUniqueId().toString());
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
         }
@@ -79,11 +74,8 @@ public class ValueQueries {
 
     public static int getTotalPoints() {
         String sql = "SELECT SUM(POINTS) FROM " + tableName;
-        try (Connection conn = getConnection();
-             ResultSet rs = QueryUtils.executeQuery(conn, sql)) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
+        try (Connection conn = getConnection()) {
+            return QueryUtils.query(conn, sql, rs -> rs.next() ? rs.getInt(1) : 0);
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
         }
@@ -92,11 +84,11 @@ public class ValueQueries {
 
     public static String getPlayerAtPosition(int position) {
         String sql = "SELECT UUID FROM " + tableName + " ORDER BY POINTS DESC LIMIT 1 OFFSET ?";
-        try (Connection conn = getConnection();
-             ResultSet rs = QueryUtils.executeQuery(conn, sql, position - 1)) {
-            if (rs.next()) {
-                UUID uuid = UUID.fromString(rs.getString("UUID"));
-                return plugin.getServer().getOfflinePlayer(uuid).getName();
+        try (Connection conn = getConnection()) {
+            String uuid = QueryUtils.query(conn, sql, rs -> rs.next() ? rs.getString("UUID") : null, position - 1);
+            if (uuid != null) {
+                String name = plugin.getServer().getOfflinePlayer(UUID.fromString(uuid)).getName();
+                return name == null ? "" : name;
             }
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, "Error retrieving player at position", e);
@@ -106,11 +98,8 @@ public class ValueQueries {
 
     public static int getPointsAtPosition(int position) {
         String sql = "SELECT POINTS FROM " + tableName + " ORDER BY POINTS DESC LIMIT 1 OFFSET ?";
-        try (Connection conn = getConnection();
-             ResultSet rs = QueryUtils.executeQuery(conn, sql, position - 1)) {
-            if (rs.next()) {
-                return rs.getInt("POINTS");
-            }
+        try (Connection conn = getConnection()) {
+            return QueryUtils.query(conn, sql, rs -> rs.next() ? rs.getInt("POINTS") : 0, position - 1);
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, "Error retrieving points at position", e);
         }
@@ -120,11 +109,9 @@ public class ValueQueries {
     public static int getPlayerPointsPosition(OfflinePlayer player) {
         String sql = "SELECT COUNT(*) AS pos FROM " + tableName + " WHERE POINTS > (SELECT POINTS FROM "
                 + tableName + " WHERE UUID = ?)";
-        try (Connection conn = getConnection();
-             ResultSet rs = QueryUtils.executeQuery(conn, sql, player.getUniqueId().toString())) {
-            if (rs.next()) {
-                return rs.getInt("pos") + 1;
-            }
+        try (Connection conn = getConnection()) {
+            return QueryUtils.query(conn, sql, rs -> rs.next() ? rs.getInt("pos") + 1 : -1,
+                    player.getUniqueId().toString());
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Error determining player rank by points", e);
         }
