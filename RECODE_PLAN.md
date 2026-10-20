@@ -4,6 +4,116 @@ Analysis date: 2026-10-20. The baseline is `Downloads/ChatGames-Premium-1.9.9.ja
 
 ---
 
+## 0. Target: what ChatGames-Premium 2.0.0 will be
+
+This is the finished feature set the plan builds toward. Items marked *(new)* weren't in 1.9.9. Items marked *(my call)* are design decisions I made where the recode left them open; change them if you meant something else.
+
+**Platforms**
+- Spigot, Paper and their forks, Minecraft 1.8.8 → 26.x, from one jar.
+- Folia 26.x, from the same jar. *(new)*
+- SQLite or MySQL storage, with a connection pool.
+- Automatic upgrade from 1.9.9: player data and config files are migrated on first start, with backups kept. *(new)*
+
+**Chat games (13)**
+- Answer in chat. Each game has its own settings in `games.yml`:
+  - on/off, number of winners, time limit, case sensitivity
+  - title/subtitle, and its own messages and rewards
+- The games:
+  - **Unscramble**, **Unreverse**, **Reaction**, **Fill-out** (letters hidden by difficulty %): word lists in `words.yml`.
+  - **Hoverable:** hover the chat text to see the word.
+  - **Clickable:** first to click wins.
+  - **Random:** type a random string; length range and character set are configurable, including a custom set.
+  - **Math:** configurable operators and difficulty.
+  - **Variable:** symbol equations such as ★ + ★ = 10.
+  - **Guess the Number:** a range is shown.
+  - **Trivia:** questions with multiple accepted answers.
+  - **Memorize** *(was Shopping List)*: a list is shown, chat is cleared, then the list must be typed back.
+  - **Sequence** *(new)*: solve for the missing number in an equation.
+- "Wrong case" hint, with its own sound, when the answer is right except for capitalisation.
+
+**Races (7)**
+- Hunt (kill mobs), Mine, Place, Fish, Eat, Craft, Smelt.
+- Configured per item or mob, with per-amount rewards in `races.yml`.
+- Options: count or ignore spawner mobs, and allow or deny creative mode.
+- Legacy and modern material and mob names are both accepted.
+
+**Global game** *(new)*
+- **Global Reaction:** a word is announced, and *everyone* who types it within N seconds gets the participation reward.
+- It starts either by chance after a regular game (`chance_trigger_percent`) or by command.
+- Its messages and rewards are configurable. *(my call: rewards go in `rewards.yml` under `global_word`)*
+
+**Scheduling**
+- A game every X minutes, or a random delay between min and max (seconds or minutes). Each game re-rolls the delay. *(fixed: in 1.9.9 it was rolled once)*
+- Minimum players online, with options to exclude vanished players or players without the play permission.
+- **Presets** *(new)*: named sets of games, switchable by command, e.g. weekend set or minimal set.
+- Disabled worlds, an optional permission to play, and an option to allow or deny starting games from disabled worlds.
+
+**Winners and rewards**
+- Multiple places per game, with per-place rewards. The fastest time is recorded for each winner.
+- Reward actions: `[consolecmd]`, `[playercmd]`, `[playermsg]`, `[broadcast]`, `[player_as_op]` *(kept from 1.9.9 if it still works on 26.x; otherwise removed)*, and direct item give. If the inventory is full, the item drops.
+- Chance-based rewards (`50%~ command`) and permission-gated rewards (`has:perm`).
+- Rewards have a minimum-players requirement.
+
+**Progression**
+- Points: +1 per win, plus admin add/remove/set.
+- **Milestones** *(new)*: run commands at point thresholds (`milestones.yml`).
+- **Daily challenge** *(new)*: win N games today, then claim a reward. *(my call: N is configurable, default 3. 1.9.9 hard-coded 3)*
+- **Daily streak** *(new)*: consecutive days the daily challenge was completed. *(my call: currently it counts every win; I'll make it count days)*
+- **Weekly challenge** *(new)*: win N games this week, then claim a reward. Resets weekly.
+- **Server-wide daily goal** *(new, my call for what "global daily / global streak" was meant to be)*: all players together win N games in a day, and everyone who contributed gets a reward. The player's "global streak" counts consecutive days they contributed.
+
+**Leaderboards**
+- Top points.
+- Fastest typers overall.
+- **Fastest per game** *(new)*.
+- Your own position and best time are shown under each list.
+
+**GUI** *(new, my call: small player menu)*
+- `/chatgames menu`, built with your InventoryManager library.
+- Contents: game and sound toggles, your stats, the leaderboards, and challenge progress with claim buttons.
+- Fully configurable in a `menus.yml`.
+
+**Messages and presentation**
+- Everything is in `messages.yml`: `<center>` text, hex colours on 1.16+, and PlaceholderAPI placeholders inside messages.
+- Titles/subtitles per game.
+- Sounds for start, win, time-expired and wrong-case, with volume and pitch. The correct sound is picked for every version.
+- Material and mob names are translated into the server language (`lang`), using downloaded translation files.
+
+**Commands** (`/chatgames`, alias `/chatgame`)
+- Players:
+  - `help`, `top`, `fastest [game]` *(game arg new)*, `points [player]`
+  - `toggle`, `togglesound`
+  - `menu` *(new)*, `challenges` *(new)*, `claim <daily|weekly>` *(new)*
+- Admin:
+  - `<game> [args]` and `any`: start a specific or random game; `<race> [material/mob] [amount]` for custom races.
+  - `stop` *(new)*: end the current game with no winner.
+  - `global [word]` *(new)*, `preset <name>` *(new)*
+  - `reload`, `toggleAll`, `logs`, `remove <player>`
+  - `+points`, `-points`, `setpoints <player> <amount>`
+- `shoppinglist` still works as an alias for `memorize`.
+- All subcommands tab-complete. Every permission is declared in `plugin.yml`.
+
+**PlaceholderAPI** (`%chatgames_…%`)
+- From 1.9.9: `points`, `toggle`, `top_<n>`, `points_top_<n>`, `personal_best`, `fastest_<n>`, `fastest_time_<n>`, `show_current_pos_top`, `show_current_pos_fastest`.
+- New:
+  - `sound_toggle`
+  - `fastest_<game>` (your best time), `fastest_<game>_<n>` and `fastest_<game>_time_<n>`
+  - `daily_wins`, `daily_goal`, `daily_streak`, `weekly_wins`, `global_streak`
+  - `current_game`, `time_left`
+- All of them are served from memory, so a scoreboard never waits on the database.
+
+**Integrations and admin tools**
+- Discord webhook for winners: embed, avatar, fields.
+- Game logs to the console and/or a file, viewable in-game with `/chatgames logs`.
+- Update check against Spigot, with a notice for OPs on join.
+- `/chatgames reload` reloads every file without a restart.
+
+**Developer API**
+- `ChatGamesStartEvent` *(now actually cancellable; in 1.9.9 cancelling did nothing)*.
+- `ChatGamesEndEvent`, which carries the game, answer, and winners with places and times.
+
+---
+
 ## Progress (branch `recode-2.0`)
 
 - [x] **Step 1: builds again** (2026-10-20). `mvn package` passes, with 5 tests.
