@@ -87,6 +87,10 @@ games:
     enabled: true
     duration_seconds: 30
     points: 1
+  word_association:
+    enabled: true
+    duration_seconds: 30
+    points: 1
   fillout:
     enabled: true
     duration_seconds: 30

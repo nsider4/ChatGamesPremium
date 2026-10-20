@@ -140,6 +140,8 @@ public class StartGameCommand extends SubCommand {
                 return Collections.singletonList("<word>");
             case TRIVIA:
                 return Collections.singletonList("<question id>");
+            case WORD_ASSOCIATION:
+                return Collections.singletonList("<association id>");
             default:
                 return Collections.emptyList();
         }

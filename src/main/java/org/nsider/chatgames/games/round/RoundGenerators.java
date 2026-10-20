@@ -6,6 +6,7 @@ import org.nsider.chatgames.games.round.generators.MemorizeRoundGenerator;
 import org.nsider.chatgames.games.round.generators.SequenceRoundGenerator;
 import org.nsider.chatgames.games.round.generators.SimpleRoundGenerators;
 import org.nsider.chatgames.games.round.generators.VariableRoundGenerator;
+import org.nsider.chatgames.games.round.generators.WordAssociationRoundGenerator;
 import org.nsider.chatgames.games.round.generators.WordRoundGenerator;
 
 import org.nsider.inventorymanager.extras.Nullable;
@@ -32,6 +33,7 @@ public final class RoundGenerators {
         GENERATORS.put(GameType.SEQUENCE, new SequenceRoundGenerator());
         GENERATORS.put(GameType.VARIABLE, new VariableRoundGenerator());
         GENERATORS.put(GameType.MEMORIZE, new MemorizeRoundGenerator());
+        GENERATORS.put(GameType.WORD_ASSOCIATION, new WordAssociationRoundGenerator());
     }
 
     private RoundGenerators() {}

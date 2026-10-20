@@ -116,6 +116,40 @@ class RoundGeneratorsTest {
     }
 
     @Test
+    void wordAssociationsHaveThreeCluesAndHardOnesRevealThemOneByOne() {
+        ConfigurationSection data = words.getConfigurationSection("word_association.data");
+        assertNotNull(data);
+        int[] counts = new int[3];
+        for (String id : data.getKeys(false)) {
+            assertEquals(3, data.getStringList(id + ".clues").size(), id);
+            String difficulty = data.getString(id + ".difficulty");
+            counts[Arrays.asList("easy", "medium", "hard").indexOf(difficulty)]++;
+        }
+        assertTrue(counts[0] >= 15 && counts[1] >= 15 && counts[2] >= 15, Arrays.toString(counts));
+
+        Round easy = generate(GameType.WORD_ASSOCIATION, 1, "nether_portal");
+        assertEquals("Obsidian &7• &bFlint and Steel &7• &bPurple", easy.getDisplay());
+        assertEquals(AnswerChecker.Result.CORRECT, AnswerChecker.check(easy, "portal", false), "aliases count");
+        assertEquals("easy", easy.getPlaceholders().get("%difficulty%"));
+
+        Round hard = generate(GameType.WORD_ASSOCIATION, 1, "netherite");
+        assertEquals("Ancient Debris &7• &b? &7• &b?", hard.getDisplay());
+        assertEquals(Arrays.asList("Ancient Debris &7• &bGold &7• &b?", "Ancient Debris &7• &bGold &7• &bUpgrade"),
+                hard.getHints());
+    }
+
+    @Test
+    void wordAssociationDifficultyPicksOnlyThatLevel() {
+        YamlConfiguration settings = new YamlConfiguration();
+        settings.set("difficulty", "hard");
+        for (int seed = 0; seed < 50; seed++) {
+            Round round = RoundGenerators.get(GameType.WORD_ASSOCIATION).generate(
+                    new RoundContext(settings, words, null, new Random(seed), key -> null));
+            assertEquals("hard", round.getPlaceholders().get("%difficulty%"));
+        }
+    }
+
+    @Test
     void mathAcceptsAnExpressionFromTheCommand() {
         Round round = generate(GameType.MATH, 1, "12", "x", "3", "+", "1");
         assertEquals("37", round.getMainAnswer());

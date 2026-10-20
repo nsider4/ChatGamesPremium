@@ -324,6 +324,28 @@ memorize:
   titleMessage: '&bMemorize'
   subtitleMessage: '&aTry remembering this list!'
 
+#Three clues, one hidden link (associations are in words.yml).
+#difficulty: easy, medium, hard or mixed. Hard rounds show one clue and reveal the others
+#as hints, so keep hints on for them (max 2 shows all three clues).
+word_association:
+  enable: true
+  winners: 1
+  weight: 1
+  points: 1
+  difficulty: mixed
+  hints:
+    enable: true
+    after-percent: 34
+    max: 2
+  countdown:
+    enable: true
+    last-seconds: 10
+
+  case-sensitive: false
+  timeToGuess_seconds: 30
+  titleMessage: '&bWORD ASSOCIATION'
+  subtitleMessage: '&aCheck Chat!'
+
 trivia:
   enable: true
   winners: 1

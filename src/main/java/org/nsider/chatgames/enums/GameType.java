@@ -23,6 +23,7 @@ public enum GameType {
     SEQUENCE("sequence", false),
     FILLOUT("fillout", false),
     HOVERABLE("hoverable", false),
+    WORD_ASSOCIATION("word_association", false),
     HUNT("hunt", true),
     PLACE("place", true),
     MINE("mine", true),

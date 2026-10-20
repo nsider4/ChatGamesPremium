@@ -117,6 +117,13 @@ memorize:
         data:
           - '[consolecmd] give %player% iron_block 5'
 
+word_association:
+  rewards:
+    1:
+      reward_1:
+        data:
+          - '[consolecmd] give %player% iron_block 5'
+
 trivia:
   rewards:
     1:

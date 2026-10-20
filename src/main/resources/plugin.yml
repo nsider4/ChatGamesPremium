@@ -23,6 +23,7 @@ permissions:
       chatgames.start.unscramble: true
       chatgames.start.math: true
       chatgames.start.trivia: true
+      chatgames.start.word_association: true
       chatgames.start.reaction: true
       chatgames.start.clickable: true
       chatgames.start.random: true
@@ -40,6 +41,9 @@ permissions:
       chatgames.start.eat: true
       chatgames.start.craft: true
       chatgames.start.furnace: true
+  chatgames.start.word_association:
+    description: 'Allows starting word_association by command.'
+    default: op
   chatgames.global:
     description: 'Allows starting a global game or race by command.'
     default: op
