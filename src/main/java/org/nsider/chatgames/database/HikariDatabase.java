@@ -10,15 +10,12 @@ import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.database.enums.DatabaseDriver;
 import org.nsider.chatgames.database.enums.JDBCUrlPrefix;
 import org.nsider.chatgames.database.enums.StorageType;
-import org.nsider.chatgames.database.queries.FastestTimeQueries;
-import org.nsider.chatgames.database.queries.ManagementQueries;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -57,13 +54,13 @@ public class HikariDatabase implements DataHandler {
     }
 
     @Override
-    public void initialize() {
+    public boolean initialize() {
         FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = config.getConfigurationSection(storageType.name());
 
         if (section == null) {
-            plugin.getLogger().warning("Failed to load database config.");
-            return;
+            plugin.getLogger().severe("Missing the '" + storageType.name() + "' section in config.yml.");
+            return false;
         }
 
         HikariConfig hikariConfig = new HikariConfig();
@@ -77,6 +74,9 @@ public class HikariDatabase implements DataHandler {
             // SQLite allows one writer at a time; extra pooled connections only cause SQLITE_BUSY errors
             hikariConfig.setMaximumPoolSize(1);
             hikariConfig.setMinimumIdle(1);
+            // The SQLite driver bundled with 1.8-1.12 servers predates Connection.isValid(), which Hikari
+            // calls unless a test query is set; without this the pool fails with AbstractMethodError
+            hikariConfig.setConnectionTestQuery("SELECT 1");
         } else {
             hikariConfig.setMaximumPoolSize(section.getInt("Pool-Settings.max-pool-size", 10));
             hikariConfig.setMinimumIdle(section.getInt("Pool-Settings.min-idle", 10));
@@ -90,9 +90,16 @@ public class HikariDatabase implements DataHandler {
         } catch (NoSuchMethodError ignored) {}
 
         hikariConfig.setDataSourceProperties(getProperties());
-        dataSource = new HikariDataSource(hikariConfig);
-
-        setupDatabase();
+        try {
+            // Opens the first connection, so a wrong host or password fails here
+            dataSource = new HikariDataSource(hikariConfig);
+        } catch (RuntimeException | LinkageError e) {
+            // LinkageError covers drivers too old for the JDBC calls the pool makes
+            plugin.getLogger().log(Level.SEVERE, "Could not connect to the " + storageType + " database.", e);
+            return false;
+        }
+        plugin.getLogger().info("Connected to the " + storageType + " database.");
+        return true;
     }
 
     private static boolean classExists(String name) {
@@ -123,17 +130,6 @@ public class HikariDatabase implements DataHandler {
                     ConfigValue.getString(ConfigPaths.MYSQL_DATABASE),
                     ConfigValue.getString(ConfigPaths.MYSQL_CONNECTION_PARAMS)
             );
-        }
-    }
-
-    private void setupDatabase() {
-        try (Connection connection = getConnection(); Statement s = connection.createStatement()) {
-            s.executeUpdate(ManagementQueries.getSQLiteCreateChatGamesTable());
-            s.executeUpdate(FastestTimeQueries.getSQLiteCreateFastestTimesTable());
-            plugin.getLogger().info("Connected to the database successfully.");
-        } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to initialize database.");
-            e.printStackTrace();
         }
     }
 

@@ -277,7 +277,30 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - `ChatGamesEndEvent` carries its own answer and winners, so listeners no longer read a game that may already be cleared.
     - `GameType.fromName` replaces the `valueOf` calls that threw on unknown names. It accepts `shoppinglist`.
   - Not yet checked on a live server: the plugin can't start until step 3 registers its listeners and commands. Steps 3 and 12 cover that.
-- [ ] Step 3: bootstrap
+- [x] **Step 3: bootstrap** (2026-10-20). `mvn package` passes, with 38 tests. **Boot-tested on real servers:** Spigot 1.8.8, Spigot 1.13 and Spigot 1.20.1, Paper 1.21.1 and Paper 26.3, and Folia 26.1.2. Each test covers enable, DB connect + table creation, `/chatgames reload`, unknown sub-command, and clean disable (`scripts/boot-test.py`).
+  - **`onEnable` order:**
+    1. messages util → configs
+    2. scheduler + platform log
+    3. database (the plugin disables itself with a clear message if it can't connect)
+    4. player cache (+ players already online)
+    5. game systems
+    6. listeners
+    7. `/chatgames`
+    8. PAPI detection
+    9. rotation, 5-min autosave, update check
+  - **`onDisable`:** stop the rotation and global game, end the running game without rewards, cancel tasks, then save every player *synchronously* (async tasks don't run while disabling), then close the pool.
+  - **`reloadAll()`:** reloads every file and messages, reloads the language if `lang` changed, reloads the enabled games, restarts the rotation. DB settings still need a restart.
+  - **Command skeleton:** `ChatGamesCommand` routes `SubCommand`s and handles permission, player-only and tab completion. `reload` works; step 6 adds the rest.
+  - **Join/quit:** these now load/save the player cache off the main thread. The join handler used to query the DB on the main thread.
+  - `LanguageManager` downloads off-thread through a temp file and falls back to English names until the download arrives. `RaceUtils` no longer NPEs when a key is missing.
+  - **Found by the real-server tests and fixed:**
+    - `MessageUtils` was never initialised, so `onEnable` crashed.
+    - The 1.8–1.12 bundled SQLite driver lacks `Connection.isValid` (`AbstractMethodError` in HikariCP). Fixed with a test query.
+    - The update checker called 1.9.9 an "update" over 2.0.0. It now compares versions numerically, with tests.
+    - SLF4J's stderr warning, which Paper logs as an ERROR and a nag, is silenced by bundling `slf4j-nop`.
+    - Below 1.16, colours were applied by replacing every `&`. They now use `translateAlternateColorCodes`.
+  - `folia-supported: true` was added early so the scheduler could be tested on Folia; the remaining Folia hardening stays in step 11.
+- [ ] Step 4: player cache lifecycle
 
 ---
 

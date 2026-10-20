@@ -52,4 +52,34 @@ public class UpdateChecker {
             }
         });
     }
+
+    /**
+     * Compares dotted version numbers, e.g. "2.0.10" is newer than "2.0.9".
+     * Anything after the numbers (like "-SNAPSHOT") is ignored.
+     *
+     * @return true if {@code remote} is a higher version than {@code local}
+     */
+    public static boolean isNewer(@Nonnull String remote, @Nonnull String local) {
+        int[] a = numbers(remote);
+        int[] b = numbers(local);
+        for (int i = 0; i < Math.max(a.length, b.length); i++) {
+            int x = i < a.length ? a[i] : 0;
+            int y = i < b.length ? b[i] : 0;
+            if (x != y) return x > y;
+        }
+        return false;
+    }
+
+    private static int[] numbers(String version) {
+        String[] parts = version.trim().split("[^0-9]+");
+        int count = 0;
+        int[] result = new int[parts.length];
+        for (String part : parts) {
+            if (!part.isEmpty()) {
+                // Long version segments are capped rather than overflowing
+                result[count++] = part.length() > 9 ? Integer.MAX_VALUE : Integer.parseInt(part);
+            }
+        }
+        return java.util.Arrays.copyOf(result, count);
+    }
 }

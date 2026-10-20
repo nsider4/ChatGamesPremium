@@ -12,10 +12,11 @@ import java.sql.SQLException;
 public interface DataHandler {
 
     /**
-     * Initializes the storage.
-     * This method is used to set up the storage connection and any necessary configurations.
+     * Opens the connection pool.
+     *
+     * @return true if the database is reachable
      */
-    void initialize();
+    boolean initialize();
 
     /**
      * Closes the storage connection.

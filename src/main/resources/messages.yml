@@ -1,5 +1,6 @@
 unknown_command: '&8[%prefix%&8] &cUnknown command. Try something else!'
-config_reloaded: '&8[%prefix%&8] &fThe configuration files has been reloaded!'
+config_reloaded: '&8[%prefix%&8] &fThe configuration files have been reloaded!'
+config_reload_failed: '&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.'
 not_enough_permissions: '&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!'
 player_only_command: '&8[%prefix%&8] &cThis command can only be executed by players!'
 player_deleted: '&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!'

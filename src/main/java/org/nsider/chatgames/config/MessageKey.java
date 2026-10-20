@@ -1,7 +1,7 @@
 package org.nsider.chatgames.config;
 
 /**
- * Enum representing the different message keys used in the ElytraTweaks plugin.
+ * Enum representing the different message keys used in the ChatGames plugin.
  * Each key corresponds to a message that can be retrieved from configuration files
  * or has a default message value. This is used to centralize all messages in the plugin.
  */
@@ -10,6 +10,11 @@ public enum MessageKey {
             "messages",
             "config_reloaded",
             "&cMessage has not been configured"
+    ),
+    CONFIG_RELOAD_FAILED(
+            "messages",
+            "config_reload_failed",
+            "&cSome files failed to load; check the console. Those files keep their previous values."
     ),
     UNKNOWN_COMMAND(
             "messages",

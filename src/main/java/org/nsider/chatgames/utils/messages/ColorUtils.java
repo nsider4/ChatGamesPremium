@@ -29,7 +29,8 @@ public class ColorUtils {
         if (VersionUtils.isAtLeast(1, 16)) {
             return translateHexColors(message);
         }
-        return message.replace("&", "§");
+        // Only "&" followed by a colour code is translated, so a plain "&" in text survives
+        return ChatColor.translateAlternateColorCodes('&', message);
     }
 
     /**

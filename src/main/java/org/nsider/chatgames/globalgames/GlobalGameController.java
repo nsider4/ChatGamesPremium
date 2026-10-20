@@ -18,6 +18,7 @@ public class GlobalGameController {
     // Chat events arrive on many threads at once
     private final Set<UUID> participants = ConcurrentHashMap.newKeySet();
     private ChatGamesScheduler.Task listenerRemover;
+    private GlobalReactionGameListener listener;
     @Getter private volatile boolean active;
 
     public GlobalGameController(ChatGames plugin) {
@@ -29,13 +30,26 @@ public class GlobalGameController {
         active = true;
         broadcast("&eGlobal Game starting! Type &b" + promptWord + " &ein chat within " + durationSeconds + "s to join!");
 
-        GlobalReactionGameListener listener = new GlobalReactionGameListener(plugin, promptWord, participants);
+        listener = new GlobalReactionGameListener(plugin, promptWord, participants);
         Bukkit.getPluginManager().registerEvents(listener, plugin);
 
         listenerRemover = plugin.getScheduler().globalLater(() -> {
             HandlerList.unregisterAll(listener);
             concludeGlobalGame();
         }, durationSeconds * 20L);
+    }
+
+    /**
+     * Ends a running global game without rewards, e.g. when the plugin is disabled.
+     */
+    public void stop() {
+        if (!active) return;
+        active = false;
+        ChatGamesScheduler.cancel(listenerRemover);
+        if (listener != null) {
+            HandlerList.unregisterAll(listener);
+        }
+        participants.clear();
     }
 
     private void concludeGlobalGame() {

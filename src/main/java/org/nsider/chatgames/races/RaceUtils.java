@@ -1,6 +1,5 @@
 package org.nsider.chatgames.races;
 
-import com.google.gson.JsonElement;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.CraftingInventory;
@@ -49,14 +48,12 @@ public class RaceUtils {
     public String getMaterialName(Material material) {
         String materialKey = this.convertTo113(material).toLowerCase();
 
-        JsonElement element = plugin.getLanguageManager().getLanguageData().get("block.minecraft." + materialKey);
-        if (element != null) {
-            return element.getAsString();
-        } else {
-            JsonElement element1 = plugin.getLanguageManager().getLanguageData().get("item.minecraft." + materialKey);
-            if (element1 != null) {
-                return element1.getAsString();
-            }
+        String translated = plugin.getLanguageManager().translate("block.minecraft." + materialKey);
+        if (translated == null) {
+            translated = plugin.getLanguageManager().translate("item.minecraft." + materialKey);
+        }
+        if (translated != null) {
+            return translated;
         }
 
         return this.getItemName(material);
@@ -70,9 +67,8 @@ public class RaceUtils {
             }
         } else {*/
         EntityType entityType = validatedEntity.getEntityType();
-        String entityName = plugin.getLanguageManager().getLanguageData()
-                .getAsJsonPrimitive("entity.minecraft." + entityType.name().toLowerCase())
-                .getAsString();
+        String entityName = plugin.getLanguageManager()
+                .translate("entity.minecraft." + entityType.name().toLowerCase());
 
         if (entityName == null || entityName.isEmpty()) {
             return this.getEntityName(entityType);

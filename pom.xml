@@ -147,6 +147,14 @@
             <version>4.0.3</version>
             <scope>compile</scope>
         </dependency>
+        <!-- HikariCP logs through SLF4J; without a binding it prints a warning to stderr on every start,
+             which Paper reports as an error. The no-op binding keeps the console quiet. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.30</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- Cross-version materials, sounds and entity types (1.8.8 to 26.x) -->
         <dependency>
             <groupId>com.github.cryptomorin</groupId>
