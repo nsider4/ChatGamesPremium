@@ -4,9 +4,14 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.games.Game;
+import org.nsider.chatgames.games.GameController;
+import org.nsider.chatgames.games.manager.GameUtility;
+import org.nsider.chatgames.races.RaceHandler;
 import org.nsider.chatgames.utils.management.TaskUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 
@@ -44,7 +49,7 @@ public class ExpirationTask {
         task = taskUtils.runAsyncTask(() -> {
             if (plugin.isInGame()) {
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    if (plugin.getGameManager().isRace(GameType.valueOf(game.toUpperCase()))) {
+                    if (GameUtility.isRace(GameType.valueOf(game.toUpperCase()))) {
                         handleRaceExpiration(game);
                     } else {
                         handleGameExpiration(plugin.getGameManager().getGame());
@@ -68,9 +73,20 @@ public class ExpirationTask {
      * @return The time to complete in ticks.
      */
     private long getTimeToCompleteTicks(@Nonnull String game) {
-        int timeInSeconds = plugin.getConfig().isSet(game + ".timeToGuess_seconds")
-                ? plugin.getConfig().getInt(game + ".timeToGuess_seconds")
-                : plugin.getConfigManager().getChatRaces().getInt(game + ".timeToComplete_seconds");
+        String gameKey = game.toUpperCase();
+        long timeInSeconds = 0;
+
+        try {
+            ConfigPaths timePath = ConfigPaths.valueOf(gameKey + "_TIME_TO_GUESS");
+            timeInSeconds = ConfigValue.getInt(timePath);
+        } catch (IllegalArgumentException e) {
+            try {
+                ConfigPaths racePath = ConfigPaths.valueOf("RACE_" + gameKey + "_TIME_LIMIT");
+                timeInSeconds = ConfigValue.getInt(racePath);
+            } catch (IllegalArgumentException ex) {
+                plugin.getLogger().warning("No time configuration found for game: " + game);
+            }
+        }
 
         return timeInSeconds * 20L;
     }
@@ -84,13 +100,13 @@ public class ExpirationTask {
         String selectedAnswer = extractSelectedAnswer(game.getAnswer());
 
         // Trigger end event
-        ChatGamesEndEvent endEvent = new ChatGamesEndEvent(plugin, game.getGameType(), GameHandler.getResults());
+        ChatGamesEndEvent endEvent = new ChatGamesEndEvent(plugin, game.getGameType(), GameController.getResults());
         Bukkit.getServer().getPluginManager().callEvent(endEvent);
 
         // Handle results or expiration message
-        if (!GameHandler.getResults().isEmpty()) {
-            plugin.getGameManager().sendMessageForWinners();
-            GameHandler.clearResults();
+        if (!GameController.getResults().isEmpty()) {
+            plugin.getGameManager().sendWinnerMessages();
+            GameController.clearResults();
         } else {
             plugin.getGameManager().sendTimeExpiredToWorlds(selectedAnswer, game.getGameConfigName());
         }
@@ -104,8 +120,8 @@ public class ExpirationTask {
      * @param game The name of the race.
      */
     private void handleRaceExpiration(@Nonnull String game) {
-        plugin.getRaceHandler().removePlayersOnline();
-        plugin.getRaceBuilder().sendTimeExpiredToWorlds(game);
+        RaceHandler.removePlayersOnline();
+        plugin.getRaceBuilder().getRaceMessageSender().sendTimeExpiredToWorlds(game);
         plugin.getRaceBuilder().endRace();
     }
 

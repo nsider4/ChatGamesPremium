@@ -5,11 +5,13 @@ import lombok.Setter;
 import org.bukkit.Material;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.games.GameController;
 import org.nsider.chatgames.races.setup.RaceDataLoader;
 import org.nsider.chatgames.races.setup.RaceMessageSender;
 import org.nsider.chatgames.races.setup.RaceStarter;
 import org.nsider.chatgames.races.validator.EntityValidator;
 import org.nsider.chatgames.races.validator.MaterialValidator;
+import org.nsider.chatgames.utils.management.TimeUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +23,7 @@ public class RaceBuilder {
     private final EntityValidator entityValidator;
     private final RaceStarter raceStarter;
     private final RaceDataLoader raceDataLoader;
-    private final RaceMessageSender raceMessageSender;
+    @Getter private final RaceMessageSender raceMessageSender;
 
     @Getter @Setter private String currentRace = "none";
 
@@ -34,7 +36,7 @@ public class RaceBuilder {
             furnaceData = new HashMap<>();
 
     private RaceType raceType;
-    @Getter private Race race;
+    @Getter @Setter private Race race;
 
     public RaceBuilder(ChatGames plugin) {
         this.plugin = plugin;
@@ -91,5 +93,14 @@ public class RaceBuilder {
             case FURNACE:
                 raceStarter.startRaceWithMaterial(getFurnaceData(), "furnace", material, value);
         }
+    }
+
+    public void endRace() {
+        RaceHandler.removePlayersOnline();
+        TimeUtils.stopTimer();
+        GameController.clearResults();
+        this.currentRace = "";
+        plugin.setInGame(false);
+        plugin.getExpirationTask().cancel();
     }
 }

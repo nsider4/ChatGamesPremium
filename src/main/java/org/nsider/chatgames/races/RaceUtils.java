@@ -123,15 +123,15 @@ public class RaceUtils {
 
     public String getValueName() {
         String var;
-        if(this.currentRace.equalsIgnoreCase("hunt")) {
-            var = this.getEntityTypeName(this.race.getEntityType());
+        if(plugin.getRaceBuilder().getCurrentRace().equalsIgnoreCase("hunt")) {
+            var = this.getEntityTypeName(plugin.getRaceBuilder().getRace().getEntityType());
         } else {
-            var = this.getMaterialName(this.race.getMaterial());
+            var = this.getMaterialName(plugin.getRaceBuilder().getRace().getMaterial());
         }
         return var;
     }
 
     public List<String> getRewardsForGame(String game, String key, int amount) {
-        return ConfigManager.getChatRaces().getStringList(game+".data."+key+"."+amount+".rewards");
+        return ConfigManager.getRaces().getStringList(game+".data."+key+"."+amount+".rewards");
     }
 }

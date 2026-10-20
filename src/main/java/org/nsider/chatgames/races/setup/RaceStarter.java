@@ -1,5 +1,6 @@
 package org.nsider.chatgames.races.setup;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -23,12 +24,14 @@ public class RaceStarter {
     private final MaterialValidator materialValidator;
     private final EntityValidator entityValidator;
     private final RaceUtils raceUtils;
+    private final RaceMessageSender raceMessageSender;
 
     public RaceStarter(ChatGames plugin, MaterialValidator materialValidator, EntityValidator entityValidator, RaceUtils raceUtils) {
         this.plugin = plugin;
         this.materialValidator = materialValidator;
         this.entityValidator = entityValidator;
         this.raceUtils = raceUtils;
+        raceMessageSender = new RaceMessageSender(plugin, raceUtils);
     }
 
     public void startRaceWithEntityType(HashMap<String, List<Integer>> data, String raceName, ValidatedEntity validatedEntity, int amount) {
@@ -53,7 +56,7 @@ public class RaceStarter {
                 return;
             }
 
-            race = getRaceType(raceName, validatedEntity, amount, new ArrayList<>(raceUtils.getRewardsForGame(raceName, entityTypeName, amount)));
+            plugin.getRaceBuilder().setRace(getRaceType(raceName, validatedEntity, amount, new ArrayList<>(raceUtils.getRewardsForGame(raceName, entityTypeName, amount))));
             startRace(raceName, amount);
         } catch (Exception e) {
             plugin.getLogger().log(Level.INFO, "Error while trying to start game", e);
@@ -75,7 +78,7 @@ public class RaceStarter {
                 return;
             }
 
-            race = getRaceType(raceName, material, amount, new ArrayList<>(raceUtils.getRewardsForGame(raceName, materialName, amount)));
+            plugin.getRaceBuilder().setRace(getRaceType(raceName, material, amount, new ArrayList<>(raceUtils.getRewardsForGame(raceName, materialName, amount))));
             startRace(raceName, amount);
         } catch (Exception e) {
             plugin.getLogger().log(Level.INFO, "Error while trying to start game", e);
@@ -113,7 +116,7 @@ public class RaceStarter {
         RaceHandler.addPlayersOnline();
         plugin.getRaceBuilder().setCurrentRace(game);
 
-        this.sendRaceStartedMessage(game, "%amount%", amount);
+        raceMessageSender.sendRaceStartedMessage(game, "%amount%", amount);
 
         plugin.getExpirationTask().timeExpiredTask(game);
 

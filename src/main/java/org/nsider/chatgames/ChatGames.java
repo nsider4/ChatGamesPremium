@@ -14,6 +14,7 @@ import org.nsider.chatgames.games.manager.GameConfigManager;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.utils.GameUtils;
 import org.nsider.chatgames.races.RaceBuilder;
+import org.nsider.chatgames.tasks.ExpirationTask;
 import org.nsider.chatgames.utils.management.LogUtils;
 import org.nsider.chatgames.utils.management.TaskUtils;
 
@@ -25,6 +26,7 @@ public final class ChatGames extends JavaPlugin {
 
     private final Random random = new Random();
 
+    private ExpirationTask expirationTask;
     private GameAlgorithms gameAlgorithms;
     private DataHandler dataHandler;
     private GameBuilder gameBuilder;
@@ -44,6 +46,7 @@ public final class ChatGames extends JavaPlugin {
             saveDefaultConfig();
         }
 
+        this.expirationTask = new ExpirationTask(this);
         this.gameAlgorithms = new GameAlgorithms(this);
         this.gameBuilder = new GameBuilder(this);
         this.gameConfigManager = new GameConfigManager(this);
