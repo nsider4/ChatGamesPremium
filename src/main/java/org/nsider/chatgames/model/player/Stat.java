@@ -20,7 +20,25 @@ public final class Stat {
     /** Global games finished in a rewarded place. */
     public static final String GLOBAL_WON = "global_won";
 
+    /** Milestones reached but not yet paid out, as "milestone_pending.<points>" = 1. */
+    public static final String MILESTONE_PENDING_PREFIX = "milestone_pending.";
+
     private Stat() {}
+
+    public static String milestonePending(int points) {
+        return MILESTONE_PENDING_PREFIX + points;
+    }
+
+    /**
+     * @return the points of a {@link #milestonePending} stat name, or -1 if it isn't one
+     */
+    public static int milestoneOf(String statName) {
+        try {
+            return Integer.parseInt(statName.substring(MILESTONE_PENDING_PREFIX.length()));
+        } catch (RuntimeException e) {
+            return -1;
+        }
+    }
 
     /**
      * @return the counter for wins of one game or race, e.g. "wins.unscramble"

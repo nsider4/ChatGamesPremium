@@ -56,6 +56,19 @@ public final class ChatGamesScheduler {
     }
 
     /**
+     * Runs a task on the main thread (global region on Folia): straight away when already
+     * on the main thread outside Folia, otherwise on the next tick. Commands use this, as
+     * Folia runs a player's commands on that player's region thread.
+     */
+    public void onGlobal(@Nonnull Runnable task) {
+        if (!isFolia() && Bukkit.isPrimaryThread()) {
+            task.run();
+        } else {
+            global(task);
+        }
+    }
+
+    /**
      * Runs a task on the main thread (global region on Folia) after a delay.
      */
     @Nonnull

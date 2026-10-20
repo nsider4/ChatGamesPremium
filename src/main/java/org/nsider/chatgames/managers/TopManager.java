@@ -25,14 +25,15 @@ public final class TopManager {
     }
 
     /**
-     * Adds points (negative to remove) and runs any milestones crossed on the way up.
+     * Adds points (negative to remove) and runs any milestones crossed on the way up,
+     * straight away or, for an offline player, when they next join.
      */
     public static void addPoints(OfflinePlayer player, int amount) {
         UUID uuid = player.getUniqueId();
         ChatGamesPlayerManager.modify(uuid, data -> {
             int before = data.getPoints();
             int after = data.addPoints(amount);
-            MilestoneUtils.checkMilestones(uuid, before, after);
+            MilestoneUtils.checkMilestones(data, before, after);
         });
     }
 

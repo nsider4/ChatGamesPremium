@@ -2,6 +2,9 @@
 //
 // usage: node bot.js <port> <username> <version|auto> <action> [action ...]
 // actions: wait:<ms>  chat:<text>  quit  join
+//          tab:<text>  prints the server's tab completions for <text>, as "[tab] <text> -> a, b";
+//                      a trailing "_" stands for a space (the test harness trims actions)
+//          play:on / play:off  autoplay in the background while later actions run
 //          autoplay:<seconds>  plays the chat games for that long (see autoplay below)
 // Prints every chat line the bot receives as "[BOT <name>] <text>", and action-bar text as "[BOT <name>] [bar] <text>".
 // Needs mineflayer (npm install mineflayer@4); point NODE_PATH at its node_modules.
@@ -155,6 +158,13 @@ function play(message) {
     const arg = rest.join(':');
     if (kind === 'wait') await sleep(Number(arg));
     else if (kind === 'chat') bot.chat(arg);
+    else if (kind === 'play') autoplay = arg === 'on';
+    else if (kind === 'tab') {
+      const text = arg.endsWith('_') ? `${arg.slice(0, -1)} ` : arg;
+      const matches = await bot.tabComplete(text, true, false, 3000).catch((e) => [`error: ${e.message}`]);
+      const names = matches.map((m) => (typeof m === 'string' ? m : m.match));
+      console.log(`[BOT ${username}] [tab] ${text} -> ${names.join(', ')}`);
+    }
     else if (kind === 'quit') await quit();
     else if (kind === 'join') await connect();
     else if (kind === 'autoplay') {

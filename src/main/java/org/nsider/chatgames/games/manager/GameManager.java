@@ -119,6 +119,34 @@ public class GameManager {
         plugin.setInGame(false);
     }
 
+    /**
+     * Ends the running chat game (including one still in its Memorize phase) or race,
+     * with no winner and no announcement. Main/global thread only.
+     *
+     * @return false if nothing was running
+     */
+    public boolean stopCurrent() {
+        if (!plugin.isInGame()) return false;
+        Game current;
+        boolean chatGame;
+        synchronized (this) {
+            current = game;
+            chatGame = current != null || !roundTasks.isEmpty();
+        }
+        if (chatGame) {
+            // Listeners (and the game log) see every started game end, stopped ones included.
+            // A game stopped while its Memorize list is shown has no Game yet, so nothing to report.
+            if (current != null && current.finish()) {
+                Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(current.getGameType(), current.getAnswer(),
+                        current.getResultsByPlace()));
+            }
+            endGame();
+        } else {
+            plugin.getRaceBuilder().endRace();
+        }
+        return true;
+    }
+
     private synchronized void cancelRoundTasks() {
         for (ChatGamesScheduler.Task task : roundTasks) {
             ChatGamesScheduler.cancel(task);

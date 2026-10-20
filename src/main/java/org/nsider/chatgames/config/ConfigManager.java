@@ -23,6 +23,7 @@ public class ConfigManager {
     @Getter private static Addons addons;
     @Getter private static Milestones milestones;
     @Getter private static GlobalGames globalGames;
+    @Getter private static Presets presets;
 
     private ConfigManager() {}
 
@@ -45,6 +46,7 @@ public class ConfigManager {
         addons = new Addons();
         milestones = new Milestones();
         globalGames = new GlobalGames();
+        presets = new Presets();
 
         // Messages read messages.yml, so they are built last
         messages = new Messages();
@@ -68,7 +70,8 @@ public class ConfigManager {
                 & rewards.reload()
                 & races.reload()
                 & milestones.reload()
-                & globalGames.reload();
+                & globalGames.reload()
+                & presets.reload();
 
         messages = new Messages();
         return success;
@@ -146,6 +149,17 @@ public class ConfigManager {
     public static class GlobalGames extends YamlConfig {
         public GlobalGames() {
             super(plugin, "global_games");
+        }
+    }
+
+    /**
+     * Game presets and the active one. The plugin writes this file itself
+     * ({@code /chatgames preset}), which is why it is apart from config.yml.
+     */
+    public static class Presets extends YamlConfig {
+        public Presets() {
+            super(plugin, "presets");
+            options().copyHeader(true);
         }
     }
 }

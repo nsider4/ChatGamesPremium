@@ -6,7 +6,8 @@ The server dir gets eula.txt, a flat-world server.properties (port 25599) and th
 plugin copied into plugins/. Each command is typed into the console 3 seconds apart.
 A command starting with "@bot " runs scripts/bot.js instead and waits for it to finish, e.g.
   "@bot Tester auto | wait:2000 | chat:/chatgames reload | quit | join | wait:1000"
-(the name, version and each action are separated by " | ", so chat text may contain spaces)
+(the name, version and each action are separated by " | ", so chat text may contain spaces;
+ the parts are trimmed, so bot.js reads a trailing "_" in tab:<text> as a space)
 (needs node and mineflayer; set NODE_PATH to the node_modules folder that has mineflayer).
 
 Server jars used for the 2.0.0 test matrix:
@@ -15,7 +16,7 @@ Server jars used for the 2.0.0 test matrix:
     https://fill.papermc.io/v3/projects/<paper|folia>/versions/<version>/builds/latest
   Java 25: https://api.adoptium.net/v3/binary/latest/25/ga/windows/x64/jdk/hotspot/normal/eclipse
 """
-import os, shutil, subprocess, sys, threading, time
+import os, re, shutil, subprocess, sys, threading, time
 
 # Server output has symbols like the check mark that the Windows console code page can't print
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -83,5 +84,7 @@ time.sleep(1)
 keep = ('chatgames', 'ChatGames', '>>> ', '[BOT ', 'joined the game', 'left the game', 'Exception', 'Error', 'ERROR', 'SEVERE', 'WARN', 'Done (', '\tat ',
         'Unknown', 'reloaded', 'permission', 'Caused by', 'Disabling', 'Enabling', 'DID NOT')
 for line in lines:
-    if any(k in line for k in keep):
+    # Plugin messages to the console are coloured; the codes would split words like "CHAT GAMES"
+    line = re.sub(r'\x1b\[[0-9;]*m', '', line)
+    if '[CHAT GAMES]' in line or any(k in line for k in keep):
         print(line)

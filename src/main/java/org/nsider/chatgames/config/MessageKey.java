@@ -100,6 +100,146 @@ public enum MessageKey {
             "messages",
             "cant_log_local",
             "&cMessage has not been configured"
+    ),
+    TOGGLE_GAME(
+            "messages",
+            "toggle_game",
+            "&8[%prefix%&8] &fYou have toggled &a%state% &fchat events!"
+    ),
+    TOGGLE_GAME_OTHER(
+            "messages",
+            "toggle_game_other",
+            "&8[%prefix%&8] &fYou have toggled &a%state% &fchat events for &c%player%&f!"
+    ),
+    TOGGLE_SOUND(
+            "messages",
+            "toggle_sound",
+            "&8[%prefix%&8] &fYou have toggled &a%state% &fchat game sounds!"
+    ),
+    TOGGLE_SOUND_OTHER(
+            "messages",
+            "toggle_sound_other",
+            "&8[%prefix%&8] &fYou have toggled &a%state% &fchat game sounds for &c%player%&f!"
+    ),
+    TOGGLE_ALL(
+            "messages",
+            "toggleAllGames",
+            "&8[%prefix%&8] &fYou have toggled &a%state% &cALL &fchatgames!"
+    ),
+    STATE_ON(
+            "messages",
+            "state-ON",
+            "ON"
+    ),
+    STATE_OFF(
+            "messages",
+            "state-OFF",
+            "OFF"
+    ),
+    PLAYER_POINTS_OTHER(
+            "messages",
+            "player_points_other",
+            "&8[%prefix%&8] &c%player% &fhas &a%amount% &fpoints!"
+    ),
+    DATA_LOADING(
+            "messages",
+            "data_loading",
+            "&8[%prefix%&8] &cThat player's data is still loading, try again in a moment."
+    ),
+    USAGE(
+            "messages",
+            "usage",
+            "&8[%prefix%&8] &cUsage: &f%usage%"
+    ),
+    GAME_ALREADY_RUNNING(
+            "messages",
+            "game_already_running",
+            "&8[%prefix%&8] &cA chat game is already running! Use &f/chatgames stop &cto end it first."
+    ),
+    GAME_NOT_STARTED(
+            "messages",
+            "game_not_started",
+            "&8[%prefix%&8] &cThe %game% game couldn't start with those values. Check the console for details."
+    ),
+    NO_GAMES_ENABLED(
+            "messages",
+            "no_games_enabled",
+            "&8[%prefix%&8] &cNo games are enabled at the moment."
+    ),
+    GAME_STOPPED(
+            "messages",
+            "game_stopped",
+            "&8[%prefix%&8] &fThe current game has been stopped with no winner."
+    ),
+    NO_GAME_RUNNING(
+            "messages",
+            "no_game_running",
+            "&8[%prefix%&8] &cNo chat game is running right now."
+    ),
+    FASTEST_DISABLED(
+            "messages",
+            "TypersTop.top_disabled_message",
+            "&8[%prefix%&8] &cThis function is currently disabled!"
+    ),
+    UNKNOWN_GAME(
+            "messages",
+            "unknown_game",
+            "&8[%prefix%&8] &cThere is no game called &f%game%&c."
+    ),
+    LOGS_HEADER(
+            "messages",
+            "logs.header",
+            "&8[%prefix%&8] &eLast &6%amount% &elogs:"
+    ),
+    LOGS_EMPTY(
+            "messages",
+            "logs.no_logs",
+            "&cNo logs available or an error occurred."
+    ),
+    PRESET_LOADED(
+            "messages",
+            "presets.loaded",
+            "&8[%prefix%&8] &fLoaded the preset &a%preset% &f(%games%)."
+    ),
+    PRESET_CLEARED(
+            "messages",
+            "presets.cleared",
+            "&8[%prefix%&8] &fNo preset is active any more; the games enabled in games.yml are used."
+    ),
+    PRESET_SAVED(
+            "messages",
+            "presets.saved",
+            "&8[%prefix%&8] &fSaved the enabled games as the preset &a%preset% &f(%games%)."
+    ),
+    PRESET_NOT_FOUND(
+            "messages",
+            "presets.not_found",
+            "&8[%prefix%&8] &cThere is no preset called &f%preset%&c."
+    ),
+    PRESET_INVALID_NAME(
+            "messages",
+            "presets.invalid_name",
+            "&8[%prefix%&8] &cPreset names can only use letters, numbers, - and _ (up to 32)."
+    ),
+    PRESET_LIST_HEADER(
+            "messages",
+            "presets.list_header",
+            "&8[%prefix%&8] &ePresets:"
+    ),
+    PRESET_LIST_ENTRY(
+            "messages",
+            "presets.list_entry",
+            "&7- &f%preset%%active% &8(%games%)"
+    ),
+    PRESET_ACTIVE_MARKER(
+            "messages",
+            "presets.active_marker",
+            " &a(active)"
+    ),
+    PRESET_LIST_EMPTY(
+            "messages",
+            "presets.list_empty",
+            "&8[%prefix%&8] &cNo presets are configured in presets.yml."
     );
 
     private final String fileName;

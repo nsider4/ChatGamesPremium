@@ -50,16 +50,20 @@ public class TopPlayerQueries {
                 sql = "SELECT UUID, POINTS AS val FROM " + tableName + " WHERE POINTS > 0 ORDER BY POINTS DESC LIMIT 10";
                 break;
             case TypersTop:
-                sql = "SELECT UUID, MIN(fastest_time) AS val FROM " + fastestTable + " GROUP BY UUID ORDER BY val ASC LIMIT 10";
+                sql = "SELECT UUID, MIN(fastest_time) AS val FROM " + fastestTable + " WHERE fastest_time > 0 GROUP BY UUID ORDER BY val ASC LIMIT 10";
                 break;
             case GameTypersTop:
-                sql = "SELECT UUID, fastest_time AS val FROM " + fastestTable + " WHERE game_name = ? ORDER BY val ASC LIMIT 10";
+                sql = "SELECT UUID, fastest_time AS val FROM " + fastestTable + " WHERE game_name = ? AND fastest_time > 0 ORDER BY val ASC LIMIT 10";
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported top type: " + top);
         }
 
-        plugin.getScheduler().async(() -> {
+        // Online players' points and times live in the cache: save them first, and read on the
+        // player-data thread so the query runs after those saves
+        ChatGamesPlayerManager.saveAll();
+        ChatGamesPlayerManager.runAfterSaves(() -> {
+            List<TopData> rows = new ArrayList<>();
             try (Connection conn = getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -68,36 +72,32 @@ public class TopPlayerQueries {
                 }
 
                 try (ResultSet rs = ps.executeQuery()) {
-                    List<TopData> rows = new ArrayList<>();
                     int rank = 0;
 
                     while (rs.next()) {
                         UUID uuid = UUID.fromString(rs.getString("UUID"));
                         String name = Bukkit.getOfflinePlayer(uuid).getName();
+                        if (name == null) name = "?";
                         double value = rs.getDouble("val");
                         rows.add(new TopData(++rank, name, value));
                     }
-
-                    // Everything below the list also comes from the database, so it is read here, off the main thread
-                    int totalPoints = (top == TopType.POINTS) ? ValueQueries.getTotalPoints() : 0;
-                    GameType gameType = game.length == 0 ? null : game[0];
-                    double personal = sender instanceof Player
-                            ? (gameType == null
-                                ? getPersonalValue((Player) sender, top)
-                                : getPersonalValue((Player) sender, top, gameType))
-                            : 0;
-
-                    plugin.getScheduler().global(() -> {
-                        TopPresenter presenter = gameType == null
-                                ? new TopPresenter(sender, messages, top)
-                                : new TopPresenter(sender, messages, top, gameType);
-                        presenter.present(rows, personal, totalPoints);
-                    });
                 }
-
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Error loading leaderboard for " + top, e);
+                return;
             }
+
+            // Opens its own connection, so only once the one above is closed: SQLite's pool holds one
+            int totalPoints = (top == TopType.POINTS) ? ValueQueries.getTotalPoints() : 0;
+            GameType gameType = game.length == 0 ? null : game[0];
+            double personal = sender instanceof Player
+                    ? (gameType == null
+                        ? getPersonalValue((Player) sender, top)
+                        : getPersonalValue((Player) sender, top, gameType))
+                    : 0;
+
+            plugin.getScheduler().global(() ->
+                    new TopPresenter(sender, messages, top, gameType).present(rows, personal, totalPoints));
         });
     }
 

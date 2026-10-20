@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.utils.gameplay.MilestoneUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
@@ -69,6 +70,8 @@ public final class ChatGamesPlayerManager {
                 // They may have left while this was loading; their quit already ran, so don't cache them
                 if (Bukkit.getPlayer(uuid) != null) {
                     cache.put(uuid, data);
+                    // Milestones reached while offline (points given by an admin)
+                    MilestoneUtils.payPendingLater(uuid);
                 }
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Could not load ChatGames data for " + player.getName(), e);
@@ -129,6 +132,20 @@ public final class ChatGamesPlayerManager {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * Runs a task on the player-data thread after every save queued so far, e.g. a
+     * leaderboard query that must see the latest points.
+     */
+    public static void runAfterSaves(@Nonnull Runnable task) {
+        io.execute(() -> {
+            try {
+                task.run();
+            } catch (RuntimeException e) {
+                plugin.getLogger().log(Level.SEVERE, "A ChatGames data task failed", e);
+            }
+        });
     }
 
     /**

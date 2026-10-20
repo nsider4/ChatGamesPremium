@@ -1,46 +1,33 @@
 package org.nsider.chatgames.utils.gameplay;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.plugin.Plugin;
 
 import org.nsider.inventorymanager.extras.Nonnull;
-import java.util.Collections;
-import java.util.Set;
 
 public final class CommandUtils {
 
     private CommandUtils() {}
 
     /**
-     * Runs a command as the player with every permission, for {@code [player_as_op]} rewards.
-     * Ported from 1.9.9; still to be checked on 26.x in the test matrix (see RECODE_PLAN step 1 notes).
+     * Runs a command as the player with operator rights, for {@code [player_as_op]} rewards.
+     *
+     * <p>1.9.9 used a fake {@code CommandSender} here, which modern servers reject for
+     * vanilla commands and which breaks on interface methods added after 1.8. The player
+     * is now made operator only for the duration of this one synchronous dispatch, and
+     * the {@code finally} takes it away again even if the command throws. Must run on
+     * the player's thread (the main thread outside Folia).</p>
      */
     public static void executeAsOp(@Nonnull Player player, @Nonnull String command) {
-        CommandSender proxySender = new CommandSender() {
-            @Override public boolean isOp() { return true; }
-            @Override public void setOp(boolean value) {}
-            @Override public void sendMessage(String message) { player.sendMessage(message); }
-            @Override public void sendMessage(String[] messages) { player.sendMessage(messages); }
-            @Override public boolean hasPermission(String name) { return true; }
-            @Override public boolean hasPermission(Permission permission) { return true; }
-            @Override public boolean isPermissionSet(String name) { return true; }
-            @Override public boolean isPermissionSet(Permission permission) { return true; }
-            @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) { return null; }
-            @Override public PermissionAttachment addAttachment(Plugin plugin) { return null; }
-            @Override public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) { return null; }
-            @Override public PermissionAttachment addAttachment(Plugin plugin, int ticks) { return null; }
-            @Override public void removeAttachment(PermissionAttachment attachment) {}
-            @Override public void recalculatePermissions() {}
-            @Override public Set<PermissionAttachmentInfo> getEffectivePermissions() { return Collections.emptySet(); }
-            @Override public Server getServer() { return Bukkit.getServer(); }
-            @Override public String getName() { return player.getName(); }
-        };
-        Bukkit.dispatchCommand(proxySender, command);
+        if (player.isOp()) {
+            Bukkit.dispatchCommand(player, command);
+            return;
+        }
+        player.setOp(true);
+        try {
+            Bukkit.dispatchCommand(player, command);
+        } finally {
+            player.setOp(false);
+        }
     }
 }

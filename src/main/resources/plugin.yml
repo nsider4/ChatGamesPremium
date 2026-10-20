@@ -16,39 +16,138 @@ commands:
 
 
 permissions:
-  chatgames.start.<type>:
-    description: Allows starting a specific type of event.
-    default: op
   chatgames.start.*:
-    description: Allows starting any event type.
+    description: 'Allows starting any game or race, and starting games from disabled worlds.'
+    default: op
+    children:
+      chatgames.start.unscramble: true
+      chatgames.start.math: true
+      chatgames.start.trivia: true
+      chatgames.start.reaction: true
+      chatgames.start.clickable: true
+      chatgames.start.random: true
+      chatgames.start.unreverse: true
+      chatgames.start.variable: true
+      chatgames.start.guess_the_number: true
+      chatgames.start.memorize: true
+      chatgames.start.sequence: true
+      chatgames.start.fillout: true
+      chatgames.start.hoverable: true
+      chatgames.start.hunt: true
+      chatgames.start.place: true
+      chatgames.start.mine: true
+      chatgames.start.fish: true
+      chatgames.start.eat: true
+      chatgames.start.craft: true
+      chatgames.start.furnace: true
+  chatgames.stop:
+    description: 'Allows stopping the running game with no winner.'
     default: op
   chatgames.top:
-    description: Allows viewing the top players by points.
+    description: 'Allows viewing the top players by points.'
     default: true
   chatgames.fastesttop:
-    description: Allows viewing the fastest players.
+    description: 'Allows viewing the fastest players, overall or per game.'
     default: true
+  chatgames.points:
+    description: 'Allows checking your own points.'
+    default: true
+  chatgames.points.others:
+    description: 'Allows checking another player''s points.'
+    default: op
+  chatgames.manage.points:
+    description: 'Allows adding, removing and setting players'' points.'
+    default: op
   chatgames.play:
-    description: Allows playing chat games. Optional permission.
+    description: 'Allows playing chat games. Only checked when use-permission-toplay is true.'
     default: true
   chatgames.toggle:
-    description: Allows toggling games on or off.
+    description: 'Allows toggling chat games on or off for yourself.'
     default: true
+  chatgames.toggle.others:
+    description: 'Allows toggling chat games on or off for another player.'
+    default: op
   chatgames.togglesound:
-    description: Allows toggling sound effects for games. Optional permission.
+    description: 'Allows toggling game sounds for yourself.'
     default: true
+  chatgames.togglesound.others:
+    description: 'Allows toggling game sounds for another player.'
+    default: op
   chatgames.help:
-    description: Allows accessing help commands.
+    description: 'Allows viewing the command list.'
     default: true
   chatgames.reload:
-    description: Allows reloading the configuration files.
+    description: 'Allows reloading the configuration files.'
     default: op
   chatgames.toggleAll:
-    description: Allows toggling all games on or off.
+    description: 'Allows turning the automatic game rotation on or off.'
+    default: op
+  chatgames.preset:
+    description: 'Allows listing, loading and saving game presets.'
     default: op
   chatgames.remove:
-    description: Allows removing a player from the database.
+    description: 'Allows removing a player from the database.'
     default: op
   chatgames.logs:
-    description: Allows viewing logs.
+    description: 'Allows viewing the game logs.'
+    default: op
+  chatgames.start.unscramble:
+    description: 'Allows starting unscramble by command.'
+    default: op
+  chatgames.start.math:
+    description: 'Allows starting math by command.'
+    default: op
+  chatgames.start.trivia:
+    description: 'Allows starting trivia by command.'
+    default: op
+  chatgames.start.reaction:
+    description: 'Allows starting reaction by command.'
+    default: op
+  chatgames.start.clickable:
+    description: 'Allows starting clickable by command.'
+    default: op
+  chatgames.start.random:
+    description: 'Allows starting random by command.'
+    default: op
+  chatgames.start.unreverse:
+    description: 'Allows starting unreverse by command.'
+    default: op
+  chatgames.start.variable:
+    description: 'Allows starting variable by command.'
+    default: op
+  chatgames.start.guess_the_number:
+    description: 'Allows starting guess_the_number by command.'
+    default: op
+  chatgames.start.memorize:
+    description: 'Allows starting memorize by command.'
+    default: op
+  chatgames.start.sequence:
+    description: 'Allows starting sequence by command.'
+    default: op
+  chatgames.start.fillout:
+    description: 'Allows starting fillout by command.'
+    default: op
+  chatgames.start.hoverable:
+    description: 'Allows starting hoverable by command.'
+    default: op
+  chatgames.start.hunt:
+    description: 'Allows starting hunt by command.'
+    default: op
+  chatgames.start.place:
+    description: 'Allows starting place by command.'
+    default: op
+  chatgames.start.mine:
+    description: 'Allows starting mine by command.'
+    default: op
+  chatgames.start.fish:
+    description: 'Allows starting fish by command.'
+    default: op
+  chatgames.start.eat:
+    description: 'Allows starting eat by command.'
+    default: op
+  chatgames.start.craft:
+    description: 'Allows starting craft by command.'
+    default: op
+  chatgames.start.furnace:
+    description: 'Allows starting furnace by command.'
     default: op

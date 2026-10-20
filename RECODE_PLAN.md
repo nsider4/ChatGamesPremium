@@ -258,7 +258,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - `VersionUtils.correctConfigs` was removed; it rewrote users' configs. Races now resolve materials and entities through XSeries, so legacy and renamed names work, e.g. `RAW_FISH`/`COD` and `MUSHROOM_COW`/`MOOSHROOM`.
   - Found while porting:
     - The recode's `isMaterialRace` had dropped EAT and FISH, so `LogListener` would NPE on those races. This is fixed.
-    - `[player_as_op]` was ported as-is from 1.9.9: a fake sender that claims OP. It's an anonymous `CommandSender` compiled against the 1.8 API, so on modern servers any newer interface method a command calls on it fails with `AbstractMethodError`. Vanilla commands may also reject a non-player sender. Test it on 26.x, or drop it in step 6.
+    - `[player_as_op]` was ported as-is from 1.9.9: a fake sender that claims OP. It's an anonymous `CommandSender` compiled against the 1.8 API, so on modern servers any newer interface method a command calls on it fails with `AbstractMethodError`. Vanilla commands may also reject a non-player sender. Test it on 26.x, or drop it in step 6. *(Step 6 replaced the fake sender with op-for-one-dispatch.)*
   - Still stubbed until its step: PlaceholderAPI is only detected, not hooked (step 7). The full `onEnable` order comes in step 3.
 - [x] **Step 2: foundations** (2026-10-20). `mvn package` passes, with 34 tests.
   - **Config:** `ConfigPaths` resolves its file through the new `ConfigFile` enum when read, so values survive `/chatgames reload` (they used to keep the old file, or were null before init). `ConfigManager.initialize` is now called first in `onEnable`, and `Messages` is built after `messages.yml`. `reload()` reloads every file, adds `global_games.yml`, and rebuilds the messages.
@@ -316,7 +316,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - **Milestones:** these now load on enable and reload (they were never loaded), and run their commands on the main/global thread.
   - **Left for later steps:**
     - Wins don't yet add points or stats; that's step 5.
-    - A milestone crossed while the player is offline is skipped; that's revisited with the admin point commands in step 6.
+    - A milestone crossed while the player is offline is skipped. *(Fixed in step 6: it is paid when they next join.)*
     - 1.9.9 databases have a `fastest NOT NULL` column that the new insert doesn't fill, so the step 10 migration must run before this.
     - MySQL is tested in step 12 (no MySQL server here).
 - [x] **Step 5: core game loop** (2026-10-20). 79 tests. **Played on real servers** by a scripted player that reads and answers questions (`scripts/bot.js` `autoplay`), on Paper 1.21.1, Spigot 1.8.8 and Folia 26.1.2. All three: wins, Clickable by clicking, Memorize, Math missing-value, Sequence, the wrong-case message, anti-macro, hints, the action-bar countdown, "time's up" and a milestone command. Points, per-game wins and per-game fastest times were checked in the database afterwards.
@@ -339,6 +339,32 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - The empty Discord webhook no longer logs a warning on every win.
   - **Until step 8:** races have no data loaded yet, so the default `enable-races: true` makes the rotation log an error whenever it picks one (it then carries on). The gameplay tests ran with races off. Races still use the old `GameMessageManager`.
   - **For step 11:** reward commands (`[playercmd]`) and broadcasts run on the global thread; Folia wants player commands on the player's thread. The Folia run had no errors with the default rewards, but this is still to do.
+- [x] **Step 6: commands** (2026-10-20). 71 tests (step 5's "79" was a miscount; it was 68). Tested on real servers with two scripted players (an op and a non-op) plus the console, on Paper 1.21.1, Spigot 1.8.8 and Folia 26.1.2: every command below, its error cases, and tab completion.
+  - **Structure:** one class per sub-command under `commands/sub`, routed by `ChatGamesCommand` (names and aliases ignore case; plain `/chatgames` shows the help). `CommandSupport` holds the shared bits: messages, number parsing, and an offline-safe player lookup that asks Mojang off the main thread. Commands that touch the running game hop to the global thread, because Folia runs a player's commands on that player's region thread.
+  - **Ported from 1.9.9:** `help`, `top`, `fastest`, `points`, `toggle`, `togglesound`, `toggleAll`, `reload`, `logs [amount]`, `remove <player>`, `+points`/`-points`/`setpoints <player> <amount>`, `<game> [values]` and `any`. `shoppinglist` still works as an alias for `memorize`.
+  - **New:**
+    - `stop` ends the running game with no winner.
+    - `fastest <game>` shows one game's leaderboard.
+    - `points <player>` and `toggle|togglesound <player>`, with new `.others` permissions.
+    - `preset list | load <name|none> | save <name>`. Presets moved from config.yml to a new `presets.yml`, because saving config.yml from code wipes its comments on older servers.
+  - **Permissions:** `PermissionKey` lists every permission the code checks, and plugin.yml declares the same set. There is now one `chatgames.start.<game>` per game, all granted by `chatgames.start.*`. `PermissionKeyTest` fails the build if the two lists drift apart.
+  - **Fixed along the way:**
+    - `top` deadlocked the SQLite pool for 20 s: it held one connection and asked for a second.
+    - Leaderboards could miss the last 5 minutes of points. They now save online players first and read after that save.
+    - The points top read the wrong messages.yml section (`POINTS.*` instead of `top.*`), so it would have crashed.
+    - Leaderboards showed "5.0 points" and crashed on a player with no known name. An empty leaderboard now shows its `no_data_message`.
+    - `toggle <player>` let anyone toggle anyone else. It now needs `chatgames.toggle.others`.
+    - `+points abc` threw an exception. Amounts are now validated.
+    - Starting a game while one runs used to cancel the old game's timer and leave it stuck. It now says a game is already running.
+    - `stop` fires `ChatGamesEndEvent`, so listeners and the game log see every game end.
+    - `CooldownManager` kept every Player object forever and wasn't thread-safe.
+  - **Milestones for offline players:** points given to an offline player now store any milestone crossed as pending, and the commands run when that player next joins (tested live). They used to be lost.
+  - **`[player_as_op]`:** the 1.9.9 fake op sender was replaced. The player is made op only for that one synchronous dispatch, inside a `finally`. Modern servers reject the fake sender for vanilla commands.
+  - **Moved to later steps:**
+    - `challenges` and `claim` go to step 9. The v1 daily challenge has no rewards or config to claim yet, so a command now would have nothing to give.
+    - Custom race values (`/chatgames mine <material> <amount>`) go to step 8 with the race rebuild. Until then, a race starts with random values.
+    - `profile`, `menu`, `admin`, `debug`, `global` and `event` arrive with their features in step 9.
+  - **Test tooling:** `scripts/bot.js` gained `tab:<text>` (prints the server's completions) and `play:on|off` (autoplay in the background). `boot-test.py` strips colour codes, so coloured console replies are shown.
 
 ---
 
@@ -674,8 +700,9 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
    - Port the `ChatRaces` listener using XSeries types, then `loadRaces()`.
    - Build the win flow: rewards, messages, end event, `endRace`.
    - Keep the spawner-mob and creative-mode rules.
+   - Custom values from the start command: `/chatgames <race> <material/mob> <amount>`, with tab completion (moved from step 6).
 9. **New features.**
-   - Challenges: types, daily/weekly reset, claims.
+   - Challenges: types, daily/weekly reset, claims, and the `challenges`/`claim` commands (moved from step 6).
    - Streaks: three types, 7-day ladders.
    - Global games: a generic global mode over the existing generators, plus Global Race.
    - Presets, including `preset save`.

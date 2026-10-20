@@ -85,32 +85,4 @@ GameSounds:
   time-expired: 'minecraft:entity.villager.no'
   wrong-case: 'minecraft:block.note_block.bass'
 
-
-#Presets section
-active-preset: "none"
-
-presets:
-  weekend_set:
-    games:
-      - unscramble
-      - unreverse
-      - reaction
-
-  minimal_set:
-    games:
-      - reaction
-
-  full_rotation:
-    games:
-      - unscramble
-      - unreverse
-      - reaction
-      - guess_the_number
-      - shoppinglist
-      - clickable
-      - fillout
-      - hoverable
-      - random
-      - math
-      - variable
-      - trivia
+#Game presets (named sets of enabled games) live in presets.yml.

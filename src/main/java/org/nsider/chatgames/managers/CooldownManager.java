@@ -4,15 +4,17 @@ import org.bukkit.entity.Player;
 import org.nsider.chatgames.utils.management.TimeUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages cooldowns for players to prevent repeated actions within a short time frame.
  */
 public class CooldownManager {
 
-    private static final Map<Player, Long> cooldowns = new HashMap<>();
+    // By UUID so a player who left isn't kept in memory; commands run on region threads under Folia
+    private static final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private static final long COOLDOWN_MILLIS = 5000;
 
     /**
@@ -25,7 +27,7 @@ public class CooldownManager {
     public static boolean checkCooldown(@Nonnull Player player) {
         long remainingCooldown = getRemainingCooldown(player);
         if (remainingCooldown <= 0) {
-            cooldowns.put(player, System.currentTimeMillis());
+            cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
             return true;
         }
         return false;
@@ -49,8 +51,8 @@ public class CooldownManager {
      * @return The remaining cooldown time in milliseconds, or 0 if no cooldown is active.
      */
     private static long getRemainingCooldown(@Nonnull Player player) {
-        if (cooldowns.containsKey(player)) {
-            long lastExecutionTime = cooldowns.get(player);
+        Long lastExecutionTime = cooldowns.get(player.getUniqueId());
+        if (lastExecutionTime != null) {
             long currentTime = System.currentTimeMillis();
             long elapsedTime = currentTime - lastExecutionTime;
             return Math.max(COOLDOWN_MILLIS - elapsedTime, 0);

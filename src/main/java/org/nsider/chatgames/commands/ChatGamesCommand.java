@@ -6,7 +6,20 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.commands.sub.AnyGameCommand;
+import org.nsider.chatgames.commands.sub.HelpCommand;
+import org.nsider.chatgames.commands.sub.LogsCommand;
+import org.nsider.chatgames.commands.sub.ManagePointsCommand;
+import org.nsider.chatgames.commands.sub.PointsCommand;
+import org.nsider.chatgames.commands.sub.PresetCommand;
 import org.nsider.chatgames.commands.sub.ReloadCommand;
+import org.nsider.chatgames.commands.sub.RemoveCommand;
+import org.nsider.chatgames.commands.sub.StartGameCommand;
+import org.nsider.chatgames.commands.sub.StopCommand;
+import org.nsider.chatgames.commands.sub.ToggleAllCommand;
+import org.nsider.chatgames.commands.sub.ToggleCommand;
+import org.nsider.chatgames.commands.sub.TopCommand;
+import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.MessageKey;
 import org.nsider.chatgames.utils.messages.MessageUtils;
@@ -21,18 +34,38 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * {@code /chatgames}: routes the first argument to a {@link SubCommand}.
+ * {@code /chatgames}: routes the first argument to a {@link SubCommand}, ignoring case.
+ * Plain {@code /chatgames} shows the help.
  */
 public class ChatGamesCommand implements TabExecutor {
 
-    /** Sub-commands by name and alias, in registration order for tab completion. */
     private final ChatGames plugin;
+    /** Sub-commands by lower-case name and alias. */
     private final Map<String, SubCommand> commands = new LinkedHashMap<>();
+    /** In registration order, for tab completion. */
     private final List<SubCommand> registered = new ArrayList<>();
 
     public ChatGamesCommand(@Nonnull ChatGames plugin) {
         this.plugin = plugin;
+        register(new HelpCommand());
+        register(TopCommand.points());
+        register(TopCommand.fastest());
+        register(new PointsCommand(plugin));
+        register(ToggleCommand.games());
+        register(ToggleCommand.sound());
+        register(new AnyGameCommand(plugin));
+        register(new StopCommand(plugin));
+        register(new ToggleAllCommand(plugin));
+        register(new PresetCommand(plugin));
+        register(new LogsCommand(plugin));
+        register(new RemoveCommand(plugin));
+        for (ManagePointsCommand command : ManagePointsCommand.all(plugin)) {
+            register(command);
+        }
         register(new ReloadCommand(plugin));
+        for (GameType type : GameType.values()) {
+            register(new StartGameCommand(plugin, type));
+        }
     }
 
     /**
@@ -45,7 +78,7 @@ public class ChatGamesCommand implements TabExecutor {
 
     private void register(SubCommand command) {
         registered.add(command);
-        commands.put(command.getName(), command);
+        commands.put(command.getName().toLowerCase(Locale.ROOT), command);
         for (String alias : command.getAliases()) {
             commands.put(alias.toLowerCase(Locale.ROOT), command);
         }
@@ -54,9 +87,7 @@ public class ChatGamesCommand implements TabExecutor {
     @Override
     public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
         if (args.length == 0) {
-            // `help` arrives in step 6; until then an empty command is unknown
-            send(sender, MessageKey.UNKNOWN_COMMAND);
-            return true;
+            args = new String[]{"help"};
         }
 
         SubCommand sub = commands.get(args[0].toLowerCase(Locale.ROOT));

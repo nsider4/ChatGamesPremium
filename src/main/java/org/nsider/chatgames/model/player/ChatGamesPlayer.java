@@ -114,6 +114,17 @@ public final class ChatGamesPlayer {
         dirtyStats.add(name);
     }
 
+    /**
+     * @return a copy of the names of every stat starting with the prefix
+     */
+    public synchronized Set<String> getStatNames(String prefix) {
+        Set<String> names = new HashSet<>();
+        for (String name : stats.keySet()) {
+            if (name.startsWith(prefix)) names.add(name);
+        }
+        return names;
+    }
+
     /* ------------------------------------------ fastest times ----------------------------------- */
 
     /**

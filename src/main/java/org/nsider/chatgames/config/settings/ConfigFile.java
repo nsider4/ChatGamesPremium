@@ -22,7 +22,8 @@ public enum ConfigFile {
     GAMES(ConfigManager::getGames),
     ADDONS(ConfigManager::getAddons),
     MILESTONES(ConfigManager::getMilestones),
-    GLOBAL_GAMES(ConfigManager::getGlobalGames);
+    GLOBAL_GAMES(ConfigManager::getGlobalGames),
+    PRESETS(ConfigManager::getPresets);
 
     private final Supplier<FileConfiguration> supplier;
 

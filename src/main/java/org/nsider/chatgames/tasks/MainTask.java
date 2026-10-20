@@ -1,12 +1,12 @@
 package org.nsider.chatgames.tasks;
 
 import lombok.Getter;
-import org.bukkit.configuration.ConfigurationSection;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.managers.PresetManager;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
@@ -22,14 +22,14 @@ public class MainTask {
 
     @Nonnull
     private final ChatGames plugin;
+    /** Replaced as a whole on reload, never changed in place, so readers on other threads see a full list. */
     @Getter
-    private final List<GameType> enabledGames = new ArrayList<>();
+    private volatile List<GameType> enabledGames = Collections.emptyList();
     @Getter
     private volatile boolean taskEnabled;
     @Getter
     private volatile ChatGamesScheduler.Task task;
 
-    private String activePreset;
     /** Set and read on the main/global thread only. */
     private GameType lastGame;
 
@@ -40,8 +40,6 @@ public class MainTask {
      */
     public MainTask(@Nonnull ChatGames instance) {
         this.plugin = instance;
-        this.activePreset = plugin.getConfig().getString("active-preset", null); //TODO CHANGE TO CONFIG VALUE ENUM
-        if(Objects.equals(this.activePreset, "none")) this.activePreset = null;
         reloadEnabledGames();
     }
 
@@ -90,28 +88,22 @@ public class MainTask {
     }
 
     /**
-     * Reloads the list of enabled games from the plugin's configuration or active preset.
+     * Reloads the enabled games: the active preset's, or else every game enabled in games.yml / races.yml.
      */
     public void reloadEnabledGames() {
-        enabledGames.clear();
-
-        if (activePreset != null && plugin.getConfig().isConfigurationSection("presets." + activePreset)) {
-            ConfigurationSection preset = plugin.getConfig().getConfigurationSection("presets." + activePreset);
-            if (preset != null) {
-                for (String key : preset.getStringList("games")) {
-                    GameType type = GameType.fromName(key);
-                    if (type != null) enabledGames.add(type);
-                }
-                return;
+        List<GameType> games = new ArrayList<>();
+        String preset = PresetManager.getActive();
+        if (preset != null) {
+            for (GameType type : PresetManager.getGames(preset, plugin.getLogger())) {
+                // Races stay off when races are turned off globally, preset or not
+                if (!type.isRace() || ConfigValue.getBoolean(ConfigPaths.RACES_ENABLED)) games.add(type);
+            }
+        } else {
+            for (GameType type : GameType.values()) {
+                if (isEnabledInConfig(type)) games.add(type);
             }
         }
-
-        //Default fallback if no preset or invalid
-        for (GameType type : GameType.values()) {
-            if (isEnabledInConfig(type)) {
-                enabledGames.add(type);
-            }
-        }
+        enabledGames = Collections.unmodifiableList(games);
     }
 
     /**
@@ -120,13 +112,20 @@ public class MainTask {
     private void doTask() {
         // A game started by command, or a long game, may still be running: skip this round
         if (plugin.isInGame() || !checkEnoughPlayers()) return;
-        GameType type;
-        synchronized (enabledGames) {
-            type = pickGame(enabledGames, lastGame, plugin.getRandom(), this::weightOf);
-        }
+        GameType type = pickNext();
         if (type != null && plugin.getGameManager().startGame(type)) {
             lastGame = type;
         }
+    }
+
+    /**
+     * Picks the next game the way the rotation does (weighted, no repeat), without starting it.
+     *
+     * @return null if no game is enabled
+     */
+    @Nullable
+    public GameType pickNext() {
+        return pickGame(enabledGames, lastGame, plugin.getRandom(), this::weightOf);
     }
 
     /**
@@ -187,15 +186,12 @@ public class MainTask {
     }
 
     /**
-     * Sets a new preset and reloads the enabled games accordingly.
-     *
-     * @param presetName The name of the preset to apply.
+     * Makes a preset active (null for none) and switches the rotation to its games.
+     * The running game, if any, finishes normally.
      */
-    public void applyPreset(String presetName) {
-        this.activePreset = presetName;
-        plugin.getConfig().set("active-preset", presetName);
-        plugin.saveConfig();
+    public void applyPreset(@Nullable String presetName) {
+        PresetManager.setActive(presetName);
         reloadEnabledGames();
-        restart();
+        if (taskEnabled) restart();
     }
 }
