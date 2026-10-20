@@ -11,6 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
+import org.nsider.chatgames.utils.gameplay.CommandUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
 public class RewardManager extends RandomReward {
@@ -133,7 +134,7 @@ public class RewardManager extends RandomReward {
                     .filter(plugin.getGameManager()::worldEnabled)
                     .forEach(p -> p.sendMessage(MessageUtils.color(cmd.replace("[broadcast] ", ""))));
         } else if (cmd.startsWith("[player_as_op]")) {
-            plugin.getCommandUtils().executeAsOp(player, cmd.replace("[player_as_op] ", ""));
+            CommandUtils.executeAsOp(player, cmd.replace("[player_as_op] ", ""));
         }
     }
 }

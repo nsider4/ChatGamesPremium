@@ -1,59 +1,72 @@
 package org.nsider.chatgames.utils.gameplay;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.config.ConfigManager;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Utility class for handling version-related operations.
- * This class provides methods to retrieve the current Minecraft server version and perform
- * version-dependent logic.
+ * Detects the running Minecraft version.
+ *
+ * <p>Mojang dropped the "1." prefix after 1.21.11, so versions are compared as
+ * (major, minor, patch): 1.8.8 is (1, 8, 8) and 26.1.2 is (26, 1, 2), which
+ * makes every 26.x release newer than any 1.x release.</p>
  */
-public class VersionUtils {
+public final class VersionUtils {
 
-    private static ChatGames plugin;
+    // Spigot reports "1.21.11-R0.2-SNAPSHOT" or "26.1.2-R0.1-SNAPSHOT", Paper reports "26.3.build.207-stable"
+    private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)(?:\\.(\\d+))?");
+
+    private static int[] version;
+
+    private VersionUtils() {}
 
     /**
-     * Initializes the TaskUtils with the given plugin instance.
+     * Checks whether the server runs the given version or newer.
      *
-     * @param plugin The plugin instance.
+     * @param major major version, e.g. 1 for 1.16 or 26 for 26.1
+     * @param minor minor version, e.g. 16 for 1.16 or 1 for 26.1
+     * @return true if the server version is at least major.minor
      */
-    public static void initialize(ChatGames plugin) {
-        VersionUtils.plugin = plugin;
+    public static boolean isAtLeast(int major, int minor) {
+        return isAtLeast(major, minor, 0);
     }
 
     /**
-     * Retrieves the current Minecraft server version number (major version).
-     * This method extracts the version number from the Bukkit version string.
+     * Checks whether the server runs the given version or newer.
      *
-     * @return The major version number of the current Minecraft server (e.g., 1 for Minecraft 1.16).
+     * @return true if the server version is at least major.minor.patch
      */
-    public static int getMCVersion() {
-        String[] split = Bukkit.getBukkitVersion().split("-")[0].split("\\.");
-        String verNum = split[1];
+    public static boolean isAtLeast(int major, int minor, int patch) {
+        return isAtLeast(getVersion(), major, minor, patch);
+    }
 
-        return Integer.parseInt(verNum);
+    static boolean isAtLeast(int[] current, int major, int minor, int patch) {
+        if (current[0] != major) return current[0] > major;
+        if (current[1] != minor) return current[1] > minor;
+        return current[2] >= patch;
     }
 
     /**
-     * Corrects configuration settings based on the Minecraft version.
-     * This method adjusts the configuration options for older Minecraft versions (e.g., version 8).
-     *
-     * @param config The main configuration file.
-     * @param raceConfig The race-specific configuration file.
+     * @return the server version as {major, minor, patch}
      */
-    public void correctConfigs(FileConfiguration config, YamlConfiguration raceConfig) {
-        if(getMCVersion() <= 8) {
-            config.set("GameSounds.win", "ORB_PICKUP");
-            config.set("GameSounds.game-start", "LEVEL_UP");
-            config.set("GameSounds.time-expired", "VILLAGER_NO");
-            Object codData = raceConfig.get("fish.data.COD");
-            raceConfig.set("fish.data", null);
-            raceConfig.set("fish.data.RAW_FISH", codData);
-            plugin.saveConfig();
-            ConfigManager.getRaces().save();
+    public static int[] getVersion() {
+        if (version == null) {
+            version = parse(Bukkit.getBukkitVersion());
         }
+        return version.clone();
+    }
+
+    /**
+     * Parses a Bukkit version string into {major, minor, patch}.
+     * Unparseable input is treated as 1.8.0, the oldest supported version.
+     */
+    static int[] parse(String bukkitVersion) {
+        Matcher matcher = VERSION_PATTERN.matcher(bukkitVersion == null ? "" : bukkitVersion);
+        if (!matcher.find()) {
+            return new int[]{1, 8, 0};
+        }
+        int patch = matcher.group(3) == null ? 0 : Integer.parseInt(matcher.group(3));
+        return new int[]{Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)), patch};
     }
 }

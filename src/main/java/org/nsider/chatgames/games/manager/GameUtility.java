@@ -5,19 +5,10 @@ import org.nsider.chatgames.enums.GameType;
 public class GameUtility {
 
     public static boolean isRace(GameType type) {
-        return type == GameType.CRAFT ||
-                type == GameType.FURNACE ||
-                type == GameType.EAT ||
-                type == GameType.FISH ||
-                type == GameType.HUNT ||
-                type == GameType.MINE ||
-                type == GameType.PLACE;
+        return type.isRace();
     }
 
     public static boolean isMaterialRace(GameType type) {
-        return type == GameType.CRAFT ||
-                type == GameType.FURNACE ||
-                type == GameType.MINE ||
-                type == GameType.PLACE;
+        return type.isMaterialRace();
     }
 }

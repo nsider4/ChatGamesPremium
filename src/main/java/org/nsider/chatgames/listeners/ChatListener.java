@@ -10,6 +10,7 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
+import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.games.Game;
 import org.nsider.chatgames.games.GameController;
@@ -44,7 +45,7 @@ public class ChatListener implements Listener {
         Game currentGame = plugin.getGameManager().getGame();
         int maxWinners = plugin.getGameConfigManager().getGameWinners(currentGame.getGameConfigName());
 
-        if (ConfigValue.getBoolean(ConfigPaths.CANCEL_MESSAGE_WHEN_WINNING)) {
+        if (ConfigValue.getBoolean(ConfigPaths.CANCEL_MESSAGE_ON_WIN)) {
             event.setCancelled(true);
         }
 
@@ -61,17 +62,17 @@ public class ChatListener implements Listener {
         plugin.getGameUtils().addWinner(player);
         plugin.getGameUtils().giveRewards(game.getGameConfigName(), player);
 
-        handleFastestTyper(player);
+        handleFastestTyper(player, game.getGameType());
         notifyAdditionalWinners(player, game);
         TimeUtils.startTimer();
     }
 
-    private void handleFastestTyper(Player player) {
+    private void handleFastestTyper(Player player, GameType gameType) {
         if (!ConfigValue.getBoolean(ConfigPaths.FASTEST_TYPERS_TOP)) return;
 
-        boolean isFaster = TopManager.isFasterThan(player, TimeUtils.getLastTimer());
-        if (isFaster) {
-            TopManager.setFastestTime(player, TimeUtils.getLastTimer());
+        double time = TimeUtils.getLastTimer();
+        if (TopManager.isFasterThan(player, gameType, time)) {
+            TopManager.setFastestTime(player, gameType, time);
         }
     }
 
@@ -87,7 +88,7 @@ public class ChatListener implements Listener {
     }
 
     private void concludeGame(Game game) {
-        List<PlayerResult> results = GameController.getResults();
+        List<PlayerResult> results = GameController.getResultsByPlace();
         ChatGamesEndEvent gameEndEvent = new ChatGamesEndEvent(plugin, game.getGameType(), results);
 
         Bukkit.getScheduler().runTask(plugin, () -> {

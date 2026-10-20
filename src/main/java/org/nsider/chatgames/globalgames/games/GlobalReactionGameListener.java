@@ -5,6 +5,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 
 import java.util.Set;
 import java.util.UUID;
@@ -22,10 +24,10 @@ public class GlobalReactionGameListener implements Listener { //TODO REGISTER LI
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChat(AsyncPlayerChatEvent event) {
-        if (!plugin.isGlobalGameActive()) return;
+        if (!plugin.getGlobalGameController().isActive()) return;
         if (event.getMessage().equalsIgnoreCase(promptWord) && !participants.contains(event.getPlayer().getUniqueId())) {
             participants.add(event.getPlayer().getUniqueId());
-            event.setCancelled(plugin.getConfig().getBoolean("cancel-message-when-winning"));
+            event.setCancelled(ConfigValue.getBoolean(ConfigPaths.CANCEL_MESSAGE_ON_WIN));
         }
     }
 }

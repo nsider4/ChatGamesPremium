@@ -100,7 +100,7 @@ public class ExpirationTask {
         String selectedAnswer = extractSelectedAnswer(game.getAnswer());
 
         // Trigger end event
-        ChatGamesEndEvent endEvent = new ChatGamesEndEvent(plugin, game.getGameType(), GameController.getResults());
+        ChatGamesEndEvent endEvent = new ChatGamesEndEvent(plugin, game.getGameType(), GameController.getResultsByPlace());
         Bukkit.getServer().getPluginManager().callEvent(endEvent);
 
         // Handle results or expiration message

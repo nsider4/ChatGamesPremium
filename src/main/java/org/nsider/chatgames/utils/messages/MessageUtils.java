@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.utils.gameplay.VersionUtils;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -106,7 +105,7 @@ public class MessageUtils {
      */
     public static String color(String message) {
         String prefixedMessage = message.replace("%prefix%", plugin.getConfig().getString("prefix", ""));
-        return ColorUtils.colorizeMessage(prefixedMessage, VersionUtils.getMCVersion());
+        return ColorUtils.colorizeMessage(prefixedMessage);
     }
 
     /**

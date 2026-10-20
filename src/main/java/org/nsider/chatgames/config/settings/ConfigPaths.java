@@ -394,42 +394,42 @@ public enum ConfigPaths {
     ),
 
     /** Whether Guess‑the‑Number game is enabled. */
-    GUESS_NUMBER_ENABLE(
+    GUESS_THE_NUMBER_ENABLE(
             ConfigManager.getGames(),
             "guess_the_number.enable",
             ConfigType.BOOLEAN
     ),
 
     /** Number of winners allowed in Guess‑the‑Number game. */
-    GUESS_NUMBER_WINNERS(
+    GUESS_THE_NUMBER_WINNERS(
             ConfigManager.getGames(),
             "guess_the_number.winners",
             ConfigType.INTEGER
     ),
 
     /** Case sensitivity for Guess‑the‑Number game (must remain false). */
-    GUESS_NUMBER_CASE_SENSITIVE(
+    GUESS_THE_NUMBER_CASE_SENSITIVE(
             ConfigManager.getGames(),
             "guess_the_number.case-sensitive",
             ConfigType.BOOLEAN
     ),
 
     /** Time (in seconds) players have to guess in Guess‑the‑Number game. */
-    GUESS_NUMBER_TIME_TO_GUESS(
+    GUESS_THE_NUMBER_TIME_TO_GUESS(
             ConfigManager.getGames(),
             "guess_the_number.timeToGuess_seconds",
             ConfigType.INTEGER
     ),
 
     /** Lower bound for Guess‑the‑Number game range. */
-    GUESS_NUMBER_LOWER_LIMIT(
+    GUESS_THE_NUMBER_LOWER_LIMIT(
             ConfigManager.getGames(),
             "guess_the_number.lower-limit",
             ConfigType.INTEGER
     ),
 
     /** Upper bound for Guess‑the‑Number game range. */
-    GUESS_NUMBER_UPPER_LIMIT(
+    GUESS_THE_NUMBER_UPPER_LIMIT(
             ConfigManager.getGames(),
             "guess_the_number.upper-limit",
             ConfigType.INTEGER

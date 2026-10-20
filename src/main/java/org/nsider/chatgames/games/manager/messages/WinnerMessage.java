@@ -57,10 +57,10 @@ public class WinnerMessage extends GameMessageManager {
     private String getPlayerPoints(String message) {
         StringBuilder updatedMessage = new StringBuilder(message);
         String defaultPlaceholder = ConfigManager.getMessagesConfig().getString("no_winner_placeholder");
-        int maxWinners = plugin.getConfig().getInt(plugin.getGameManager().getGame().getGameConfigName() + ".winners");
+        int maxWinners = plugin.getGameConfigManager().getGameWinners(plugin.getGameManager().getGame().getGameConfigName());
         boolean[] placeholdersUsed = new boolean[maxWinners + 1];
 
-        for (PlayerResult result : GameController.getResults()) {
+        for (PlayerResult result : GameController.getResults().values()) {
             int place = result.getPlace();
             int points = TopManager.getPoints(result.getPlayer());
 

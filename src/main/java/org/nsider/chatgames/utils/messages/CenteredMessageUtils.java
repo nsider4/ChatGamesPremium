@@ -29,7 +29,7 @@ public class CenteredMessageUtils {
      * @param message the message to center
      * @return a list of centered lines
      */
-    protected static List<String> getCenteredMessage(String message) {
+    public static List<String> getCenteredMessage(String message) {
         message = ChatColor.translateAlternateColorCodes('&', message);
         List<String> lines = new ArrayList<>();
         StringBuilder currentLine = new StringBuilder();

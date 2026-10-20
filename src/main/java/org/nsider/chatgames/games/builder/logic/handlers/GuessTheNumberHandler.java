@@ -18,8 +18,8 @@ public class GuessTheNumberHandler implements GameHandler<String[]> {
 
     @Override
     public String[] handle(String... args) {
-        int lowerLimit = ConfigValue.getInt(ConfigPaths.GUESS_NUMBER_LOWER_LIMIT);
-        int upperLimit = ConfigValue.getInt(ConfigPaths.GUESS_NUMBER_UPPER_LIMIT);
+        int lowerLimit = ConfigValue.getInt(ConfigPaths.GUESS_THE_NUMBER_LOWER_LIMIT);
+        int upperLimit = ConfigValue.getInt(ConfigPaths.GUESS_THE_NUMBER_UPPER_LIMIT);
         String selected;
         String toReplace;
 

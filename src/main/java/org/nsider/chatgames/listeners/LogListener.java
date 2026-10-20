@@ -11,6 +11,7 @@ import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.events.ChatGamesStartEvent;
 import org.nsider.chatgames.games.manager.GameUtility;
 import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.races.Race;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -76,7 +77,7 @@ public class LogListener implements Listener {
         Race race = plugin.getRaceBuilder().getRace();
         if (race == null) return "";
 
-        return plugin.getGameManager().isMaterialRace(gameType)
+        return GameUtility.isMaterialRace(gameType)
                 ? String.format("Race Starting: %s | Material: %s | Amount: %d",
                 gameType.name(), race.getMaterial().name(), race.getAmount())
                 : String.format("Race Starting: %s | Entity: %s | Amount: %d",
@@ -90,7 +91,7 @@ public class LogListener implements Listener {
         Race race = plugin.getRaceBuilder().getRace();
         if (race == null) return "";
 
-        return plugin.getGameManager().isMaterialRace(event.getType())
+        return GameUtility.isMaterialRace(event.getType())
                 ? String.format("Race Ending: %s | Has Winner: %s%s | Material: %s | Amount: %d",
                 event.getType().name(), event.hasWinner() ? "Yes" : "No",
                 event.hasWinner() ? " | Winners: " + formatWinners(event.getWinners()) : "",

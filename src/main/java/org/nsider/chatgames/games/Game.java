@@ -39,37 +39,9 @@ public class Game {
     /**
      * Retrieves the configuration name corresponding to the game type.
      *
-     * @return A {@link String} representing the configuration name of the game type.
-     *         Returns an empty string if the game type is not recognized.
+     * @return the section name of this game in the config files
      */
     public String getGameConfigName() {
-        switch (gameType) {
-            case UNSCRAMBLE:
-                return "unscramble";
-            case UNREVERSE:
-                return "unreverse";
-            case REACTION:
-                return "reaction";
-            case RANDOM:
-                return "random";
-            case FILLOUT:
-                return "fillout";
-            case MATH:
-                return "math";
-            case VARIABLE:
-                return "variable";
-            case GUESS_THE_NUMBER:
-                return "guess_the_number";
-            case MEMORIZE:
-                return "memorize";
-            case TRIVIA:
-                return "trivia";
-            case HOVERABLE:
-                return "hoverable";
-            case CLICKABLE:
-                return "clickable";
-            default:
-                return "";
-        }
+        return gameType.getConfigKey();
     }
 }

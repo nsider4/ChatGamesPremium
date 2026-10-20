@@ -30,6 +30,7 @@ public class GameManager {
     private final WinnerMessage winnerMessage;
     private final MemorizationMessage memorizationMessage;
     private final GameStartComponentMessage gameStartComponentMessage;
+    private final TimeExpiredMessage timeExpiredMessage;
 
     public GameManager(ChatGames plugin) {
         this.plugin = plugin;
@@ -42,6 +43,7 @@ public class GameManager {
         this.winnerMessage = new WinnerMessage(plugin);
         this.memorizationMessage = new MemorizationMessage(plugin);
         this.gameStartComponentMessage = new GameStartComponentMessage(plugin);
+        this.timeExpiredMessage = new TimeExpiredMessage(plugin);
     }
 
     public void sendGameStartedMessage(String game, String variable, String word) {
@@ -60,6 +62,10 @@ public class GameManager {
 
     public void sendWinnerMessages() {
         winnerMessage.sendMessageForWinners();
+    }
+
+    public void sendTimeExpiredToWorlds(String answer, String game) {
+        timeExpiredMessage.sendTimeExpiredMessage(answer, game);
     }
 
     public void startMemorizationGame(String displayList, String selected) {

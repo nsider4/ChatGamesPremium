@@ -1,5 +1,6 @@
 package org.nsider.chatgames.globalgames;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -16,6 +17,7 @@ public class GlobalGameController {
     private final ChatGames plugin;
     private final Set<UUID> participants = new HashSet<>();
     private BukkitRunnable listenerRemover;
+    @Getter private volatile boolean active;
 
     public GlobalGameController(ChatGames plugin) {
         this.plugin = plugin;
@@ -23,6 +25,7 @@ public class GlobalGameController {
 
     public void startGlobalWordGame(long durationSeconds, String promptWord) {
         participants.clear();
+        active = true;
         broadcast("&eGlobal Game starting! Type &b" + promptWord + " &ein chat within " + durationSeconds + "s to join!");
 
         GlobalReactionGameListener listener = new GlobalReactionGameListener(plugin, promptWord, participants);
@@ -39,6 +42,7 @@ public class GlobalGameController {
     }
 
     private void concludeGlobalGame() {
+        active = false;
         //TODO CHANGE TO NORMAL REWARDS
         participants.forEach(uuid -> {
             Player p = plugin.getServer().getPlayer(uuid);

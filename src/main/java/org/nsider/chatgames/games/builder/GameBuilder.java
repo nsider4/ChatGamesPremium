@@ -40,7 +40,7 @@ public class GameBuilder {
 
         if (type != GameType.MEMORIZE) {
             initGame(type, selected);
-            plugin.getExpirationTask().timeExpiredTask(plugin.getGameManager().getGame().getGameConfigName());
+            plugin.getExpirationTask().scheduleExpirationTask(plugin.getGameManager().getGame().getGameConfigName());
         }
 
         if (!BuilderUtils.isSpecialGame(type) && !toReplace.isEmpty()) {
@@ -50,7 +50,6 @@ public class GameBuilder {
 
     public void initGame(GameType type, String selected) {
         plugin.getGameManager().setGame(new Game(type, selected));
-        plugin.getGameManager().setCurrentGame(plugin.getGameManager().getGame().getGameConfigName());
         plugin.setInGame(true);
         ChatGamesStartEvent startEvent = new ChatGamesStartEvent(plugin, type);
         Bukkit.getScheduler().runTask(plugin, () -> plugin.getServer().getPluginManager().callEvent(startEvent));

@@ -5,6 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.scheduler.BukkitTask;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.ConfigManager;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.utils.management.TaskUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
@@ -48,7 +51,7 @@ public class MainTask {
     public void enable() {
         taskUtils.cancelTask(task);
         taskEnabled = true;
-        long delayTicks = plugin.getGameManager().getNextGameDelay();
+        long delayTicks = plugin.getGameConfigManager().getNextGameDelay();
         task = taskUtils.runRepeatingAsyncTask(this::doTask, delayTicks, delayTicks);
     }
 
@@ -114,8 +117,8 @@ public class MainTask {
      * @return True if the minimum player requirement is met, false otherwise.
      */
     public boolean checkEnoughPlayers() {
-        int minPlayers = plugin.getConfig().getInt("min_players_online");
-        return plugin.getGameManager().checkPlayersOnline(minPlayers);
+        int minPlayers = ConfigValue.getInt(ConfigPaths.MIN_PLAYERS);
+        return plugin.getGameManager().getGamePlayerManager().checkMinimumPlayersOnline(minPlayers);
     }
 
     /**
@@ -139,11 +142,11 @@ public class MainTask {
      * @return True if the game type is enabled, false otherwise.
      */
     private boolean isEnabledInConfig(@Nonnull GameType type) {
-        if (plugin.getGameManager().isRace(type)) {
-            return plugin.getConfigManager().getChatRaces().getBoolean(type.toString().toLowerCase() + ".enable") &&
-                    plugin.getConfigManager().getChatRaces().getBoolean("enable-races");
+        if (type.isRace()) {
+            return ConfigValue.getBoolean(ConfigPaths.RACES_ENABLED)
+                    && ConfigManager.getRaces().getBoolean(type.getConfigKey() + ".enable");
         }
-        return plugin.getConfig().getBoolean(type.toString().toLowerCase() + ".enable");
+        return ConfigManager.getGames().getBoolean(type.getConfigKey() + ".enable");
     }
 
     /**

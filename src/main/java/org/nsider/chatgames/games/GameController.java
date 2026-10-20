@@ -3,6 +3,9 @@ package org.nsider.chatgames.games;
 import lombok.Getter;
 import org.nsider.chatgames.games.utils.PlayerResult;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +25,15 @@ public class GameController {
 
     public static PlayerResult getPlayerResult(UUID playerUUID) {
         return results.get(playerUUID);
+    }
+
+    /**
+     * @return a snapshot of the current results ordered by place (1st first)
+     */
+    public static List<PlayerResult> getResultsByPlace() {
+        List<PlayerResult> sorted = new ArrayList<>(results.values());
+        sorted.sort(Comparator.comparingInt(PlayerResult::getPlace));
+        return sorted;
     }
 
     public static void clearResults() {

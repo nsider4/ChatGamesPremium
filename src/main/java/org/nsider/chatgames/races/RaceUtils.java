@@ -8,8 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.utils.gameplay.VersionUtils;
-import org.nsider.chatgames.utils.gameplay.XMaterial;
+import com.cryptomorin.xseries.XMaterial;
 
 import java.util.List;
 
@@ -82,14 +81,11 @@ public class RaceUtils {
         return entityName;
     }
 
+    // Translation keys use modern names (e.g. "cod"), which XMaterial maps from legacy ones like RAW_FISH
     private String convertTo113(Material material) {
-        if (VersionUtils.getMCVersion() < 13) {
-            XMaterial xMaterial = XMaterial.matchXMaterial(material);
-            if (xMaterial == null) {
-                return null;
-            }
-            return xMaterial.name();
-        } else {
+        try {
+            return XMaterial.matchXMaterial(material).name();
+        } catch (IllegalArgumentException e) {
             return material.name();
         }
     }

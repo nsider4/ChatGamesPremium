@@ -118,7 +118,7 @@ public class RaceStarter {
 
         raceMessageSender.sendRaceStartedMessage(game, "%amount%", amount);
 
-        plugin.getExpirationTask().timeExpiredTask(game);
+        plugin.getExpirationTask().scheduleExpirationTask(game);
 
         ChatGamesStartEvent startEvent = new ChatGamesStartEvent(plugin, GameType.valueOf(game.toUpperCase()));
         Bukkit.getScheduler().runTask(plugin , () -> plugin.getServer().getPluginManager().callEvent(startEvent));

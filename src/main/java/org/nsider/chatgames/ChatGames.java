@@ -4,7 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.nsider.chatgames.config.ConfigManager;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.database.DataHandler;
 import org.nsider.chatgames.database.HikariDatabase;
 import org.nsider.chatgames.database.enums.StorageType;
@@ -13,8 +14,13 @@ import org.nsider.chatgames.games.builder.GameBuilder;
 import org.nsider.chatgames.games.manager.GameConfigManager;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.utils.GameUtils;
+import org.nsider.chatgames.globalgames.GlobalGameController;
+import org.nsider.chatgames.managers.LanguageManager;
+import org.nsider.chatgames.other.UpdateChecker;
 import org.nsider.chatgames.races.RaceBuilder;
+import org.nsider.chatgames.reward.RewardManager;
 import org.nsider.chatgames.tasks.ExpirationTask;
+import org.nsider.chatgames.tasks.MainTask;
 import org.nsider.chatgames.utils.management.LogUtils;
 import org.nsider.chatgames.utils.management.TaskUtils;
 
@@ -23,6 +29,8 @@ import java.util.Random;
 
 @Getter
 public final class ChatGames extends JavaPlugin {
+
+    private static final int SPIGOT_RESOURCE_ID = 107781;
 
     private final Random random = new Random();
 
@@ -36,7 +44,12 @@ public final class ChatGames extends JavaPlugin {
     private GameManager gameManager;
     private LogUtils logUtils;
     private RaceBuilder raceBuilder;
+    private RewardManager rewardManager;
+    private LanguageManager languageManager;
+    private GlobalGameController globalGameController;
+    private MainTask mainTask;
     private boolean isPlaceHolderAPIEnabled = false;
+    private volatile boolean updateNeeded = false;
     @Setter private boolean inGame = false;
 
     @Override
@@ -55,12 +68,12 @@ public final class ChatGames extends JavaPlugin {
         this.logUtils = new LogUtils(this);
         this.gameManager = new GameManager(this);
         this.raceBuilder = new RaceBuilder(this);
+        this.rewardManager = new RewardManager(this);
+        this.languageManager = new LanguageManager(this, ConfigValue.getString(ConfigPaths.LANGUAGE));
+        this.globalGameController = new GlobalGameController(this);
+        this.mainTask = new MainTask(this);
 
-        if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new PlaceHolderHook(this).register();
-            getLogger().info("PlaceholderAPI Hooked!");
-            this.isPlaceHolderAPIEnabled = true;
-        }
+        this.isPlaceHolderAPIEnabled = Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
 
         if(this.getConfig().getString("Storage").equalsIgnoreCase("MySQL")) {
             this.dataHandler = new HikariDatabase(this, StorageType.MySQL);
@@ -69,9 +82,8 @@ public final class ChatGames extends JavaPlugin {
         }
         this.dataHandler.initialize();
 
-        VersionUtils.correctConfigs(getConfig(), ConfigManager.getChatRaces());
         checkForUpdate();
-        if(getConfig().getInt("time_minutes") != -1) { //DO IN THE OTHER CLASS
+        if (ConfigValue.getInt(ConfigPaths.TIME_MINUTES) != -1) {
             mainTask.enable();
         }
     }
@@ -79,5 +91,14 @@ public final class ChatGames extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    }
+
+    private void checkForUpdate() {
+        new UpdateChecker(this, SPIGOT_RESOURCE_ID).getVersion(version -> {
+            this.updateNeeded = !getDescription().getVersion().equals(version);
+            if (updateNeeded && ConfigValue.getBoolean(ConfigPaths.CHECK_UPDATE)) {
+                getLogger().info("There is a new update available on Spigot!");
+            }
+        });
     }
 }
