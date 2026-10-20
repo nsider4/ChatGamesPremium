@@ -319,7 +319,26 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - A milestone crossed while the player is offline is skipped; that's revisited with the admin point commands in step 6.
     - 1.9.9 databases have a `fastest NOT NULL` column that the new insert doesn't fill, so the step 10 migration must run before this.
     - MySQL is tested in step 12 (no MySQL server here).
-- [ ] Step 5: core game loop
+- [x] **Step 5: core game loop** (2026-10-20). 79 tests. **Played on real servers** by a scripted player that reads and answers questions (`scripts/bot.js` `autoplay`), on Paper 1.21.1, Spigot 1.8.8 and Folia 26.1.2. All three: wins, Clickable by clicking, Memorize, Math missing-value, Sequence, the wrong-case message, anti-macro, hints, the action-bar countdown, "time's up" and a milestone command. Points, per-game wins and per-game fastest times were checked in the database afterwards.
+  - **New structure:** each game has a `RoundGenerator` that builds a `Round` (answers, what to show, placeholders, hints, clickable/hoverable text) with no side effects. `GameBuilder` then generates the round, fires `ChatGamesStartEvent`, announces it and schedules the time limit, hints and countdown. `AnswerHandler` checks answers and pays out; `RoundAnnouncer` sends every game message through the new `Msg` builder. The six old message classes, `GameAlgorithms`, the handler factory and `TextMatchUtils` are gone, as are ~90 per-game `ConfigPaths` entries: `GameSettings` reads each game's games.yml section, with defaults for keys a 1.9.9 file lacks.
+  - **Games:**
+    - **Sequence** (new): add, multiply, squares, alternating and Fibonacci patterns; difficulty 1–3 picks patterns and number size.
+    - **Math** gained `modes: [solve, missing-value]` and `operations`. Divisions are always exact (the 1.9.9 game could show `7 / 2` and expect 3).
+    - **Memorize** draws from pools: shopping_list (1.9.9's list), words, colors, numbers, blocks and mobs (both shown in the server language), or any list you add. `order-matters` can be turned off. The list shows, chat clears, then answers open.
+    - Admin arguments work for every game (a word, an expression, a list length…), ready for `/chatgames start` in step 6.
+  - **New per-game settings** (all optional, documented at the top of games.yml): `weight`, `points`, `min-answer-ms` (anti-macro, default 400), `hints.enable/after-percent/max`, `countdown.enable/last-seconds`. The shared `hint_message` and `countdown_actionbar` are in messages.yml, and a game can override either.
+  - **Rotation:** weighted, never the same game twice in a row, skips a round while a game is running, and keeps going if a game fails to start (one exception used to stop it until restart).
+  - **Wins** add points (`points`, default 1), `wins` and `wins.<game>`, and the fastest time, and run milestone commands.
+  - **Bugs fixed:** 9, 10, 11, 12, 13, 14, 16 (rest), 18, 19, 20, 21, 24, 25. Also:
+    - The winner message stripped any text between two `%` signs.
+    - Placeholders were replaced as regexes, so a `$` in a value broke messages.
+    - Fill-out could hide the same letter twice, which hid fewer letters than its difficulty set.
+    - A hint could reveal a whole answer ending in `_` (such as "Jeb_").
+    - Sounds now go through XSeries, so `minecraft:entity.player.levelup` also works on 1.8.
+    - Titles now go through XSeries, which handles every version.
+    - The empty Discord webhook no longer logs a warning on every win.
+  - **Until step 8:** races have no data loaded yet, so the default `enable-races: true` makes the rotation log an error whenever it picks one (it then carries on). The gameplay tests ran with races off. Races still use the old `GameMessageManager`.
+  - **For step 11:** reward commands (`[playercmd]`) and broadcasts run on the global thread; Folia wants player commands on the player's thread. The Folia run had no errors with the default rewards, but this is still to do.
 
 ---
 
