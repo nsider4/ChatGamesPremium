@@ -376,7 +376,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - **Ranks:** players with equal points share a place (1, 2, 2, 4), as in 1.9.9. Only the top 100 of each list get a name lookup, but everyone has a rank.
   - **Times** show 3 decimals. An empty place shows `placeholders.empty-value` (default empty, as in 1.9.9). The full list is documented in config.yml above the `placeholders` section.
   - **Moved to step 9,** with their features: `daily_*`, `weekly_*`, `streak_*` and `event_*`.
-- [x] **Step 8: Races** (2026-10-20). 99 tests. A bot played mine, place, eat, craft, furnace and hunt, plus a random start, time running out, `stop`, custom values and tab completion. Tested live on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2. Fish is unit-level only: the flat test world has no water.
+- [x] **Step 8: Races** (2026-10-20, ce4c20a). 99 tests. A bot played mine, place, eat, craft, furnace and hunt, plus a random start, time running out, `stop`, custom values and tab completion. Tested live on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2. Fish is unit-level only: the flat test world has no water.
   - **Rebuilt `races/`** (936 lines became 7 small classes):
     - `RaceData`: races.yml targets, amounts and rewards, loaded on enable and on `reload`.
     - `RaceTarget`: modern or legacy names through XSeries.
