@@ -57,7 +57,7 @@ public class TopPlayerQueries {
                 throw new IllegalArgumentException("Unsupported top type: " + top);
         }
 
-        plugin.getTaskUtils().runAsyncTask(() -> {
+        plugin.getScheduler().async(() -> {
             try (Connection conn = getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -76,25 +76,27 @@ public class TopPlayerQueries {
                         rows.add(new TopData(++rank, name, value));
                     }
 
-                    plugin.getTaskUtils().runSyncTask(() -> {
-                        int totalPoints = (top == TopType.POINTS) ? ValueQueries.getTotalPoints() : 0;
+                    // Everything below the list also comes from the database, so it is read here, off the main thread
+                    int totalPoints = (top == TopType.POINTS) ? ValueQueries.getTotalPoints() : 0;
+                    GameType gameType = game.length == 0 ? null : game[0];
+                    double personal = sender instanceof Player
+                            ? (gameType == null
+                                ? getPersonalValue((Player) sender, top)
+                                : getPersonalValue((Player) sender, top, gameType))
+                            : 0;
 
-                        if(game.length == 0) {
-                            double personal = getPersonalValue((Player) sender, top);
-                            new TopPresenter(sender, messages, top)
-                                    .present(rows, personal, totalPoints);
-                        } else {
-                            double personal = getPersonalValue((Player) sender, top, game[0]);
-                            new TopPresenter(sender, messages, top, game[0])
-                                    .present(rows, personal, totalPoints);
-                        }
+                    plugin.getScheduler().global(() -> {
+                        TopPresenter presenter = gameType == null
+                                ? new TopPresenter(sender, messages, top)
+                                : new TopPresenter(sender, messages, top, gameType);
+                        presenter.present(rows, personal, totalPoints);
                     });
                 }
 
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Error loading leaderboard for " + top, e);
             }
-        }, 0L);
+        });
     }
 
     private static double getPersonalValue(Player player, TopType top, GameType... game) {

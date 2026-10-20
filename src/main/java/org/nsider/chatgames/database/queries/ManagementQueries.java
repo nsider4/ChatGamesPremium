@@ -66,7 +66,7 @@ public class ManagementQueries {
     }
 
     public static void createPlayer(OfflinePlayer player, int startingPoints, Consumer<Boolean> callback) {
-        plugin.getTaskUtils().runAsyncTask(() -> {
+        plugin.getScheduler().async(() -> {
             try (Connection connection = getConnection();
                  PreparedStatement ps = connection.prepareStatement(buildInsertStatement())) {
 
@@ -77,13 +77,13 @@ public class ManagementQueries {
                         true
                 );
 
-                plugin.getTaskUtils().runSyncTaskLater(() -> callback.accept(true), 0L);
+                plugin.getScheduler().global(() -> callback.accept(true));
 
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
-                plugin.getTaskUtils().runSyncTaskLater(() -> callback.accept(false), 0L);
+                plugin.getScheduler().global(() -> callback.accept(false));
             }
-        }, 0L);
+        });
     }
 
     public static PlayerMainData getPlayerData(OfflinePlayer player) {
@@ -106,7 +106,7 @@ public class ManagementQueries {
     }
 
     public static void updatePlayerData(UUID uuid, int points, boolean toggled, boolean sound) {
-        plugin.getTaskUtils().runAsyncTask(() -> {
+        plugin.getScheduler().async(() -> {
             String sql = "UPDATE " + tableName + " SET POINTS = ?, toggled = ?, sound = ? WHERE UUID = ?";
             try (Connection connection = getConnection();
                  PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -116,7 +116,7 @@ public class ManagementQueries {
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
             }
-        }, 0L);
+        });
     }
 
     private static String buildInsertStatement() {
@@ -144,17 +144,17 @@ public class ManagementQueries {
             return;
         }
 
-        plugin.getTaskUtils().runAsyncTask(() -> {
+        plugin.getScheduler().async(() -> {
             try (Connection connection = getConnection();
                  PreparedStatement ps = connection.prepareStatement("DELETE FROM " + tableName + " WHERE UUID = ?")) {
 
                 QueryUtils.executeUpdate(ps, player.getUniqueId().toString());
-                plugin.getTaskUtils().runSyncTaskLater(() -> callback.accept(true), 0L);
+                plugin.getScheduler().global(() -> callback.accept(true));
 
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
-                plugin.getTaskUtils().runSyncTaskLater(() -> callback.accept(false), 0L);
+                plugin.getScheduler().global(() -> callback.accept(false));
             }
-        }, 0L);
+        });
     }
 }

@@ -1,6 +1,5 @@
 package org.nsider.chatgames.model.player;
 
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.database.queries.ChallengeQueries;
@@ -27,7 +26,7 @@ public class ChatGamesPlayerManager {
     }
 
     public static void load(OfflinePlayer player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        plugin.getScheduler().async(() -> {
             if (!ManagementQueries.playerExists(player)) {
                 ManagementQueries.createPlayerIfNotExists(player);
             }
@@ -72,7 +71,7 @@ public class ChatGamesPlayerManager {
 
     public static void save(ChatGamesPlayer data) {
         UUID uuid = data.getUuid();
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        plugin.getScheduler().async(() -> {
             ManagementQueries.updatePlayerData(uuid, data.getPoints(), data.isToggled(), data.isSoundEnabled());
             ChallengeQueries.updateChallengeProgress(uuid, data.getWinsToday(), data.isRewardClaimed(), data.getLastUpdated(),
                     data.getChallengeStreak(), data.getDailyStreak(), data.getGlobalStreak(), data.getWeeklyWins());

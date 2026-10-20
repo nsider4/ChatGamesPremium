@@ -4,19 +4,20 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.globalgames.games.GlobalReactionGameListener;
+import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GlobalGameController {
     private final ChatGames plugin;
-    private final Set<UUID> participants = new HashSet<>();
-    private BukkitRunnable listenerRemover;
+    // Chat events arrive on many threads at once
+    private final Set<UUID> participants = ConcurrentHashMap.newKeySet();
+    private ChatGamesScheduler.Task listenerRemover;
     @Getter private volatile boolean active;
 
     public GlobalGameController(ChatGames plugin) {
@@ -31,14 +32,10 @@ public class GlobalGameController {
         GlobalReactionGameListener listener = new GlobalReactionGameListener(plugin, promptWord, participants);
         Bukkit.getPluginManager().registerEvents(listener, plugin);
 
-        listenerRemover = new BukkitRunnable() {
-            @Override
-            public void run() {
-                HandlerList.unregisterAll(listener);
-                concludeGlobalGame();
-            }
-        };
-        listenerRemover.runTaskLater(plugin, durationSeconds * 20L);
+        listenerRemover = plugin.getScheduler().globalLater(() -> {
+            HandlerList.unregisterAll(listener);
+            concludeGlobalGame();
+        }, durationSeconds * 20L);
     }
 
     private void concludeGlobalGame() {
@@ -46,7 +43,7 @@ public class GlobalGameController {
         //TODO CHANGE TO NORMAL REWARDS
         participants.forEach(uuid -> {
             Player p = plugin.getServer().getPlayer(uuid);
-            if (p != null) plugin.getGameUtils().giveRewards("global_word", p);
+            if (p != null) plugin.getGameUtils().giveRewards("global_word", p, 1);
         });
         broadcast("&aGlobal Game ended! Participants rewarded: " + participants.size());
     }

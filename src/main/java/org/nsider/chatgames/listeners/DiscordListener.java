@@ -2,7 +2,6 @@ package org.nsider.chatgames.listeners;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
@@ -31,12 +30,7 @@ public class DiscordListener implements Listener {
     }
 
     private void scheduleDiscordMessage(PlayerResult winner, GameType type) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                sendWinnerDiscordMessage(winner, type);
-            }
-        }.runTaskAsynchronously(plugin);
+        plugin.getScheduler().async(() -> sendWinnerDiscordMessage(winner, type));
     }
 
     private void sendWinnerDiscordMessage(PlayerResult winner, GameType type) {

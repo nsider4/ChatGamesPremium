@@ -260,7 +260,24 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - The recode's `isMaterialRace` had dropped EAT and FISH, so `LogListener` would NPE on those races. This is fixed.
     - `[player_as_op]` was ported as-is from 1.9.9: a fake sender that claims OP. It's an anonymous `CommandSender` compiled against the 1.8 API, so on modern servers any newer interface method a command calls on it fails with `AbstractMethodError`. Vanilla commands may also reject a non-player sender. Test it on 26.x, or drop it in step 6.
   - Still stubbed until its step: PlaceholderAPI is only detected, not hooked (step 7). The full `onEnable` order comes in step 3.
-- [ ] Step 2: foundations
+- [x] **Step 2: foundations** (2026-10-20). `mvn package` passes, with 34 tests.
+  - **Config:** `ConfigPaths` resolves its file through the new `ConfigFile` enum when read, so values survive `/chatgames reload` (they used to keep the old file, or were null before init). `ConfigManager.initialize` is now called first in `onEnable`, and `Messages` is built after `messages.yml`. `reload()` reloads every file, adds `global_games.yml`, and rebuilds the messages.
+  - **Database:**
+    - `QueryUtils.query(conn, sql, handler, params)` reads rows while the statement is open. The old helper returned a closed `ResultSet`. Tested against a real SQLite database.
+    - SQLite now uses one pooled connection.
+    - MySQL falls back to the legacy `com.mysql.jdbc.Driver` on servers older than 1.16.
+    - The leaderboard no longer queries the database on the main thread, and no longer casts the console to `Player`.
+  - **Scheduler:** `ChatGamesScheduler` (FoliaLib behind it) replaces `TaskUtils` and every `Bukkit.getScheduler()`/`BukkitRunnable`. There are no direct Bukkit scheduler calls left. The game rotation reschedules itself each round, which also fixes the random delay being rolled once.
+  - **Thread-safe game state:** `Game` now owns its clock, winners and end state. `GameController`'s static map is gone.
+    - `claimPlace` is atomic. A 50-thread test, repeated 20 times, always gives exactly places 1..N.
+    - `finish()` makes sure the last winner and the time limit can't both end a game.
+    - Times are measured from game start with `nanoTime`.
+  - **Also fixed:**
+    - Rewards are given by the place passed in, so global-game participants actually get rewards. Before, they looked up a result that never existed.
+    - `ChatGamesEndEvent` carries its own answer and winners, so listeners no longer read a game that may already be cleared.
+    - `GameType.fromName` replaces the `valueOf` calls that threw on unknown names. It accepts `shoppinglist`.
+  - Not yet checked on a live server: the plugin can't start until step 3 registers its listeners and commands. Steps 3 and 12 cover that.
+- [ ] Step 3: bootstrap
 
 ---
 

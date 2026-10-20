@@ -1,18 +1,14 @@
 package org.nsider.chatgames.games.utils;
 
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.games.GameController;
-import org.nsider.chatgames.utils.management.TimeUtils;
-import org.bukkit.Bukkit;
+import org.nsider.chatgames.games.Game;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Game utilities.
@@ -30,40 +26,29 @@ public class GameUtils {
      * @param player The player to check.
      * @return true if the player can participate, false otherwise.
      */
-    public boolean canCheckGame(Player player) {
-        if (!plugin.isInGame() || plugin.getGameManager().getGame() == null) {
+    public boolean canCheckGame(Player player, Game game) {
+        if (!plugin.isInGame() || game == null || game.isFinished()) {
             return false;
         }
 
-        return plugin.getGameManager().gamesIsToggled(player)
-                && plugin.getGameManager().worldEnabled(player)
-                && !GameController.playerExists(player.getUniqueId());
-    }
-
-    /**
-     * Adds a winner and updates game statistics.
-     *
-     * @param player The player who won.
-     */
-    public void addWinner(OfflinePlayer player) {
-        TimeUtils.stopTimer();
-        double elapsedTime = Double.parseDouble(TimeUtils.getElapsedTime());
-        TimeUtils.setLastTimer(TimeUtils.getLastTimer() + elapsedTime);
-        GameController.addResult(player.getUniqueId(), TimeUtils.getLastTimer(), GameController.getResults().size() + 1);
+        return !game.hasResult(player.getUniqueId())
+                && plugin.getGameManager().gamesIsToggled(player)
+                && plugin.getGameManager().worldEnabled(player);
     }
 
     /**
      * Gives rewards to a player based on their game performance.
      *
-     * @param game  The game type.
+     * @param game   The game type.
      * @param player The player to reward.
+     * @param place  The player's place, 1 for first.
      */
-    public void giveRewards(String game, Player player) {
+    public void giveRewards(String game, Player player, int place) {
         if (player == null) {
             return;
         }
 
-        Bukkit.getScheduler().runTask(plugin, () -> processRewards(game, player));
+        plugin.getScheduler().global(() -> processRewards(game, player, place));
     }
 
     /**
@@ -71,29 +56,12 @@ public class GameUtils {
      *
      * @param game   The game type.
      * @param player The player receiving rewards.
+     * @param place  The player's place, 1 for first.
      */
-    private void processRewards(String game, Player player) {
-        List<String> rewards = getPlayerRewards(game, player);
-        if (rewards.isEmpty()) {
-            return;
-        }
-
-        for (String reward : rewards) {
+    private void processRewards(String game, Player player, int place) {
+        for (String reward : plugin.getRewardManager().loadGameRewards(game, player, place)) {
             processReward(player, reward);
         }
-    }
-
-    /**
-     * Retrieves rewards for a player based on game performance.
-     *
-     * @param game   The game type.
-     * @param player The player receiving rewards.
-     * @return List of rewards.
-     */
-    private List<String> getPlayerRewards(String game, Player player) {
-        PlayerResult playerResult = GameController.getPlayerResult(player.getUniqueId());
-        return (playerResult == null) ? Collections.emptyList()
-                : plugin.getRewardManager().loadGameRewards(game, player, playerResult.getPlace());
     }
 
     /**

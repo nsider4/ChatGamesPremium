@@ -2,17 +2,15 @@ package org.nsider.chatgames.tasks;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.games.Game;
-import org.nsider.chatgames.games.GameController;
 import org.nsider.chatgames.games.manager.GameUtility;
 import org.nsider.chatgames.races.RaceHandler;
-import org.nsider.chatgames.utils.management.TaskUtils;
+import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 /**
@@ -22,11 +20,9 @@ public class ExpirationTask {
 
     @Nonnull
     private final ChatGames plugin;
-    @Nonnull
-    private final TaskUtils taskUtils;
 
     @Getter
-    private BukkitTask task;
+    private volatile ChatGamesScheduler.Task task;
 
     /**
      * Constructs a new {@code ExpirationTask}.
@@ -35,7 +31,6 @@ public class ExpirationTask {
      */
     public ExpirationTask(@Nonnull ChatGames instance) {
         this.plugin = instance;
-        this.taskUtils = new TaskUtils(plugin);
     }
 
     /**
@@ -46,15 +41,17 @@ public class ExpirationTask {
     public void scheduleExpirationTask(@Nonnull String game) {
         long timeToCompleteTicks = getTimeToCompleteTicks(game);
 
-        task = taskUtils.runAsyncTask(() -> {
-            if (plugin.isInGame()) {
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    if (GameUtility.isRace(GameType.valueOf(game.toUpperCase()))) {
-                        handleRaceExpiration(game);
-                    } else {
-                        handleGameExpiration(plugin.getGameManager().getGame());
-                    }
-                });
+        GameType type = GameType.fromName(game);
+        task = plugin.getScheduler().globalLater(() -> {
+            if (!plugin.isInGame()) return;
+            if (type != null && GameUtility.isRace(type)) {
+                handleRaceExpiration(game);
+                return;
+            }
+            Game current = plugin.getGameManager().getGame();
+            // A last winner may have ended the game in the same tick
+            if (current != null && current.finish()) {
+                handleGameExpiration(current);
             }
         }, timeToCompleteTicks);
     }
@@ -63,7 +60,7 @@ public class ExpirationTask {
      * Cancels the currently running expiration task.
      */
     public void cancel() {
-        taskUtils.cancelTask(task);
+        ChatGamesScheduler.cancel(task);
     }
 
     /**
@@ -100,13 +97,12 @@ public class ExpirationTask {
         String selectedAnswer = extractSelectedAnswer(game.getAnswer());
 
         // Trigger end event
-        ChatGamesEndEvent endEvent = new ChatGamesEndEvent(plugin, game.getGameType(), GameController.getResultsByPlace());
+        ChatGamesEndEvent endEvent = new ChatGamesEndEvent(game.getGameType(), game.getAnswer(), game.getResultsByPlace());
         Bukkit.getServer().getPluginManager().callEvent(endEvent);
 
         // Handle results or expiration message
-        if (!GameController.getResults().isEmpty()) {
+        if (game.hasWinners()) {
             plugin.getGameManager().sendWinnerMessages();
-            GameController.clearResults();
         } else {
             plugin.getGameManager().sendTimeExpiredToWorlds(selectedAnswer, game.getGameConfigName());
         }

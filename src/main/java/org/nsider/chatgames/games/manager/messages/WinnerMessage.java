@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.games.GameController;
 import org.nsider.chatgames.games.manager.GameMessageManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 import org.nsider.chatgames.games.utils.PlayerResult;
@@ -60,7 +59,7 @@ public class WinnerMessage extends GameMessageManager {
         int maxWinners = plugin.getGameConfigManager().getGameWinners(plugin.getGameManager().getGame().getGameConfigName());
         boolean[] placeholdersUsed = new boolean[maxWinners + 1];
 
-        for (PlayerResult result : GameController.getResults().values()) {
+        for (PlayerResult result : plugin.getGameManager().getGame().getResultsByPlace()) {
             int place = result.getPlace();
             int points = TopManager.getPoints(result.getPlayer());
 

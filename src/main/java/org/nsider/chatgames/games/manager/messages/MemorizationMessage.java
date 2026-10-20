@@ -40,7 +40,7 @@ public class MemorizationMessage extends GameMessageManager {
                 String subtitleMessage = ConfigValue.getString(ConfigPaths.MEMORIZE_SUBTITLE_MESSAGE)
                         .replace("%timeToGuess%", String.valueOf(timeToGuess));
 
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                plugin.getScheduler().globalLater(() -> {
                     clearChat(player);
                     if (!titleMessage.isEmpty() && !subtitleMessage.isEmpty()) {
                         player.sendTitle(color(titleMessage), color(subtitleMessage));

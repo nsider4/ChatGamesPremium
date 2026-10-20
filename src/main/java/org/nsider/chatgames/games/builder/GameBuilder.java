@@ -1,11 +1,9 @@
 package org.nsider.chatgames.games.builder;
 
-import org.bukkit.Bukkit;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesStartEvent;
 import org.nsider.chatgames.games.Game;
-import org.nsider.chatgames.utils.management.TimeUtils;
 
 import java.util.Random;
 
@@ -49,10 +47,10 @@ public class GameBuilder {
     }
 
     public void initGame(GameType type, String selected) {
-        plugin.getGameManager().setGame(new Game(type, selected));
+        int maxWinners = plugin.getGameConfigManager().getGameWinners(type.getConfigKey());
+        plugin.getGameManager().setGame(new Game(type, selected, maxWinners));
         plugin.setInGame(true);
         ChatGamesStartEvent startEvent = new ChatGamesStartEvent(plugin, type);
-        Bukkit.getScheduler().runTask(plugin, () -> plugin.getServer().getPluginManager().callEvent(startEvent));
-        TimeUtils.startTimer();
+        plugin.getScheduler().global(() -> plugin.getServer().getPluginManager().callEvent(startEvent));
     }
 }

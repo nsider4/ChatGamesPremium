@@ -10,15 +10,11 @@ import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.model.top.FastestData;
 import org.nsider.chatgames.utils.database.DatabaseUtils;
 import org.nsider.chatgames.utils.database.QueryUtils;
-import org.nsider.chatgames.utils.management.TaskUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 
 public class FastestTimeQueries {
@@ -64,7 +60,7 @@ public class FastestTimeQueries {
      * @param time      The new time to attempt to set.
      */
     public static void updateFastestTime(Player player, String gameName, double time) {
-        plugin.getTaskUtils().runAsyncTask(() -> {
+        plugin.getScheduler().async(() -> {
             try (Connection connection = getConnection()) {
                 String checkSql = "SELECT fastest_time FROM " + tableName + " WHERE UUID = ? AND game_name = ?";
                 Double current = QueryUtils.query(connection, checkSql,
@@ -79,7 +75,7 @@ public class FastestTimeQueries {
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Error updating fastest time", e);
             }
-        }, 0L);
+        });
     }
 
     public static FastestData getFastestData(OfflinePlayer player) {

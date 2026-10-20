@@ -5,7 +5,6 @@ import lombok.Setter;
 import org.bukkit.Material;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.games.GameController;
 import org.nsider.chatgames.races.setup.RaceDataLoader;
 import org.nsider.chatgames.races.setup.RaceMessageSender;
 import org.nsider.chatgames.races.setup.RaceStarter;
@@ -98,7 +97,6 @@ public class RaceBuilder {
     public void endRace() {
         RaceHandler.removePlayersOnline();
         TimeUtils.stopTimer();
-        GameController.clearResults();
         this.currentRace = "";
         plugin.setInGame(false);
         plugin.getExpirationTask().cancel();

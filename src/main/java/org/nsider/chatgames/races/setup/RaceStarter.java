@@ -1,7 +1,5 @@
 package org.nsider.chatgames.races.setup;
 
-import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.nsider.chatgames.ChatGames;
@@ -121,7 +119,7 @@ public class RaceStarter {
         plugin.getExpirationTask().scheduleExpirationTask(game);
 
         ChatGamesStartEvent startEvent = new ChatGamesStartEvent(plugin, GameType.valueOf(game.toUpperCase()));
-        Bukkit.getScheduler().runTask(plugin , () -> plugin.getServer().getPluginManager().callEvent(startEvent));
+        plugin.getScheduler().global(() -> plugin.getServer().getPluginManager().callEvent(startEvent));
     }
 
     public void startEntityTypeRace(String raceName, HashMap<String, List<Integer>> data) {

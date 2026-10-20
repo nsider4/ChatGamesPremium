@@ -3,7 +3,6 @@ package org.nsider.chatgames.model.top;
 import lombok.Getter;
 import org.nsider.chatgames.enums.GameType;
 
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 

@@ -23,7 +23,7 @@ import org.nsider.chatgames.reward.RewardManager;
 import org.nsider.chatgames.tasks.ExpirationTask;
 import org.nsider.chatgames.tasks.MainTask;
 import org.nsider.chatgames.utils.management.LogUtils;
-import org.nsider.chatgames.utils.management.TaskUtils;
+import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 
 import java.util.Random;
 
@@ -40,7 +40,7 @@ public final class ChatGames extends JavaPlugin {
     private GameBuilder gameBuilder;
     private GameConfigManager gameConfigManager;
     private GameUtils gameUtils;
-    private TaskUtils taskUtils;
+    private ChatGamesScheduler scheduler;
     private GameManager gameManager;
     private LogUtils logUtils;
     private RaceBuilder raceBuilder;
@@ -55,13 +55,13 @@ public final class ChatGames extends JavaPlugin {
     @Override
     public void onEnable() {
         ConfigManager.initialize(this);
+        this.scheduler = new ChatGamesScheduler(this);
 
         this.expirationTask = new ExpirationTask(this);
         this.gameAlgorithms = new GameAlgorithms(this);
         this.gameBuilder = new GameBuilder(this);
         this.gameConfigManager = new GameConfigManager(this);
         this.gameUtils = new GameUtils(this);
-        this.taskUtils = new TaskUtils(this);
         this.logUtils = new LogUtils(this);
         this.gameManager = new GameManager(this);
         this.raceBuilder = new RaceBuilder(this);
@@ -87,7 +87,9 @@ public final class ChatGames extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        if (scheduler != null) {
+            scheduler.cancelAll();
+        }
     }
 
     private void checkForUpdate() {

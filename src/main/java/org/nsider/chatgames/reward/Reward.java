@@ -1,7 +1,6 @@
 package org.nsider.chatgames.reward;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 import java.util.List;
 
 public class Reward {

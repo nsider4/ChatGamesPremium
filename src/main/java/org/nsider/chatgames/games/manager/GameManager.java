@@ -11,18 +11,16 @@ import org.nsider.chatgames.database.queries.UpdateQueries;
 import org.nsider.chatgames.database.queries.ValueQueries;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.games.Game;
-import org.nsider.chatgames.games.GameController;
 import org.nsider.chatgames.games.builder.algorithms.RandomCharacterGenerator;
 import org.nsider.chatgames.games.manager.messages.*;
-import org.nsider.chatgames.utils.management.TimeUtils;
 
 import java.util.List;
-import java.util.Random;
 
 public class GameManager {
     private final ChatGames plugin;
     @Getter private final GamePlayerManager gamePlayerManager;
-    @Setter @Getter private Game game;
+    // Written on the main thread, read by async chat threads
+    @Setter @Getter private volatile Game game;
     @Getter private String clickableKey;
 
     private final GameStartMessage gameStartMessage;
@@ -81,9 +79,6 @@ public class GameManager {
     }
 
     public void endGame() {
-        TimeUtils.stopTimer();
-        TimeUtils.setLastTimer(0.00);
-        GameController.clearResults();
         plugin.setInGame(false);
         this.game = null;
         plugin.getExpirationTask().cancel();

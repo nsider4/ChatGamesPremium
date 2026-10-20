@@ -7,7 +7,6 @@ import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.utils.database.DatabaseUtils;
 import org.nsider.chatgames.utils.database.QueryUtils;
-import org.nsider.chatgames.utils.management.TaskUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,17 +34,17 @@ public class UpdateQueries {
 
     public static void updatePlayerPoints(OfflinePlayer player, int points) {
         String sql = "UPDATE " + tableName + " SET POINTS = ? WHERE UUID = ?";
-        plugin.getTaskUtils().runAsyncTask(() -> executeUpdate(sql, points, player.getUniqueId().toString()), 0L);
+        plugin.getScheduler().async(() -> executeUpdate(sql, points, player.getUniqueId().toString()));
     }
 
     public static void updatePlayerToggle(Player player, boolean toggle) {
         String sql = "UPDATE " + tableName + " SET toggled = ? WHERE UUID = ?";
-        plugin.getTaskUtils().runAsyncTask(() -> executeUpdate(sql, toggle, player.getUniqueId().toString()), 0L);
+        plugin.getScheduler().async(() -> executeUpdate(sql, toggle, player.getUniqueId().toString()));
     }
 
     public static void updatePlayerToggleSound(Player player, boolean toggle) {
         String sql = "UPDATE " + tableName + " SET sound = ? WHERE UUID = ?";
-        plugin.getTaskUtils().runAsyncTask(() -> executeUpdate(sql, toggle, player.getUniqueId().toString()), 0L);
+        plugin.getScheduler().async(() -> executeUpdate(sql, toggle, player.getUniqueId().toString()));
     }
 
     private static void executeUpdate(String sql, Object... params) {

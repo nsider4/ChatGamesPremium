@@ -1,15 +1,13 @@
 package org.nsider.chatgames.tasks;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.scheduler.BukkitTask;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.utils.management.TaskUtils;
+import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.util.*;
@@ -21,14 +19,12 @@ public class MainTask {
 
     @Nonnull
     private final ChatGames plugin;
-    @Nonnull
-    private final TaskUtils taskUtils;
     @Getter
     private final List<GameType> enabledGames = new ArrayList<>();
     @Getter
-    private boolean taskEnabled;
+    private volatile boolean taskEnabled;
     @Getter
-    private BukkitTask task;
+    private volatile ChatGamesScheduler.Task task;
 
     private String activePreset;
 
@@ -39,7 +35,6 @@ public class MainTask {
      */
     public MainTask(@Nonnull ChatGames instance) {
         this.plugin = instance;
-        this.taskUtils = new TaskUtils(plugin);
         this.activePreset = plugin.getConfig().getString("active-preset", null); //TODO CHANGE TO CONFIG VALUE ENUM
         if(Objects.equals(this.activePreset, "none")) this.activePreset = null;
         reloadEnabledGames();
@@ -49,17 +44,29 @@ public class MainTask {
      * Enables the main task, scheduling it to run periodically.
      */
     public void enable() {
-        taskUtils.cancelTask(task);
+        ChatGamesScheduler.cancel(task);
         taskEnabled = true;
+        scheduleNext();
+    }
+
+    /**
+     * Schedules the next round. Each round asks for a fresh delay, so a random
+     * min/max interval really varies between games.
+     */
+    private void scheduleNext() {
         long delayTicks = plugin.getGameConfigManager().getNextGameDelay();
-        task = taskUtils.runRepeatingAsyncTask(this::doTask, delayTicks, delayTicks);
+        task = plugin.getScheduler().globalLater(() -> {
+            if (!taskEnabled) return;
+            doTask();
+            scheduleNext();
+        }, delayTicks);
     }
 
     /**
      * Cancels the currently scheduled task.
      */
     public void cancel() {
-        taskUtils.cancelTask(task);
+        ChatGamesScheduler.cancel(task);
         taskEnabled = false;
     }
 
@@ -81,10 +88,8 @@ public class MainTask {
             ConfigurationSection preset = plugin.getConfig().getConfigurationSection("presets." + activePreset);
             if (preset != null) {
                 for (String key : preset.getStringList("games")) {
-                    try {
-                        GameType type = GameType.valueOf(key.toUpperCase());
-                        enabledGames.add(type);
-                    } catch (IllegalArgumentException ignored) {}
+                    GameType type = GameType.fromName(key);
+                    if (type != null) enabledGames.add(type);
                 }
                 return;
             }
@@ -99,7 +104,7 @@ public class MainTask {
     }
 
     /**
-     * Performs the scheduled task logic, selecting and starting a game if conditions are met.
+     * Performs one round on the main thread (global region on Folia): starts a game if conditions are met.
      */
     private void doTask() {
         if (checkEnoughPlayers()) {
@@ -131,7 +136,7 @@ public class MainTask {
             GameType type = enabledGames.get(randomIndex);
 
             validGameChosen = true;
-            Bukkit.getScheduler().runTask(plugin, () -> plugin.getGameManager().startGame(type));
+            plugin.getGameManager().startGame(type);
         }
     }
 
