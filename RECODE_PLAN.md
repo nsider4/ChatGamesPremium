@@ -411,7 +411,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - `RewardSelector` is now pure and thread-safe and follows the 1.9.9 rules (`minimum-players`, one reward drawn by `chance`, `N%~` lines, `has:` permissions). Unit-tested, and verified live on a chat game and on races.
   - **Config files load as UTF-8** on every version: on 1.8 on Windows, ✓ ✯ had shown as "âœ“".
   - **Test tooling:** `scripts/bot.js` gained `dig`, `place`, `eat`, `craft`, `attack` and `smelt`.
-- [x] **Step 9 (part 1): Challenges, streaks, global games** (2026-10-20). 118 tests. Tested live on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2, with a bot and PlaceholderAPI.
+- [x] **Step 9 (part 1): Challenges, streaks, global games** (2026-10-20, eb4cfc4). 118 tests. Tested live on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2, with a bot and PlaceholderAPI.
   - **Challenges (`progression/`, `challenges.yml`):**
     - Daily and weekly sets, `fixed` or `random` (N drawn per period, the same for everyone).
     - Weekly `reset-day`, and a `timezone` for when days start.
