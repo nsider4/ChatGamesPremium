@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
-import org.nsider.chatgames.database.queries.UpdateQueries;
-import org.nsider.chatgames.database.queries.ValueQueries;
+import org.nsider.chatgames.model.player.ChatGamesPlayer;
+import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.games.Game;
 import org.nsider.chatgames.games.builder.algorithms.RandomCharacterGenerator;
@@ -93,7 +93,9 @@ public class GameManager {
         if (ConfigValue.getBoolean(ConfigPaths.REQUIRE_PERMISSION_TO_PLAY) && !player.hasPermission("chatgames.play")) {
             return false;
         }
-        return ValueQueries.getPlayerToggle(player);
+        ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());
+        // Data still loading (a moment after joining): they can't win yet, as wins couldn't be recorded
+        return data != null && data.isToggled();
     }
 
     public boolean worldEnabled(Player player) {
@@ -106,6 +108,9 @@ public class GameManager {
     }
 
     public void toggleGames(Player player, boolean value) {
-        UpdateQueries.updatePlayerToggle(player, value);
+        ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());
+        if (data != null) {
+            data.setToggled(value);
+        }
     }
 }

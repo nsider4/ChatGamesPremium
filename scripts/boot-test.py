@@ -4,6 +4,10 @@ usage: python scripts/boot-test.py <server dir> <java exe> <server jar> <plugin 
 
 The server dir gets eula.txt, a flat-world server.properties (port 25599) and the
 plugin copied into plugins/. Each command is typed into the console 3 seconds apart.
+A command starting with "@bot " runs scripts/bot.js instead and waits for it to finish, e.g.
+  "@bot Tester auto | wait:2000 | chat:/chatgames reload | quit | join | wait:1000"
+(the name, version and each action are separated by " | ", so chat text may contain spaces)
+(needs node and mineflayer; set NODE_PATH to the node_modules folder that has mineflayer).
 
 Server jars used for the 2.0.0 test matrix:
   Spigot 1.8.8 / 1.13 (Java 8), Spigot 1.20.1 (Java 17), Paper 1.21.1 (Java 21)
@@ -47,9 +51,23 @@ if not done.wait(600):
     proc.kill()
 else:
     time.sleep(3)
+    port = '25599'
+    for line in open(props):
+        if line.startswith('server-port='):
+            port = line.strip().split('=', 1)[1]
+    bot_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot.js')
     for cmd in commands:
         lines.append('>>> ' + cmd)
-        send(cmd)
+        if cmd.startswith('@bot '):
+            username, version, *actions = [part.strip() for part in cmd[5:].split('|')]
+            result = subprocess.run(['node', bot_script, port, username, version, *actions],
+                                    capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=300)
+            lines.extend(result.stdout.splitlines())
+            # mineflayer prints PartialReadError stacks for registry packets it skips; they are harmless
+            lines.extend(l for l in result.stderr.splitlines()
+                          if l.strip() and 'PartialReadError' not in l and not l.strip().startswith('at '))
+        else:
+            send(cmd)
         time.sleep(3)
     send('stop')
     try:
@@ -59,7 +77,7 @@ else:
         lines.append('SERVER DID NOT STOP')
 
 time.sleep(1)
-keep = ('chatgames', 'ChatGames', '>>> ', 'Exception', 'Error', 'ERROR', 'SEVERE', 'WARN', 'Done (', '\tat ',
+keep = ('chatgames', 'ChatGames', '>>> ', '[BOT ', 'joined the game', 'left the game', 'Exception', 'Error', 'ERROR', 'SEVERE', 'WARN', 'Done (', '\tat ',
         'Unknown', 'reloaded', 'permission', 'Caused by', 'Disabling', 'Enabling', 'DID NOT')
 for line in lines:
     if any(k in line for k in keep):

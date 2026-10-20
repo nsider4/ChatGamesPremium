@@ -7,7 +7,6 @@ import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.database.Errors;
 import org.nsider.chatgames.utils.database.DatabaseUtils;
 import org.nsider.chatgames.utils.database.QueryUtils;
-import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -15,8 +14,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 /**
- * Read-only queries against the main ChatGames table.
- * These block on the database, so call them off the main thread.
+ * Leaderboard queries against the main ChatGames table. Per-player values come from
+ * the player cache instead. These block on the database, so call them off the main thread.
  */
 public class ValueQueries {
 
@@ -30,46 +29,6 @@ public class ValueQueries {
 
     private static Connection getConnection() throws SQLException {
         return DatabaseUtils.getConnection();
-    }
-
-    public static int getPlayerPoints(@Nonnull OfflinePlayer player) {
-        if (player == null) {
-            plugin.getLogger().warning("Null player in getPlayerPoints; returning 0.");
-            return 0;
-        }
-
-        ManagementQueries.createPlayerIfNotExists(player);
-
-        String sql = "SELECT POINTS FROM " + tableName + " WHERE UUID = ?";
-        try (Connection conn = getConnection()) {
-            return QueryUtils.query(conn, sql, rs -> rs.next() ? rs.getInt("POINTS") : 0,
-                    player.getUniqueId().toString());
-        } catch (SQLException e) {
-            plugin.getLogger().log(Level.SEVERE, "Error retrieving player points", e);
-        }
-        return 0;
-    }
-
-    public static boolean getPlayerToggle(OfflinePlayer player) {
-        String sql = "SELECT toggled FROM " + tableName + " WHERE UUID = ?";
-        try (Connection conn = getConnection()) {
-            return QueryUtils.query(conn, sql, rs -> !rs.next() || rs.getBoolean("toggled"),
-                    player.getUniqueId().toString());
-        } catch (SQLException e) {
-            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
-        }
-        return true;
-    }
-
-    public static boolean getPlayerToggleSound(OfflinePlayer player) {
-        String sql = "SELECT sound FROM " + tableName + " WHERE UUID = ?";
-        try (Connection conn = getConnection()) {
-            return QueryUtils.query(conn, sql, rs -> !rs.next() || rs.getBoolean("sound"),
-                    player.getUniqueId().toString());
-        } catch (SQLException e) {
-            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
-        }
-        return true;
     }
 
     public static int getTotalPoints() {

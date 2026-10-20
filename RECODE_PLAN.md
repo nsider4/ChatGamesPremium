@@ -300,7 +300,26 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - SLF4J's stderr warning, which Paper logs as an ERROR and a nag, is silenced by bundling `slf4j-nop`.
     - Below 1.16, colours were applied by replacing every `&`. They now use `translateAlternateColorCodes`.
   - `folia-supported: true` was added early so the scheduler could be tested on Folia; the remaining Folia hardening stays in step 11.
-- [ ] Step 4: player cache lifecycle
+- [x] **Step 4: player cache** (2026-10-20). 48 tests. Tested with a scripted player (`scripts/bot.js`, mineflayer) on Paper 1.21.1 and Spigot 1.8.8: first join creates the row, quit saves, a quick quit-and-rejoin loads the saved data, and a non-op is refused `reload`.
+  - **`ChatGamesPlayer`** holds everything about one online player: points, toggles, stat counters, per-game best times, and the daily-challenge v1 fields. Every method is synchronized, so concurrent wins are never lost; a 1000-increment test confirms it. Changes are tracked as dirty and only those are written.
+  - **`PlayerRepository`** holds all the per-player SQL, with one code path for SQLite and MySQL (`REPLACE INTO`).
+    - A save is one transaction.
+    - New players' rows are created inside `load`. This fixes a bug: the old code inserted asynchronously and read straight back, so **new players were never cached at all**.
+  - **`ChatGamesPlayerManager`** runs all player database work on one dedicated thread, in order, so the quit's save always lands before the rejoin's load.
+    - `modify(uuid, change)` works for offline players too: it loads, changes and saves. This is ready for the admin point commands.
+    - `delete(uuid)` clears every table.
+    - `shutdown()` blocks until every save is written.
+    - A failed save keeps the changes marked dirty, so the next save retries them.
+  - **New table `<table_name>_stats`** stores (player, stat, value) counters. A new profile statistic (events, streaks, challenges completed…) just needs a new name in `Stat`, with no migration. It starts with `wins`, `wins.<game>`, `race_wins`, `global_played` and `global_won`. The daily table is now `<table_name>_daily`.
+  - **Game code no longer reads the database:** toggles, sound and points all come from the cache. `UpdateQueries`, `ManagementQueries`, `FastestTimeQueries`, `ChallengeQueries` and `FastestData` are gone.
+  - **Leaderboards:** they use the configured fastest-times table; 1.9.9's hard-coded `game_fastest_times` never matched it.
+  - **Milestones:** these now load on enable and reload (they were never loaded), and run their commands on the main/global thread.
+  - **Left for later steps:**
+    - Wins don't yet add points or stats; that's step 5.
+    - A milestone crossed while the player is offline is skipped; that's revisited with the admin point commands in step 6.
+    - 1.9.9 databases have a `fastest NOT NULL` column that the new insert doesn't fill, so the step 10 migration must run before this.
+    - MySQL is tested in step 12 (no MySQL server here).
+- [ ] Step 5: core game loop
 
 ---
 

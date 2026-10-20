@@ -26,7 +26,9 @@ import org.nsider.chatgames.listeners.LogListener;
 import org.nsider.chatgames.listeners.LoginListener;
 import org.nsider.chatgames.managers.ChallengeManager;
 import org.nsider.chatgames.managers.LanguageManager;
+import org.nsider.chatgames.managers.MilestoneManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
+import org.nsider.chatgames.model.player.PlayerRepository;
 import org.nsider.chatgames.other.UpdateChecker;
 import org.nsider.chatgames.races.RaceBuilder;
 import org.nsider.chatgames.reward.RewardManager;
@@ -51,6 +53,7 @@ public final class ChatGames extends JavaPlugin {
     private ExpirationTask expirationTask;
     private GameAlgorithms gameAlgorithms;
     private DataHandler dataHandler;
+    private PlayerRepository playerRepository;
     private GameBuilder gameBuilder;
     private GameConfigManager gameConfigManager;
     private GameUtils gameUtils;
@@ -91,8 +94,9 @@ public final class ChatGames extends JavaPlugin {
         }
 
         // 4. Player cache, including anyone already online after a /reload
-        ChatGamesPlayerManager.initialize(this);
+        ChatGamesPlayerManager.initialize(this, playerRepository);
         ChallengeManager.initialize(this);
+        MilestoneManager.loadMilestones();
         ChatGamesPlayerManager.loadOnlinePlayers();
 
         // 5. Game systems
@@ -159,8 +163,8 @@ public final class ChatGames extends JavaPlugin {
         HandlerList.unregisterAll(this);
 
         if (dataHandler != null) {
-            // Synchronous on purpose: async tasks no longer run once the plugin is disabling
-            ChatGamesPlayerManager.saveAllNow();
+            // Blocks until every player is saved: the server would otherwise close the pool mid-save
+            ChatGamesPlayerManager.shutdown();
             dataHandler.disable();
         }
     }
@@ -183,6 +187,7 @@ public final class ChatGames extends JavaPlugin {
             languageManager.load(newLanguage);
         }
 
+        MilestoneManager.loadMilestones();
         mainTask.reloadEnabledGames();
         startGameRotation();
         return success;
@@ -205,7 +210,12 @@ public final class ChatGames extends JavaPlugin {
         }
 
         this.dataHandler = new HikariDatabase(this, storageType);
-        return dataHandler.initialize() && QueryInitializer.initialize(this);
+        if (!dataHandler.initialize()) return false;
+
+        String mainTable = ConfigValue.getString(ConfigPaths.TABLE_NAME);
+        this.playerRepository = new PlayerRepository(dataHandler::getConnection, mainTable,
+                ConfigValue.getString(ConfigPaths.FASTEST_TIMES_TABLE), mainTable + "_stats", mainTable + "_daily");
+        return QueryInitializer.initialize(this, playerRepository);
     }
 
     private static String[] versionParts() {

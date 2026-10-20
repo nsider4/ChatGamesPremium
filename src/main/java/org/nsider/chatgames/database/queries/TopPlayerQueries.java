@@ -29,10 +29,12 @@ public class TopPlayerQueries {
 
     private static ChatGames plugin;
     private static String tableName;
+    private static String fastestTable;
 
     public static void initialize(ChatGames instance) {
         plugin = instance;
         tableName = ConfigValue.getString(ConfigPaths.TABLE_NAME);
+        fastestTable = ConfigValue.getString(ConfigPaths.FASTEST_TIMES_TABLE);
     }
 
     private static Connection getConnection() throws SQLException {
@@ -48,10 +50,10 @@ public class TopPlayerQueries {
                 sql = "SELECT UUID, POINTS AS val FROM " + tableName + " WHERE POINTS > 0 ORDER BY POINTS DESC LIMIT 10";
                 break;
             case TypersTop:
-                sql = "SELECT UUID, MIN(fastest_time) AS val FROM game_fastest_times GROUP BY UUID ORDER BY val ASC LIMIT 10";
+                sql = "SELECT UUID, MIN(fastest_time) AS val FROM " + fastestTable + " GROUP BY UUID ORDER BY val ASC LIMIT 10";
                 break;
             case GameTypersTop:
-                sql = "SELECT UUID, fastest_time AS val FROM game_fastest_times WHERE game_name = ? ORDER BY val ASC LIMIT 10";
+                sql = "SELECT UUID, fastest_time AS val FROM " + fastestTable + " WHERE game_name = ? ORDER BY val ASC LIMIT 10";
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported top type: " + top);
@@ -62,7 +64,7 @@ public class TopPlayerQueries {
                  PreparedStatement ps = conn.prepareStatement(sql)) {
 
                 if (top == TopType.GameTypersTop && game.length == 1) {
-                    ps.setString(1, game[0].name().toLowerCase());
+                    ps.setString(1, game[0].getConfigKey());
                 }
 
                 try (ResultSet rs = ps.executeQuery()) {
@@ -101,14 +103,15 @@ public class TopPlayerQueries {
 
     private static double getPersonalValue(Player player, TopType top, GameType... game) {
         ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
+        if (cgPlayer == null) return 0;
 
         switch (top) {
             case POINTS:
                 return cgPlayer.getPoints();
             case TypersTop:
-                return cgPlayer.getFastestData().getBestOverall();
+                return cgPlayer.getBestOverall();
             case GameTypersTop:
-                return cgPlayer.getFastestData().getTime(game[0]);
+                return cgPlayer.getFastest(game[0]);
             default:
                 return 0;
         }

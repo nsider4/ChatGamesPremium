@@ -56,9 +56,7 @@ public class ChatListener implements Listener {
     private void handleFastestTyper(Player player, GameType gameType, double time) {
         if (!ConfigValue.getBoolean(ConfigPaths.FASTEST_TYPERS_TOP)) return;
 
-        if (TopManager.isFasterThan(player, gameType, time)) {
-            TopManager.setFastestTime(player, gameType, time);
-        }
+        TopManager.recordTime(player, gameType, time);
     }
 
     private void notifyAdditionalWinners(Player player, Game game) {
