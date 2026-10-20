@@ -14,7 +14,6 @@ import org.nsider.chatgames.database.DataHandler;
 import org.nsider.chatgames.database.HikariDatabase;
 import org.nsider.chatgames.database.QueryInitializer;
 import org.nsider.chatgames.database.enums.StorageType;
-import org.nsider.chatgames.games.builder.GameAlgorithms;
 import org.nsider.chatgames.games.builder.GameBuilder;
 import org.nsider.chatgames.games.manager.GameConfigManager;
 import org.nsider.chatgames.games.manager.GameManager;
@@ -51,7 +50,6 @@ public final class ChatGames extends JavaPlugin {
     private final Random random = new Random();
 
     private ExpirationTask expirationTask;
-    private GameAlgorithms gameAlgorithms;
     private DataHandler dataHandler;
     private PlayerRepository playerRepository;
     private GameBuilder gameBuilder;
@@ -103,7 +101,6 @@ public final class ChatGames extends JavaPlugin {
         this.languageManager = new LanguageManager(this);
         this.languageManager.load(ConfigValue.getString(ConfigPaths.LANGUAGE));
         this.expirationTask = new ExpirationTask(this);
-        this.gameAlgorithms = new GameAlgorithms(this);
         this.gameBuilder = new GameBuilder(this);
         this.gameConfigManager = new GameConfigManager(this);
         this.gameUtils = new GameUtils(this);

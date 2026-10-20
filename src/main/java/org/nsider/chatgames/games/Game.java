@@ -1,9 +1,11 @@
 package org.nsider.chatgames.games;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.games.round.GameSettings;
+import org.nsider.chatgames.games.round.Round;
 import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.ArrayList;
@@ -32,16 +34,20 @@ public class Game {
     private final GameType gameType;
 
     /**
-     * The current answer for the game.
-     * This value can be updated dynamically during gameplay.
+     * The answer shown when the game ends.
      */
-    @Setter
-    private volatile String answer;
+    private final String answer;
 
     /**
      * How many players can win this round.
      */
     private final int maxWinners;
+
+    /** The question being played; null only for games built directly in tests. */
+    @Nullable
+    private final Round round;
+    @Nullable
+    private final GameSettings settings;
 
     private final long startedAtNanos = System.nanoTime();
 
@@ -59,9 +65,22 @@ public class Game {
      * @param maxWinners How many players can win; at least 1.
      */
     public Game(GameType gameType, String answer, int maxWinners) {
+        this(gameType, answer, maxWinners, null, null);
+    }
+
+    /**
+     * A game for a generated round, played with the given settings.
+     */
+    public Game(@Nonnull Round round, @Nonnull GameSettings settings) {
+        this(round.getType(), round.getMainAnswer(), settings.getWinners(), round, settings);
+    }
+
+    private Game(GameType gameType, String answer, int maxWinners, Round round, GameSettings settings) {
         this.gameType = gameType;
         this.answer = answer;
         this.maxWinners = Math.max(1, maxWinners);
+        this.round = round;
+        this.settings = settings;
     }
 
     /**
@@ -78,6 +97,10 @@ public class Game {
      */
     public double getElapsedSeconds() {
         return (System.nanoTime() - startedAtNanos) / 1_000_000_000.0;
+    }
+
+    public long getElapsedMillis() {
+        return (System.nanoTime() - startedAtNanos) / 1_000_000L;
     }
 
     /**

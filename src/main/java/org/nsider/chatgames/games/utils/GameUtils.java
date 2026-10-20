@@ -1,14 +1,14 @@
 package org.nsider.chatgames.games.utils;
 
-import org.bukkit.Material;
+import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.games.Game;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * Game utilities.
@@ -18,22 +18,6 @@ public class GameUtils {
 
     public GameUtils(ChatGames instance) {
         this.plugin = instance;
-    }
-
-    /**
-     * Determines if a player can check the current game.
-     *
-     * @param player The player to check.
-     * @return true if the player can participate, false otherwise.
-     */
-    public boolean canCheckGame(Player player, Game game) {
-        if (!plugin.isInGame() || game == null || game.isFinished()) {
-            return false;
-        }
-
-        return !game.hasResult(player.getUniqueId())
-                && plugin.getGameManager().gamesIsToggled(player)
-                && plugin.getGameManager().worldEnabled(player);
     }
 
     /**
@@ -91,25 +75,34 @@ public class GameUtils {
     }
 
     /**
-     * Parses and gives an item reward to the player.
-     *
-     * @param player The player receiving the reward.
-     * @param parts  The parts of the give command.
+     * Gives the item of a "<prefix> give <player> <item> [amount]" reward. Item names may be
+     * legacy or modern (XSeries maps them to this server's version). If the inventory is
+     * full the item drops at the player's feet.
      */
     private void giveItemReward(Player player, String[] parts) {
-        Material material = Material.getMaterial(parts[3].toUpperCase());
-        int amount = (parts.length > 4) ? Integer.parseInt(parts[4]) : 1;
-
-        if (material == null) {
-            return; //Invalid material, do nothing
+        Optional<XMaterial> material = XMaterial.matchXMaterial(parts[3]);
+        ItemStack item = material.isPresent() ? material.get().parseItem() : null;
+        if (item == null) {
+            plugin.getLogger().warning("Unknown item in a reward: " + parts[3]);
+            return;
         }
-
-        ItemStack rewardItem = new ItemStack(material, amount);
-        if (player.getInventory().firstEmpty() == -1) {
-            player.getWorld().dropItemNaturally(player.getLocation(), rewardItem);
-            MessageUtils.sendMessage(player, ConfigManager.getMessagesConfig().getString("inventory_full"));
-        } else {
-            player.getInventory().addItem(rewardItem);
+        int amount = 1;
+        if (parts.length > 4) {
+            try {
+                amount = Math.max(1, Integer.parseInt(parts[4]));
+            } catch (NumberFormatException e) {
+                plugin.getLogger().warning("Invalid amount in a reward: " + parts[4]);
+            }
         }
+        item.setAmount(amount);
+        // Inventories belong to the player's region on Folia
+        plugin.getScheduler().atPlayer(player, () -> {
+            if (player.getInventory().firstEmpty() == -1) {
+                player.getWorld().dropItemNaturally(player.getLocation(), item);
+                MessageUtils.sendMessage(player, ConfigManager.getMessagesConfig().getString("inventory_full"));
+            } else {
+                player.getInventory().addItem(item);
+            }
+        });
     }
 }

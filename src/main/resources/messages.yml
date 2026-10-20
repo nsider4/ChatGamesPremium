@@ -107,6 +107,10 @@ help_command:
 #############################
 ##    CHATGAME MESSAGES    ##
 #############################
+#Shared by every game. A game can override them with its own 'hint_message' / 'countdown_actionbar' in its section below.
+hint_message: '&8[%prefix%&8] &eHint: &f%hint%'
+countdown_actionbar: '&e%seconds%s &7left'
+
 waiting_for_other_winners: '&8[%prefix%&8] &aYou got it right! &fWaiting for other winners...'
 wrong_case: '&8[%prefix%&8] &cAlmost... Check your capitalization!'
   #YOU CAN USE "%display_name%" AS A REPLACEMENT FOR %player% IN correct_message FOR ALL GAMES.
@@ -189,6 +193,7 @@ reaction:
     - ''
 
 guess_the_number:
+  hint_message: '&8[%prefix%&8] &eHint: it is between &f%hint%'
   gameStartAnnouncement:
     - ''
     - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
@@ -210,13 +215,12 @@ guess_the_number:
     - '<center>The correct answer was &e%correct_answer%&f!'
     - ''
 
-shoppinglist:
-
+memorize:
   gameStartAnnouncement:
     - ''
     - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
     - ''
-    - '<center>&fYou have &e%timeToMemorize% seconds &fto &dmemorize &fSanta`s shopping list:'
+    - '<center>&fYou have &e%timeToMemorize% seconds &fto &dmemorize &fthis list:'
     - ''
     - '<center>&f`&b%selection%&f`'
     - ''
@@ -224,7 +228,7 @@ shoppinglist:
     - ''
     - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
     - ''
-    - '<center>&fYou have &e%timeToGuess% seconds &fto write &dSanta`s shopping list &fin order! '
+    - '<center>&fYou have &e%timeToGuess% seconds &fto write the list back &din order&f!'
     - ''
     - '<center>&fUse commas to separate each item! (e.g. `&bapple, banana, chocolate&f`)'
     - ''
@@ -232,17 +236,40 @@ shoppinglist:
     - ''
     - '<center>&r✓ ✯ %prefix% &r✯ ✓'
     - ''
-    - '<center>&a%winner_1% &7was the first to write the list in order and got a prize! (&c%time_1%s&7)'
+    - '<center>&a%winner_1% &7was the first to write the list and got a prize! (&c%time_1%s&7)'
     - ''
-    - '<center>&fThe answer was: &f`&b%correct_answer%&f`'
+    - '<center>&fThe list was: &f`&b%correct_answer%&f`'
     - ''
   time_expired_message:
     - ''
     - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
     - ''
-    - '<center>&f%timeToGuess%s &chave passed! &fThe shopping list game is now over!'
+    - '<center>&f%timeToGuess%s &chave passed! &fThe memorize game is now over!'
     - ''
-    - '<center>&fThe correct answer was: &f`&b%correct_answer%&f`'
+    - '<center>&fThe list was: &f`&b%correct_answer%&f`'
+    - ''
+
+sequence:
+  gameStartAnnouncement:
+    - ''
+    - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
+    - ''
+    - '<center>&fYou have &e%timeToGuess% seconds &fto &dcomplete the sequence&f:'
+    - '<center>&f`&b%selection%&f`'
+    - ''
+  hint_message: '&8[%prefix%&8] &eHint: the next number is &f%hint%'
+  correct_message:
+    - ''
+    - '<center>&r✓ ✯ %prefix% &r✯ ✓'
+    - ''
+    - '<center>&a%winner_1% &7was the first to find `&e%correct_answer%&7` (&c%time_1%s&7) and got a prize!'
+    - ''
+  time_expired_message:
+    - ''
+    - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
+    - ''
+    - '<center>&f%timeToGuess%s &chave passed! &fThe sequence game is now over!'
+    - '<center>The next number was &e%correct_answer%&f!'
     - ''
 
 clickable:
@@ -347,7 +374,6 @@ math:
     - ''
     - '<center>&fYou have &e%timeToGuess% seconds &fto &dsolve&f: `&b%selection%&f`'
     - ''
-  #Here, you can also use '%equation%' in the message if you wish to do so
   correct_message:
     - ''
     - '<center>&r✓ ✯ %prefix% &r✯ ✓'
@@ -376,7 +402,6 @@ variable:
     - '<center>%line_2%'
     - '<center>%line_3%'
     - ''
-  #Here, you can also use '%equation%' in the message if you wish to do so
   correct_message:
     - ''
     - '<center>&r✓ ✯ %prefix% &r✯ ✓'

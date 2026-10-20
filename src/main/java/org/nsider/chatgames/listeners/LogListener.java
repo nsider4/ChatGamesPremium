@@ -9,7 +9,6 @@ import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.events.ChatGamesStartEvent;
-import org.nsider.chatgames.games.manager.GameUtility;
 import org.nsider.chatgames.games.utils.PlayerResult;
 import org.nsider.chatgames.races.Race;
 
@@ -29,7 +28,7 @@ public class LogListener implements Listener {
 
     @EventHandler
     public void onGameStart(ChatGamesStartEvent event) {
-        String logMessage = GameUtility.isRace(event.getType())
+        String logMessage = event.getType().isRace()
                 ? formatRaceStartLog(event.getType())
                 : formatGameStartLog(event);
 
@@ -38,7 +37,7 @@ public class LogListener implements Listener {
 
     @EventHandler
     public void onGameEnd(ChatGamesEndEvent event) {
-        String logMessage = GameUtility.isRace(event.getType())
+        String logMessage = event.getType().isRace()
                 ? formatRaceEndLog(event)
                 : formatGameEndLog(event);
 
@@ -77,7 +76,7 @@ public class LogListener implements Listener {
         Race race = plugin.getRaceBuilder().getRace();
         if (race == null) return "";
 
-        return GameUtility.isMaterialRace(gameType)
+        return gameType.isMaterialRace()
                 ? String.format("Race Starting: %s | Material: %s | Amount: %d",
                 gameType.name(), race.getMaterial().name(), race.getAmount())
                 : String.format("Race Starting: %s | Entity: %s | Amount: %d",
@@ -91,7 +90,7 @@ public class LogListener implements Listener {
         Race race = plugin.getRaceBuilder().getRace();
         if (race == null) return "";
 
-        return GameUtility.isMaterialRace(event.getType())
+        return event.getType().isMaterialRace()
                 ? String.format("Race Ending: %s | Has Winner: %s%s | Material: %s | Amount: %d",
                 event.getType().name(), event.hasWinner() ? "Yes" : "No",
                 event.hasWinner() ? " | Winners: " + formatWinners(event.getWinners()) : "",

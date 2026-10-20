@@ -9,8 +9,11 @@ import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.*;
+import java.util.function.ToIntFunction;
+import java.util.logging.Level;
 
 /**
  * Handles the primary task logic for managing and scheduling games.
@@ -27,6 +30,8 @@ public class MainTask {
     private volatile ChatGamesScheduler.Task task;
 
     private String activePreset;
+    /** Set and read on the main/global thread only. */
+    private GameType lastGame;
 
     /**
      * Constructs a new {@code MainTask}.
@@ -57,8 +62,14 @@ public class MainTask {
         long delayTicks = plugin.getGameConfigManager().getNextGameDelay();
         task = plugin.getScheduler().globalLater(() -> {
             if (!taskEnabled) return;
-            doTask();
-            scheduleNext();
+            try {
+                doTask();
+            } catch (RuntimeException e) {
+                // One broken game must not stop the rotation for good
+                plugin.getLogger().log(Level.SEVERE, "A game failed to start; the rotation continues with the next one.", e);
+            } finally {
+                scheduleNext();
+            }
         }, delayTicks);
     }
 
@@ -107,12 +118,14 @@ public class MainTask {
      * Performs one round on the main thread (global region on Folia): starts a game if conditions are met.
      */
     private void doTask() {
-        if (checkEnoughPlayers()) {
-            synchronized (enabledGames) {
-                if (!enabledGames.isEmpty()) {
-                    selectAndStartGame();
-                }
-            }
+        // A game started by command, or a long game, may still be running: skip this round
+        if (plugin.isInGame() || !checkEnoughPlayers()) return;
+        GameType type;
+        synchronized (enabledGames) {
+            type = pickGame(enabledGames, lastGame, plugin.getRandom(), this::weightOf);
+        }
+        if (type != null && plugin.getGameManager().startGame(type)) {
+            lastGame = type;
         }
     }
 
@@ -127,17 +140,36 @@ public class MainTask {
     }
 
     /**
-     * Selects a valid game randomly from the enabled games and starts it.
+     * Picks a game at random, weighted by each game's {@code weight}, never the
+     * previous game twice in a row unless it is the only one enabled.
+     *
+     * @return null if no game has a weight above 0
      */
-    private void selectAndStartGame() {
-        boolean validGameChosen = false;
-        while (!validGameChosen) {
-            int randomIndex = new Random().nextInt(enabledGames.size());
-            GameType type = enabledGames.get(randomIndex);
-
-            validGameChosen = true;
-            plugin.getGameManager().startGame(type);
+    @Nullable
+    static GameType pickGame(@Nonnull List<GameType> games, @Nullable GameType previous, @Nonnull Random random,
+                             @Nonnull ToIntFunction<GameType> weightOf) {
+        List<GameType> candidates = new ArrayList<>(games);
+        if (candidates.size() > 1) candidates.remove(previous);
+        int total = 0;
+        int[] weights = new int[candidates.size()];
+        for (int i = 0; i < candidates.size(); i++) {
+            weights[i] = Math.max(0, weightOf.applyAsInt(candidates.get(i)));
+            total += weights[i];
         }
+        if (total <= 0) return null;
+        int roll = random.nextInt(total);
+        for (int i = 0; i < candidates.size(); i++) {
+            roll -= weights[i];
+            if (roll < 0) return candidates.get(i);
+        }
+        return null;
+    }
+
+    private int weightOf(GameType type) {
+        if (type.isRace()) {
+            return Math.max(0, ConfigManager.getRaces().getInt(type.getConfigKey() + ".weight", 1));
+        }
+        return plugin.getGameConfigManager().settings(type).getWeight();
     }
 
     /**
@@ -151,7 +183,7 @@ public class MainTask {
             return ConfigValue.getBoolean(ConfigPaths.RACES_ENABLED)
                     && ConfigManager.getRaces().getBoolean(type.getConfigKey() + ".enable");
         }
-        return ConfigManager.getGames().getBoolean(type.getConfigKey() + ".enable");
+        return plugin.getGameConfigManager().settings(type).isEnabled();
     }
 
     /**

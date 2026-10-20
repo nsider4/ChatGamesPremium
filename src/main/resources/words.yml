@@ -513,28 +513,99 @@ hoverable:
     - 'Ingot'
     - 'Tadpole'
 
-shoppinglist:
-  items:
-    - Candy Cane
-    - Ribbon
-    - Snow Globe
-    - Gingerbread Man
-    - Sleigh
-    - Jingle Bells
-    - Christmas Tree
-    - Stocking
-    - Mistletoe
-    - Tinsel
-    - Ornaments
-    - Poinsettia
-    - Hot Cocoa
-    - Santa Hat
-    - Reindeer
-    - Wreath
-    - Christmas Lights
-    - Nutcracker
-    - Christmas Cookies
-    - Snowman
+#Item pools for the Memorize game. games.yml -> memorize.pools picks which ones are used.
+#'numbers' needs no list. 'blocks' and 'mobs' are Minecraft ids, shown in the language set in config.yml (lang).
+#Any other name is a plain list: add one here and list its name in games.yml to use it.
+memorize:
+  pools:
+    shopping_list:
+      - Candy Cane
+      - Ribbon
+      - Snow Globe
+      - Gingerbread Man
+      - Sleigh
+      - Jingle Bells
+      - Christmas Tree
+      - Stocking
+      - Mistletoe
+      - Tinsel
+      - Ornaments
+      - Poinsettia
+      - Hot Cocoa
+      - Santa Hat
+      - Reindeer
+      - Wreath
+      - Christmas Lights
+      - Nutcracker
+      - Christmas Cookies
+      - Snowman
+    words:
+      - Creeper
+      - Diamond
+      - Emerald
+      - Redstone
+      - Portal
+      - Beacon
+      - Elytra
+      - Trident
+      - Saddle
+      - Lantern
+      - Compass
+      - Anvil
+    colors:
+      - Red
+      - Orange
+      - Yellow
+      - Lime
+      - Green
+      - Cyan
+      - Light Blue
+      - Blue
+      - Purple
+      - Magenta
+      - Pink
+      - Brown
+      - Black
+      - White
+      - Gray
+    blocks:
+      - diamond_block
+      - oak_log
+      - crafting_table
+      - furnace
+      - tnt
+      - bookshelf
+      - glowstone
+      - obsidian
+      - sponge
+      - pumpkin
+      - melon
+      - cactus
+      - ice
+      - sand
+      - gravel
+      - netherrack
+      - end_stone
+      - hay_block
+    mobs:
+      - creeper
+      - zombie
+      - skeleton
+      - spider
+      - enderman
+      - blaze
+      - ghast
+      - slime
+      - witch
+      - villager
+      - cow
+      - pig
+      - sheep
+      - chicken
+      - wolf
+      - ocelot
+      - horse
+      - squid
 
 blacklistedWords:
   - 'ass'

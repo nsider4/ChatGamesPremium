@@ -64,7 +64,8 @@ class GameTest {
         Thread.sleep(50);
         PlayerResult result = game.claimPlace(UUID.randomUUID());
 
-        assertTrue(result.getTime() >= 0.05, "time was " + result.getTime());
+        // Windows may wake a sleeping thread a few ms early
+        assertTrue(result.getTime() >= 0.04, "time was " + result.getTime());
         assertTrue(result.getTime() < 5, "time was " + result.getTime());
     }
 

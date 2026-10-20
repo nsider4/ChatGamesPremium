@@ -4,10 +4,12 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.nsider.chatgames.config.ConfigManager;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class MilestoneManager {
 
-    private static final Map<Integer, List<String>> milestones = new TreeMap<>();
+    // Read by chat threads when points change, rewritten on reload
+    private static final Map<Integer, List<String>> milestones = new ConcurrentSkipListMap<>();
 
     public static void loadMilestones() {
         milestones.clear();

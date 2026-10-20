@@ -64,8 +64,11 @@ public class HikariDatabase implements DataHandler {
         }
 
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setUsername(section.getString("user", "root"));
-        hikariConfig.setPassword(section.getString("password", "pa55w0rd"));
+        if (storageType == StorageType.MySQL) {
+            // No made-up default password: a missing one should fail visibly, not try a guess
+            hikariConfig.setUsername(section.getString("user", "root"));
+            hikariConfig.setPassword(section.getString("password", ""));
+        }
 
         String jdbcUrl = buildJdbcUrl(section);
         hikariConfig.setJdbcUrl(jdbcUrl);
@@ -89,7 +92,10 @@ public class HikariDatabase implements DataHandler {
             hikariConfig.setKeepaliveTime(section.getLong("Pool-Settings.keep-alive-time", 60000L));
         } catch (NoSuchMethodError ignored) {}
 
-        hikariConfig.setDataSourceProperties(getProperties());
+        if (storageType == StorageType.MySQL) {
+            // MySQL Connector/J tuning; the SQLite driver doesn't know these options
+            hikariConfig.setDataSourceProperties(getProperties());
+        }
         try {
             // Opens the first connection, so a wrong host or password fails here
             dataSource = new HikariDataSource(hikariConfig);

@@ -35,10 +35,8 @@ public class DiscordListener implements Listener {
 
     private void sendWinnerDiscordMessage(PlayerResult winner, GameType type) {
         String webhookUrl = ConfigValue.getString(ConfigPaths.DISCORD_WEBHOOK_URL);
-        if (webhookUrl == null || webhookUrl.isEmpty()) {
-            plugin.getLogger().warning("Discord webhook URL is not configured.");
-            return;
-        }
+        // No URL means the Discord add-on is off
+        if (webhookUrl == null || webhookUrl.trim().isEmpty()) return;
 
         try {
             DiscordWebhook webhook = createDiscordWebhook(winner, type, webhookUrl);

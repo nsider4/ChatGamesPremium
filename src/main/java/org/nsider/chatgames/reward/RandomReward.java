@@ -1,57 +1,83 @@
 package org.nsider.chatgames.reward;
 
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Random;
 import java.util.TreeMap;
 
+/**
+ * Two independent chance draws: one over reward commands ({@code 50%~ command})
+ * and one over whole rewards. Chances are percentages; if they add up to less
+ * than 100, the rest of the time nothing is drawn.
+ *
+ * <p>Each draw keeps its own running total. 1.9.9 shared one total between them,
+ * so resetting one draw corrupted the other.</p>
+ */
 public class RandomReward {
 
-    private final NavigableMap<Double, String> map = new TreeMap<>();
-    private final NavigableMap<Double, String> map1 = new TreeMap<>();
-    private final Random random = new Random();
-    private double total = 0;
+    private final Draw commands = new Draw();
+    private final Draw rewards = new Draw();
 
     public void add(double chance, String value) {
-        if (chance > 0) {
-            total += chance;
-            map.put(total, value);
-        }
+        commands.add(chance, value);
     }
 
     public void addReward(double chance, String value) {
-        if (chance > 0) {
-            total += chance;
-            map1.put(total, value);
-        }
+        rewards.add(chance, value);
     }
 
+    /** @return a drawn command, or "" if the draw landed on nothing */
     public String getRandomValue() {
-        if(total < 100) { this.add(100-total, ""); }
-        final double value = random.nextDouble() * total;
-        return map.higherEntry(value).getValue();
+        return commands.draw();
     }
 
+    /** @return a drawn reward name, or "" if the draw landed on nothing */
     public String getRandomReward() {
-        if(total < 100) { this.addReward(100-total, ""); }
-        final double value = random.nextDouble() * total;
-        return map1.higherEntry(value).getValue();
+        return rewards.draw();
     }
 
     public boolean isEmpty() {
-        return map.isEmpty();
+        return commands.isEmpty();
     }
 
     public boolean isEmptyReward() {
-        return map1.isEmpty();
+        return rewards.isEmpty();
     }
 
     public void resetValues() {
-        map.clear();
-        total = 0;
+        commands.clear();
     }
 
     public void resetRewards() {
-        map1.clear();
-        total = 0;
+        rewards.clear();
+    }
+
+    private static final class Draw {
+        private final NavigableMap<Double, String> entries = new TreeMap<>();
+        private final Random random = new Random();
+        private double total;
+
+        void add(double chance, String value) {
+            if (chance > 0) {
+                total += chance;
+                entries.put(total, value);
+            }
+        }
+
+        String draw() {
+            if (entries.isEmpty()) return "";
+            double roll = random.nextDouble() * Math.max(100, total);
+            Map.Entry<Double, String> entry = entries.higherEntry(roll);
+            return entry == null ? "" : entry.getValue();
+        }
+
+        boolean isEmpty() {
+            return entries.isEmpty();
+        }
+
+        void clear() {
+            entries.clear();
+            total = 0;
+        }
     }
 }

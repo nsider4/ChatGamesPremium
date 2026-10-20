@@ -118,7 +118,7 @@ public class RaceStarter {
 
         plugin.getExpirationTask().scheduleExpirationTask(game);
 
-        ChatGamesStartEvent startEvent = new ChatGamesStartEvent(plugin, GameType.valueOf(game.toUpperCase()));
+        ChatGamesStartEvent startEvent = new ChatGamesStartEvent(GameType.fromName(game), null);
         plugin.getScheduler().global(() -> plugin.getServer().getPluginManager().callEvent(startEvent));
     }
 

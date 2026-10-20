@@ -2,6 +2,8 @@ package org.nsider.chatgames.utils.management;
 
 import org.bukkit.Bukkit;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.settings.ConfigPaths;
+import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.io.*;
@@ -36,7 +38,7 @@ public class LogUtils {
      */
     @Nonnull
     public File getLogFile() {
-        File logFile = new File(plugin.getDataFolder(), plugin.getConfig().getString("log-file"));
+        File logFile = new File(plugin.getDataFolder(), ConfigValue.getString(ConfigPaths.LOG_FILE_PATH));
 
         if (!logFile.exists()) {
             try {

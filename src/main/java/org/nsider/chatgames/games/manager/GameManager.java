@@ -1,92 +1,129 @@
 package org.nsider.chatgames.games.manager;
 
 import lombok.Getter;
-import lombok.Setter;
-import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
+import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.events.ChatGamesEndEvent;
+import org.nsider.chatgames.games.Game;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
-import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.games.Game;
-import org.nsider.chatgames.games.builder.algorithms.RandomCharacterGenerator;
-import org.nsider.chatgames.games.manager.messages.*;
+import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 
+import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Owns the running chat game and its scheduled tasks (time limit, hints,
+ * countdown, memorise phase).
+ *
+ * <p>Only one chat game or race runs at a time; {@link ChatGames#isInGame()} is
+ * the flag for both. A chat game goes through: {@link #tryBegin()} reserves the
+ * slot, {@link #activate(Game)} opens it for answers, {@link #conclude(Game)}
+ * announces the result, and {@link #endGame()} frees the slot.</p>
+ */
 public class GameManager {
+
     private final ChatGames plugin;
     @Getter private final GamePlayerManager gamePlayerManager;
-    // Written on the main thread, read by async chat threads
-    @Setter @Getter private volatile Game game;
-    @Getter private String clickableKey;
+    @Getter private final RoundAnnouncer announcer;
+    @Getter private final AnswerHandler answerHandler;
 
-    private final GameStartMessage gameStartMessage;
-    private final VariableMessage variableMessage;
-    private final WinnerMessage winnerMessage;
-    private final MemorizationMessage memorizationMessage;
-    private final GameStartComponentMessage gameStartComponentMessage;
-    private final TimeExpiredMessage timeExpiredMessage;
+    /** Set on the main/global thread, read by async chat threads. Null while no game takes answers. */
+    @Getter @Nullable private volatile Game game;
+    private final List<ChatGamesScheduler.Task> roundTasks = new ArrayList<>();
 
     public GameManager(ChatGames plugin) {
         this.plugin = plugin;
-
         this.gamePlayerManager = new GamePlayerManager(plugin);
+        this.announcer = new RoundAnnouncer(plugin);
+        this.answerHandler = new AnswerHandler(plugin);
         GameSoundManager.initialize(plugin);
-
-        this.gameStartMessage = new GameStartMessage(plugin);
-        this.variableMessage = new VariableMessage(plugin);
-        this.winnerMessage = new WinnerMessage(plugin);
-        this.memorizationMessage = new MemorizationMessage(plugin);
-        this.gameStartComponentMessage = new GameStartComponentMessage(plugin);
-        this.timeExpiredMessage = new TimeExpiredMessage(plugin);
     }
 
-    public void sendGameStartedMessage(String game, String variable, String word) {
-        gameStartMessage.sendGameStartedMessage(game, variable, word);
+    /**
+     * Starts a chat game or race now.
+     *
+     * @param args optional values for the round, e.g. the word to use
+     * @return false if something is already running, the game can't be generated, or a plugin cancelled it
+     */
+    public boolean startGame(@Nonnull GameType type, @Nonnull String... args) {
+        if (type.isRace()) {
+            if (plugin.isInGame()) return false;
+            try {
+                plugin.getRaceBuilder().startRace(type);
+            } catch (RuntimeException e) {
+                // Free the slot, or no game could ever start again
+                if (plugin.isInGame()) plugin.getRaceBuilder().endRace();
+                throw e;
+            }
+            return plugin.isInGame();
+        }
+        return plugin.getGameBuilder().start(type, args);
     }
 
-    public void sendGameStartedComponent(String game, TextComponent component, String variable) {
-        gameStartComponentMessage.sendGameStartedComponent(game, component, variable);
+    /**
+     * Reserves the game slot.
+     *
+     * @return false if a game or race is already running
+     */
+    public synchronized boolean tryBegin() {
+        if (plugin.isInGame()) return false;
+        plugin.setInGame(true);
+        return true;
     }
 
-    public void sendVariableMessages(List<String> game, List<String> list,
-                                     String replace, String replacement,
-                                     String replace1, String replacement1) {
-        variableMessage.sendVariableGameMessage(game, list, replace, replacement, replace1, replacement1);
+    /** Opens the game for answers. */
+    public synchronized void activate(@Nonnull Game game) {
+        this.game = game;
     }
 
-    public void sendWinnerMessages() {
-        winnerMessage.sendMessageForWinners();
+    public synchronized void addTask(@Nonnull ChatGamesScheduler.Task task) {
+        roundTasks.add(task);
     }
 
-    public void sendTimeExpiredToWorlds(String answer, String game) {
-        timeExpiredMessage.sendTimeExpiredMessage(answer, game);
-    }
+    /**
+     * Announces the result and ends the game. Called on the main/global thread by the
+     * last winner and by the time limit; whichever comes second does nothing.
+     */
+    public void conclude(@Nonnull Game game) {
+        if (!game.finish()) return;
+        cancelRoundTasks();
 
-    public void startMemorizationGame(String displayList, String selected) {
-        memorizationMessage.sendMemorizationStartMessage(displayList, selected);
-    }
-
-    public void startGame(GameType type) {
-        if (GameUtility.isRace(type)) {
-            plugin.getRaceBuilder().startRace(type);
+        Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(game.getGameType(), game.getAnswer(), game.getResultsByPlace()));
+        if (game.hasWinners()) {
+            announcer.announceWinners(game);
         } else {
-            plugin.getGameBuilder().startGame(type);
+            announcer.announceTimeExpired(game);
+        }
+        if (this.game == game) {
+            endGame();
         }
     }
 
+    /**
+     * Stops the running chat game, if any, without announcing anything, and frees the slot.
+     */
     public void endGame() {
+        Game current = this.game;
+        if (current != null) current.finish();
+        cancelRoundTasks();
+        synchronized (this) {
+            this.game = null;
+        }
         plugin.setInGame(false);
-        this.game = null;
-        plugin.getExpirationTask().cancel();
     }
 
-    public void generateNewClickableKey() {
-        this.clickableKey = plugin.getGameAlgorithms()
-                .generateRandomCharacters(12, RandomCharacterGenerator.Type.ALPHANUMERIC);
+    private synchronized void cancelRoundTasks() {
+        for (ChatGamesScheduler.Task task : roundTasks) {
+            ChatGamesScheduler.cancel(task);
+        }
+        roundTasks.clear();
     }
 
     public boolean gamesIsToggled(Player player) {

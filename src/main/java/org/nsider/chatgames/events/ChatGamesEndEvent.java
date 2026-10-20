@@ -9,7 +9,6 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.games.manager.GameUtility;
 import org.nsider.chatgames.games.utils.PlayerResult;
 import org.nsider.inventorymanager.extras.Nonnull;
 
@@ -33,7 +32,7 @@ public class ChatGamesEndEvent extends Event implements Cancellable {
     }
 
     public boolean hasAnswer() {
-        return !GameUtility.isRace(type);
+        return !type.isRace();
     }
 
     public String getAnswer() {

@@ -26,10 +26,12 @@ import java.util.Map;
 public class ChatGamesCommand implements TabExecutor {
 
     /** Sub-commands by name and alias, in registration order for tab completion. */
+    private final ChatGames plugin;
     private final Map<String, SubCommand> commands = new LinkedHashMap<>();
     private final List<SubCommand> registered = new ArrayList<>();
 
     public ChatGamesCommand(@Nonnull ChatGames plugin) {
+        this.plugin = plugin;
         register(new ReloadCommand(plugin));
     }
 
@@ -59,6 +61,11 @@ public class ChatGamesCommand implements TabExecutor {
 
         SubCommand sub = commands.get(args[0].toLowerCase(Locale.ROOT));
         if (sub == null) {
+            // Clicking the Clickable game's text runs /chatgames <key>
+            if (args.length == 1 && sender instanceof Player
+                    && plugin.getGameManager().getAnswerHandler().onClick((Player) sender, args[0])) {
+                return true;
+            }
             send(sender, MessageKey.UNKNOWN_COMMAND);
             return true;
         }

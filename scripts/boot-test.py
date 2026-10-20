@@ -17,6 +17,9 @@ Server jars used for the 2.0.0 test matrix:
 """
 import os, shutil, subprocess, sys, threading, time
 
+# Server output has symbols like the check mark that the Windows console code page can't print
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
 server_dir, java, server_jar, plugin_jar, *commands = sys.argv[1:]
 os.makedirs(os.path.join(server_dir, 'plugins'), exist_ok=True)
 shutil.copy(plugin_jar, os.path.join(server_dir, 'plugins', 'ChatGames-Premium.jar'))
