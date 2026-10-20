@@ -1,11 +1,5 @@
 package org.nsider.chatgames.reward;
 
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -13,130 +7,80 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.utils.gameplay.CommandUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
+import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
 
-public class RewardManager extends RandomReward {
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Reads winners' rewards from rewards.yml (see {@link RewardSelector} for how they are
+ * picked) and runs reward commands.
+ *
+ * <p>Chat games keep rewards per place: {@code <game>.rewards.<place>.<reward>}, falling
+ * back to place 1. Races list reward names in races.yml, which point into
+ * {@code races.rewards.<reward>}.</p>
+ */
+public class RewardManager {
+
+    private static final String RACE_REWARDS = "races.rewards";
+
     private final ChatGames plugin;
 
     public RewardManager(ChatGames instance) {
         this.plugin = instance;
     }
 
-    @SafeVarargs
-    public final List<String> loadGameRewards(String game, Player player, int spot, List<String>... list) {
-        String section = getSectionPath(game, spot);
-        List<String> commands = (list.length == 1) ? getRewards(game, section, player, list[0]) : getRewards(game, section, player);
-        commands.removeIf(String::isEmpty);
-        return commands;
+    /**
+     * @param game  the game's config key
+     * @param place the winner's place, 1 for first
+     */
+    @Nonnull
+    public List<String> chatGameRewards(@Nonnull String game, @Nonnull Player player, int place) {
+        String section = game + ".rewards." + place;
+        if (!ConfigManager.getRewards().isSet(section)) section = game + ".rewards.1";
+        return select(game, ConfigManager.getRewards().getConfigurationSection(section), null, player);
     }
 
-    private String getSectionPath(String game, int spot) {
-        String section = game + ".rewards." + spot;
-        return ConfigManager.getRewards().isSet(section) ? section : game + ".rewards.1";
+    /**
+     * @param names the reward names a race lists in races.yml
+     */
+    @Nonnull
+    public List<String> raceRewards(@Nonnull String race, @Nonnull Player player, @Nonnull List<String> names) {
+        if (names.isEmpty()) return Collections.emptyList();
+        return select(race, ConfigManager.getRewards().getConfigurationSection(RACE_REWARDS), names, player);
     }
 
-    @SafeVarargs
-    private final List<String> getRewards(String game, String section, Player player, List<String>... list) {
-        ConfigurationSection rewardsSection = ConfigManager.getRewards().getConfigurationSection(section);
-        if (rewardsSection == null) return new ArrayList<>();
-
-        List<Reward> rewards = (list.length == 1) ? convertToRewards(list[0], rewardsSection) : getRewardList(rewardsSection);
-        List<String> chosenRewards = selectEligibleRewards(rewards, player);
-
-        if (!isEmptyReward()) {
-            chosenRewards.add(getRandomReward());
-            resetRewards();
-        }
-
-        return processCommands(chosenRewards, player, game);
+    private List<String> select(String game, @Nullable ConfigurationSection rewards, @Nullable List<String> only, Player player) {
+        if (rewards == null) return Collections.emptyList();
+        int online = plugin.getGameManager().getGamePlayerManager().getOnlinePlayers();
+        return RewardSelector.select(rewards, only, online, player::hasPermission, plugin.getRandom(),
+                line -> plugin.getLogger().severe("Invalid chance in a " + game + " reward: " + line));
     }
 
-    private List<Reward> getRewardList(ConfigurationSection rewardsSection) {
-        return rewardsSection.getKeys(false).stream()
-                .map(rewardsSection::getConfigurationSection)
-                .map(Reward::fromConfig)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    private List<Reward> convertToRewards(List<String> rewardNames, ConfigurationSection rewardsSection) {
-        return rewardNames.stream()
-                .map(rewardsSection::getConfigurationSection)
-                .map(Reward::fromConfig)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    private List<String> selectEligibleRewards(List<Reward> rewards, Player player) {
-        int onlinePlayers = plugin.getGameManager().getGamePlayerManager().getOnlinePlayers();
-        return rewards.stream()
-                .filter(reward -> reward.isEligible(onlinePlayers))
-                .map(Reward::getName)
-                .collect(Collectors.toList());
-    }
-
-    private List<String> processCommands(List<String> chosenRewards, Player player, String game) {
-        List<String> commands = new ArrayList<>();
-
-        chosenRewards.stream()
-                .map(rewardName -> ConfigManager.getRewards().getConfigurationSection(game + ".rewards." + rewardName))
-                .map(Reward::fromConfig)
-                .filter(Objects::nonNull)
-                .map(Reward::getCommands)
-                .flatMap(List::stream)
-                .forEach(command -> processCommand(command, player, commands, game));
-
-        if (!isEmpty()) {
-            commands.add(getRandomValue());
-            resetValues();
-        }
-        return commands;
-    }
-
-    private void processCommand(String command, Player player, List<String> commands, String game) {
-        if (command.contains("has:")) {
-            int startIndex = command.indexOf("has:") + 4;
-            int endIndex = command.indexOf(" ", startIndex);
-            String permission = (endIndex == -1) ? command.substring(startIndex) : command.substring(startIndex, endIndex);
-            command = command.replace("has:" + permission, "");
-            if (!player.hasPermission(permission)) {
-                return;
-            }
-        }
-
-        if (command.contains("%~ ")) {
-            try {
-                String[] split = command.split("%~ ");
-                add(Double.parseDouble(split[0]), split[1]);
-            } catch (NumberFormatException e) {
-                plugin.getLogger().log(Level.SEVERE, "Error parsing chance for game {0} in command:", game.toUpperCase());
-                plugin.getLogger().log(Level.SEVERE, "- {0}", command);
-            }
-        } else {
-            commands.add(command);
-        }
-    }
-
-    public void executeCommands(List<String> commands, Player player) {
-        commands.forEach(command -> executeCommand(command, player));
-    }
-
-    private void executeCommand(String command, Player player) {
+    /** Runs one reward command for the winner. Main/global thread. */
+    public void executeCommand(@Nonnull String command, @Nonnull Player player) {
         String cmd = command.replace("%player%", player.getName());
 
         if (cmd.startsWith("[playercmd]")) {
-            Bukkit.dispatchCommand(player, cmd.replace("[playercmd] ", ""));
+            Bukkit.dispatchCommand(player, strip(cmd, "[playercmd]"));
         } else if (cmd.startsWith("[consolecmd]")) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("[consolecmd] ", ""));
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), strip(cmd, "[consolecmd]"));
         } else if (cmd.startsWith("[playermsg]")) {
-            player.sendMessage(MessageUtils.color(cmd.replace("[playermsg] ", "")));
+            player.sendMessage(MessageUtils.color(strip(cmd, "[playermsg]")));
         } else if (cmd.startsWith("[broadcast]")) {
+            String message = MessageUtils.color(strip(cmd, "[broadcast]"));
             Bukkit.getOnlinePlayers().stream()
                     .filter(plugin.getGameManager()::worldEnabled)
-                    .forEach(p -> p.sendMessage(MessageUtils.color(cmd.replace("[broadcast] ", ""))));
+                    .forEach(p -> p.sendMessage(message));
         } else if (cmd.startsWith("[player_as_op]")) {
-            CommandUtils.executeAsOp(player, cmd.replace("[player_as_op] ", ""));
+            CommandUtils.executeAsOp(player, strip(cmd, "[player_as_op]"));
+        } else {
+            plugin.getLogger().warning("Unknown reward action (expected [consolecmd], [playercmd], ...): " + command);
         }
     }
+
+    private static String strip(String command, String action) {
+        return command.substring(action.length()).trim();
+    }
 }
-
-

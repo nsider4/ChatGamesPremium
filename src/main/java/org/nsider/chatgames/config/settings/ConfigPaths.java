@@ -298,34 +298,6 @@ public enum ConfigPaths {
             ConfigType.BOOLEAN
     ),
 
-    /** Enables the Hunt race event. */
-    RACE_HUNT_ENABLED(
-            ConfigFile.RACES,
-            "hunt.enable",
-            ConfigType.BOOLEAN
-    ),
-
-    /** Time (in seconds) to complete the Hunt race. */
-    RACE_HUNT_TIME_LIMIT(
-            ConfigFile.RACES,
-            "hunt.timeToComplete_seconds",
-            ConfigType.INTEGER
-    ),
-
-    /** Title message shown during the Hunt race. */
-    RACE_HUNT_TITLE_MESSAGE(
-            ConfigFile.RACES,
-            "hunt.titleMessage",
-            ConfigType.STRING
-    ),
-
-    /** Subtitle message shown during the Hunt race. */
-    RACE_HUNT_SUBTITLE_MESSAGE(
-            ConfigFile.RACES,
-            "hunt.subtitleMessage",
-            ConfigType.STRING
-    ),
-
     /** Whether mobs from spawners or spawn eggs are counted in the Hunt race. */
     RACE_HUNT_COUNT_SPAWNER_MOBS(
             ConfigFile.RACES,
@@ -333,173 +305,29 @@ public enum ConfigPaths {
             ConfigType.BOOLEAN
     ),
 
-    /** Enables the Mine race event. */
-    RACE_MINE_ENABLED(
-            ConfigFile.RACES,
-            "mine.enable",
-            ConfigType.BOOLEAN
-    ),
 
-    /** Time (in seconds) to complete the Mine race. */
-    RACE_MINE_TIME_LIMIT(
-            ConfigFile.RACES,
-            "mine.timeToComplete_seconds",
-            ConfigType.INTEGER
-    ),
 
-    /** Title message shown during the Mine race. */
-    RACE_MINE_TITLE_MESSAGE(
-            ConfigFile.RACES,
-            "mine.titleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Subtitle message shown during the Mine race. */
-    RACE_MINE_SUBTITLE_MESSAGE(
-            ConfigFile.RACES,
-            "mine.subtitleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Enables the Place race event. */
-    RACE_PLACE_ENABLED(
-            ConfigFile.RACES,
-            "place.enable",
-            ConfigType.BOOLEAN
-    ),
 
-    /** Time (in seconds) to complete the Place race. */
-    RACE_PLACE_TIME_LIMIT(
-            ConfigFile.RACES,
-            "place.timeToComplete_seconds",
-            ConfigType.INTEGER
-    ),
 
-    /** Title message shown during the Place race. */
-    RACE_PLACE_TITLE_MESSAGE(
-            ConfigFile.RACES,
-            "place.titleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Subtitle message shown during the Place race. */
-    RACE_PLACE_SUBTITLE_MESSAGE(
-            ConfigFile.RACES,
-            "place.subtitleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Enables the Fish race event. */
-    RACE_FISH_ENABLED(
-            ConfigFile.RACES,
-            "fish.enable",
-            ConfigType.BOOLEAN
-    ),
 
-    /** Time (in seconds) to complete the Fish race. */
-    RACE_FISH_TIME_LIMIT(
-            ConfigFile.RACES,
-            "fish.timeToComplete_seconds",
-            ConfigType.INTEGER
-    ),
 
-    /** Title message shown during the Fish race. */
-    RACE_FISH_TITLE_MESSAGE(
-            ConfigFile.RACES,
-            "fish.titleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Subtitle message shown during the Fish race. */
-    RACE_FISH_SUBTITLE_MESSAGE(
-            ConfigFile.RACES,
-            "fish.subtitleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Enables the Eat race event. */
-    RACE_EAT_ENABLED(
-            ConfigFile.RACES,
-            "eat.enable",
-            ConfigType.BOOLEAN
-    ),
 
-    /** Time (in seconds) to complete the Eat race. */
-    RACE_EAT_TIME_LIMIT(
-            ConfigFile.RACES,
-            "eat.timeToComplete_seconds",
-            ConfigType.INTEGER
-    ),
 
-    /** Title message shown during the Eat race. */
-    RACE_EAT_TITLE_MESSAGE(
-            ConfigFile.RACES,
-            "eat.titleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Subtitle message shown during the Eat race. */
-    RACE_EAT_SUBTITLE_MESSAGE(
-            ConfigFile.RACES,
-            "eat.subtitleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Enables the Craft race event. */
-    RACE_CRAFT_ENABLED(
-            ConfigFile.RACES,
-            "craft.enable",
-            ConfigType.BOOLEAN
-    ),
 
-    /** Time (in seconds) to complete the Craft race. */
-    RACE_CRAFT_TIME_LIMIT(
-            ConfigFile.RACES,
-            "craft.timeToComplete_seconds",
-            ConfigType.INTEGER
-    ),
 
-    /** Title message shown during the Craft race. */
-    RACE_CRAFT_TITLE_MESSAGE(
-            ConfigFile.RACES,
-            "craft.titleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Subtitle message shown during the Craft race. */
-    RACE_CRAFT_SUBTITLE_MESSAGE(
-            ConfigFile.RACES,
-            "craft.subtitleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Enables the Furnace race event. */
-    RACE_FURNACE_ENABLED(
-            ConfigFile.RACES,
-            "furnace.enable",
-            ConfigType.BOOLEAN
-    ),
 
-    /** Time (in seconds) to complete the Furnace race. */
-    RACE_FURNACE_TIME_LIMIT(
-            ConfigFile.RACES,
-            "furnace.timeToComplete_seconds",
-            ConfigType.INTEGER
-    ),
 
-    /** Title message shown during the Furnace race. */
-    RACE_FURNACE_TITLE_MESSAGE(
-            ConfigFile.RACES,
-            "furnace.titleMessage",
-            ConfigType.STRING
-    ),
 
-    /** Subtitle message shown during the Furnace race. */
-    RACE_FURNACE_SUBTITLE_MESSAGE(
-            ConfigFile.RACES,
-            "furnace.subtitleMessage",
-            ConfigType.STRING
-    ),
     /* -----------------------------------------END OF races.yml----------------------------------------- */
 
     /* ----------------------------------------------add-ons.yml---------------------------------------------- */

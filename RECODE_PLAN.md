@@ -376,6 +376,41 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - **Ranks:** players with equal points share a place (1, 2, 2, 4), as in 1.9.9. Only the top 100 of each list get a name lookup, but everyone has a rank.
   - **Times** show 3 decimals. An empty place shows `placeholders.empty-value` (default empty, as in 1.9.9). The full list is documented in config.yml above the `placeholders` section.
   - **Moved to step 9,** with their features: `daily_*`, `weekly_*`, `streak_*` and `event_*`.
+- [x] **Step 8: Races** (2026-10-20). 99 tests. A bot played mine, place, eat, craft, furnace and hunt, plus a random start, time running out, `stop`, custom values and tab completion. Tested live on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2. Fish is unit-level only: the flat test world has no water.
+  - **Rebuilt `races/`** (936 lines became 7 small classes):
+    - `RaceData`: races.yml targets, amounts and rewards, loaded on enable and on `reload`.
+    - `RaceTarget`: modern or legacy names through XSeries.
+    - `RaceProgress`: atomic counts and exactly one winner.
+    - `RaceCounts`: craft maths.
+    - `Race`: the running race.
+    - `RaceManager`: start, win, time up, stop.
+    - `RaceListener`: listens to the events.
+    - Removed: the reflection-built `*Race` classes, `RaceType`, validators, `RaceStarter`/`RaceMessageSender`, `ExpirationTask`, and the static `TimeUtils` timer. Races now share the game slot with chat games through `GameManager.tryBegin()`.
+  - **Behaviour kept from 1.9.9:**
+    - Messages and placeholders: `%value%`, `%amount%`, `%timeToComplete%`, `%winner%`, `%time%`, `%points%`; `%winner_displayname%` is new.
+    - Titles, sounds, `creative-enabled`, `count-spawner-mobs`, and the reward lists in races.yml → rewards.yml `races.rewards`.
+  - **Fixed:**
+    - A player's first action always counted as 1 (a shift-craft of 64 counted 1).
+    - Two players finishing at once could both win. On Folia they really are on different threads.
+    - A plain left-click craft was counted as a shift-click.
+    - Any click in a furnace counted, including the fuel slot. Races now use `FurnaceExtractEvent`, which also covers blast furnaces and smokers.
+    - Placing items that become another block (redstone, seeds) didn't count.
+    - Spawner-mob metadata leaked.
+    - `TRIAL_SPAWNER` (1.21+) now counts as a spawner.
+    - `CraftItemEvent.getView()` is avoided: `InventoryView` became an interface in 1.21, which breaks code built against 1.8.
+  - **New:**
+    - `/chatgames <race> <material/mob> [amount]` with tab completion. Without an amount, one from races.yml is used. Unknown names and bad amounts are explained.
+    - Per-race `points` (default 1) and `weight`.
+    - `race_wins`, `wins_<race>` and per-race fastest times.
+    - Placeholders `race_target`, `race_amount`, `race_progress`.
+    - A console note for races.yml names that don't exist on the running version (e.g. SALMON on 1.8).
+  - **Overall "fastest typer"** (`fastest`, `fastest_<n>`, `personal_best`) now covers chat games only. Races keep their own `fastest <race>` lists.
+  - **Rewards fixed for all games:**
+    - The recode looked chat-game rewards up under the wrong path, so winners got nothing.
+    - It also ignored `chance:`, so every reward was given.
+    - `RewardSelector` is now pure and thread-safe and follows the 1.9.9 rules (`minimum-players`, one reward drawn by `chance`, `N%~` lines, `has:` permissions). Unit-tested, and verified live on a chat game and on races.
+  - **Config files load as UTF-8** on every version: on 1.8 on Windows, ✓ ✯ had shown as "âœ“".
+  - **Test tooling:** `scripts/bot.js` gained `dig`, `place`, `eat`, `craft`, `attack` and `smelt`.
 
 ---
 

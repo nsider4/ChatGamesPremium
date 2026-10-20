@@ -7,6 +7,7 @@ import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
+import org.nsider.chatgames.races.Race;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
@@ -57,8 +58,11 @@ public class ChatGamesExpansion extends PlaceholderExpansion {
     public String onRequest(@Nullable OfflinePlayer player, @Nonnull String params) {
         ChatGamesPlayer data = player == null ? null : ChatGamesPlayerManager.get(player.getUniqueId());
         String empty = ConfigValue.getString(ConfigPaths.PLACEHOLDER_EMPTY_VALUE);
+        Race race = plugin.getRaceManager().getCurrent();
         PlaceholderResolver.Status status = new PlaceholderResolver.Status(
-                plugin.getGameManager().getCurrentGame(), plugin.getMainTask().getSecondsUntilNextGame());
+                plugin.getGameManager().getCurrentGame(), plugin.getMainTask().getSecondsUntilNextGame(),
+                race == null ? null : race.getDisplayName(), race == null ? 0 : race.getAmount(),
+                race == null || player == null ? 0 : race.getProgress().getCount(player.getUniqueId()));
         return new PlaceholderResolver(plugin.getLeaderboardCache().getSnapshot(), data, status,
                 empty == null ? "" : empty).resolve(params);
     }

@@ -151,12 +151,13 @@ public final class ChatGamesPlayer {
     }
 
     /**
-     * @return the best time across every game in seconds, or 0 if never won
+     * @return the best time across every chat game (races aren't typing) in seconds, or 0 if never won
      */
     public synchronized double getBestOverall() {
         double best = 0;
-        for (double time : fastest.values()) {
-            if (best == 0 || time < best) best = time;
+        for (Map.Entry<GameType, Double> entry : fastest.entrySet()) {
+            double time = entry.getValue();
+            if (!entry.getKey().isRace() && (best == 0 || time < best)) best = time;
         }
         return best;
     }

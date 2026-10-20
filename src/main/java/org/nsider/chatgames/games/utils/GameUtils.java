@@ -7,7 +7,7 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,18 +32,20 @@ public class GameUtils {
             return;
         }
 
-        plugin.getScheduler().global(() -> processRewards(game, player, place));
+        plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().chatGameRewards(game, player, place), player));
     }
 
     /**
-     * Processes and distributes rewards to the player.
+     * Gives a race winner the rewards races.yml lists for the race's target and amount.
      *
-     * @param game   The game type.
-     * @param player The player receiving rewards.
-     * @param place  The player's place, 1 for first.
+     * @param names reward names from races.yml, found in rewards.yml under {@code races.rewards}
      */
-    private void processRewards(String game, Player player, int place) {
-        for (String reward : plugin.getRewardManager().loadGameRewards(game, player, place)) {
+    public void giveRaceRewards(String race, Player player, List<String> names) {
+        plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().raceRewards(race, player, names), player));
+    }
+
+    private void processRewards(List<String> rewards, Player player) {
+        for (String reward : rewards) {
             processReward(player, reward);
         }
     }
@@ -60,7 +62,7 @@ public class GameUtils {
         if (isGiveCommand(parts)) {
             giveItemReward(player, parts);
         } else {
-            plugin.getRewardManager().executeCommands(Collections.singletonList(reward), player);
+            plugin.getRewardManager().executeCommand(reward, player);
         }
     }
 

@@ -50,7 +50,9 @@ public class TopPlayerQueries {
                 sql = "SELECT UUID, POINTS AS val FROM " + tableName + " WHERE POINTS > 0 ORDER BY POINTS DESC LIMIT 10";
                 break;
             case TypersTop:
-                sql = "SELECT UUID, MIN(fastest_time) AS val FROM " + fastestTable + " WHERE fastest_time > 0 GROUP BY UUID ORDER BY val ASC LIMIT 10";
+                // Races are timed too, but the overall list is for chat games ("fastest typers")
+                sql = "SELECT UUID, MIN(fastest_time) AS val FROM " + fastestTable + " WHERE fastest_time > 0 AND game_name NOT IN ("
+                        + GameType.raceKeysForSql() + ") GROUP BY UUID ORDER BY val ASC LIMIT 10";
                 break;
             case GameTypersTop:
                 sql = "SELECT UUID, fastest_time AS val FROM " + fastestTable + " WHERE game_name = ? AND fastest_time > 0 ORDER BY val ASC LIMIT 10";

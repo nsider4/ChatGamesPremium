@@ -70,12 +70,12 @@ public final class LeaderboardSnapshot {
         }
         byPoints.sort(Comparator.comparingDouble((Row r) -> r.value).reversed());
 
-        // Overall best time = the lowest of a player's per-game times
+        // Overall best time = the lowest of a player's chat-game times; races only have per-race lists
         Map<UUID, Double> best = new HashMap<>();
         Map<GameType, List<Row>> byGame = new EnumMap<>(GameType.class);
         for (TimeRow row : fastestRows) {
             if (row.seconds <= 0) continue;
-            best.merge(row.uuid, row.seconds, Math::min);
+            if (!row.game.isRace()) best.merge(row.uuid, row.seconds, Math::min);
             byGame.computeIfAbsent(row.game, g -> new ArrayList<>()).add(new Row(row.uuid, row.seconds));
         }
         List<Row> byTime = new ArrayList<>();

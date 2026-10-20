@@ -8,7 +8,16 @@ creative-enabled: true
 #https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 #https://helpch.at/docs/1.8/org/bukkit/Material.html
 
-#IF THE IDs YOU ARE TRYING TO USE DO NOT WORK AND ARE FROM THE NEWEST ENUMS ON THE SPIGOT API TRY USING THE 1.8(LEGACY) IDS FOR THOSE ITEMS TO SEE IF IT FIXES.
+#Names can be modern or legacy (MOOSHROOM or MUSHROOM_COW, COD or RAW_FISH): they are matched to your server's
+#version. Names that don't exist on your version (e.g. a 1.21 block on 1.8) are skipped, with a console note.
+#
+#Each race also accepts (optional):
+#  points: 1     #points the winner gets (default 1)
+#  weight: 1     #how often the rotation picks it compared to other games (default 1, 0 = never)
+#
+#Admins can start a race with their own values: /chatgames <race> <material/mob> [amount]
+#Without an amount, one listed below for that material/mob is used. The winner gets the rewards listed
+#for exactly that material and amount, or none if they aren't listed here (points are still given).
 
 hunt:
   enable: true

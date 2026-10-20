@@ -48,6 +48,20 @@ public enum GameType {
     }
 
     /**
+     * @return the races' config keys as a quoted SQL list, e.g. {@code 'hunt','place'}
+     *         (constants, so safe to put in a query)
+     */
+    public static String raceKeysForSql() {
+        StringBuilder keys = new StringBuilder();
+        for (GameType type : values()) {
+            if (!type.race) continue;
+            if (keys.length() > 0) keys.append(',');
+            keys.append('\'').append(type.configKey).append('\'');
+        }
+        return keys.toString();
+    }
+
+    /**
      * Looks a game up by enum name or config key, ignoring case.
      * Accepts the 1.9.9 name "shoppinglist" for {@link #MEMORIZE}.
      *

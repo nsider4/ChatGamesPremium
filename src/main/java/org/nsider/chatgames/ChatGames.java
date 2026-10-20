@@ -31,9 +31,9 @@ import org.nsider.chatgames.model.player.PlayerRepository;
 import org.nsider.chatgames.other.UpdateChecker;
 import org.nsider.chatgames.placeholders.ChatGamesExpansion;
 import org.nsider.chatgames.placeholders.LeaderboardCache;
-import org.nsider.chatgames.races.RaceBuilder;
+import org.nsider.chatgames.races.RaceListener;
+import org.nsider.chatgames.races.RaceManager;
 import org.nsider.chatgames.reward.RewardManager;
-import org.nsider.chatgames.tasks.ExpirationTask;
 import org.nsider.chatgames.tasks.MainTask;
 import org.nsider.chatgames.utils.gameplay.VersionUtils;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
@@ -51,7 +51,6 @@ public final class ChatGames extends JavaPlugin {
 
     private final Random random = new Random();
 
-    private ExpirationTask expirationTask;
     private DataHandler dataHandler;
     private PlayerRepository playerRepository;
     private GameBuilder gameBuilder;
@@ -60,7 +59,7 @@ public final class ChatGames extends JavaPlugin {
     private ChatGamesScheduler scheduler;
     private GameManager gameManager;
     private LogUtils logUtils;
-    private RaceBuilder raceBuilder;
+    private RaceManager raceManager;
     private RewardManager rewardManager;
     private LanguageManager languageManager;
     private GlobalGameController globalGameController;
@@ -105,13 +104,12 @@ public final class ChatGames extends JavaPlugin {
         // 5. Game systems
         this.languageManager = new LanguageManager(this);
         this.languageManager.load(ConfigValue.getString(ConfigPaths.LANGUAGE));
-        this.expirationTask = new ExpirationTask(this);
         this.gameBuilder = new GameBuilder(this);
         this.gameConfigManager = new GameConfigManager(this);
         this.gameUtils = new GameUtils(this);
         this.logUtils = new LogUtils(this);
         this.gameManager = new GameManager(this);
-        this.raceBuilder = new RaceBuilder(this);
+        this.raceManager = new RaceManager(this);
         this.rewardManager = new RewardManager(this);
         this.globalGameController = new GlobalGameController(this);
         this.mainTask = new MainTask(this);
@@ -121,6 +119,7 @@ public final class ChatGames extends JavaPlugin {
         pluginManager.registerEvents(new LoginListener(this), this);
         pluginManager.registerEvents(new ChatListener(this), this);
         pluginManager.registerEvents(new LogListener(this), this);
+        pluginManager.registerEvents(new RaceListener(this), this);
         pluginManager.registerEvents(new DiscordListener(this), this);
 
         // 7. Command
@@ -161,13 +160,8 @@ public final class ChatGames extends JavaPlugin {
         if (leaderboardCache != null) {
             leaderboardCache.stop();
         }
-        if (inGame) {
-            // A running chat game has a Game object; otherwise the running round is a race
-            if (gameManager.getGame() != null) {
-                gameManager.endGame();
-            } else {
-                raceBuilder.endRace();
-            }
+        if (inGame && !raceManager.stop(false)) {
+            gameManager.endGame();
         }
         if (scheduler != null) {
             scheduler.cancelAll();
@@ -184,7 +178,7 @@ public final class ChatGames extends JavaPlugin {
 
     /**
      * Reloads every configuration file and applies the changes that don't need a restart:
-     * messages, the enabled games, the game rotation timer and the translation language.
+     * messages, the enabled games, race targets, the game rotation timer and the translation language.
      * Database settings and table names only change on restart.
      *
      * @return false if any file failed to load (those files keep their previous values)
@@ -201,6 +195,7 @@ public final class ChatGames extends JavaPlugin {
         }
 
         MilestoneManager.loadMilestones();
+        raceManager.load();
         mainTask.reloadEnabledGames();
         startGameRotation();
         leaderboardCache.start();

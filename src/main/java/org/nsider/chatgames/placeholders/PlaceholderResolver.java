@@ -24,10 +24,23 @@ public final class PlaceholderResolver {
         @Nullable final GameType currentGame;
         /** Seconds until the rotation's next game, or -1 if none is scheduled. */
         final long nextGameSeconds;
+        /** The running race's target as shown in messages, or null if no race runs. */
+        @Nullable final String raceTarget;
+        final int raceAmount;
+        /** The viewer's count in the running race. */
+        final int raceProgress;
 
         public Status(@Nullable GameType currentGame, long nextGameSeconds) {
+            this(currentGame, nextGameSeconds, null, 0, 0);
+        }
+
+        public Status(@Nullable GameType currentGame, long nextGameSeconds, @Nullable String raceTarget,
+                      int raceAmount, int raceProgress) {
             this.currentGame = currentGame;
             this.nextGameSeconds = nextGameSeconds;
+            this.raceTarget = raceTarget;
+            this.raceAmount = raceAmount;
+            this.raceProgress = raceProgress;
         }
     }
 
@@ -68,6 +81,9 @@ public final class PlaceholderResolver {
             case "current_game": return status.currentGame == null ? empty : status.currentGame.getConfigKey();
             case "next_game_in":
                 return status.currentGame != null || status.nextGameSeconds < 0 ? empty : String.valueOf(status.nextGameSeconds);
+            case "race_target": return status.raceTarget == null ? empty : status.raceTarget;
+            case "race_amount": return status.raceTarget == null ? empty : String.valueOf(status.raceAmount);
+            case "race_progress": return status.raceTarget == null ? empty : String.valueOf(status.raceProgress);
             default:
                 break;
         }

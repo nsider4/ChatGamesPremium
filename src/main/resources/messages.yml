@@ -467,7 +467,8 @@ trivia:
 #RACES
 #As of now, the races don't support multiple winners as I don't see a reason since they are 'races' or 'player challenges' that the first should get.
 
-#YOU CAN USE %points% TO SHOW THE POINTS FOR THE PLAYER THAT WON.
+#%value% is the material or mob, %amount% how many, %timeToComplete% the time limit in seconds.
+#In correct_message: %winner%, %winner_displayname%, %time% (seconds) and %points% (the winner's points).
 
 hunt:
   gameStartAnnouncement:

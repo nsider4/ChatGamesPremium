@@ -6,6 +6,13 @@
 //                      a trailing "_" stands for a space (the test harness trims actions)
 //          play:on / play:off  autoplay in the background while later actions run
 //          autoplay:<seconds>  plays the chat games for that long (see autoplay below)
+//          race actions (for the races; <names> lists alternatives for different versions, e.g. grass_block,grass):
+//          dig:<names>:<count>     breaks the nearest blocks of that kind
+//          place:<names>:<count>   places that item from the inventory on the ground nearby
+//          eat:<names>:<count>     eats that item (golden apples can be eaten on a full stomach)
+//          craft:<names>:<count>   crafts that item in the inventory's 2x2 grid
+//          attack:<names>:<secs>   hits the nearest mob of that kind until it dies or time runs out
+//          smelt:<input>:<count>   places a furnace from the inventory, smelts <count> of <input> with coal, takes the result
 // Prints every chat line the bot receives as "[BOT <name>] <text>", and action-bar text as "[BOT <name>] [bar] <text>".
 // Needs mineflayer (npm install mineflayer@4); point NODE_PATH at its node_modules.
 
@@ -53,6 +60,144 @@ function quit() {
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// ---------------------------------------------------------------------------------------------
+// Race actions. Block and item names differ between versions, so each takes a comma-separated
+// list and uses the first name this version knows.
+function pick(table, names) {
+  for (const name of names.split(',')) if (table[name]) return table[name];
+  return null;
+}
+
+function log(text) {
+  console.log(`[BOT ${username}] ${text}`);
+}
+
+async function equip(names) {
+  const item = pick(bot.registry.itemsByName, names);
+  const stack = item && bot.inventory.items().find((i) => i.type === item.id);
+  if (!stack) throw new Error(`no ${names} in the inventory`);
+  await bot.equip(stack, 'hand');
+}
+
+async function dig(names, count) {
+  const block = pick(bot.registry.blocksByName, names);
+  if (!block) throw new Error(`unknown block ${names}`);
+  for (let i = 0; i < count; i++) {
+    const target = bot.findBlock({ matching: block.id, maxDistance: 4 });
+    if (!target) throw new Error(`no ${names} within reach`);
+    await bot.dig(target, true);
+    log(`dug ${block.name} ${i + 1}/${count}`);
+  }
+}
+
+async function place(names, count) {
+  const { Vec3 } = require('vec3');
+  await equip(names);
+  const base = bot.entity.position.floored();
+  const spots = [[2, 0], [-2, 0], [0, 2], [0, -2], [2, 2], [-2, -2], [2, -2], [-2, 2]];
+  let placed = 0;
+  for (const [dx, dz] of spots) {
+    if (placed >= count) break;
+    // The surface: a solid block with air above, around the bot's feet
+    let ground = null;
+    for (const dy of [0, -1, 1]) {
+      const below = bot.blockAt(base.offset(dx, dy - 1, dz));
+      const above = bot.blockAt(base.offset(dx, dy, dz));
+      if (below && below.boundingBox === 'block' && above && above.boundingBox === 'empty') { ground = below; break; }
+    }
+    if (!ground) continue;
+    try {
+      await bot.placeBlock(ground, new Vec3(0, 1, 0));
+    } catch (e) {
+      // Some versions don't confirm the placement in time; the server still placed it
+    }
+    placed++;
+    log(`placed ${names.split(',')[0]} ${placed}/${count}`);
+    await sleep(400);
+  }
+}
+
+async function eat(names, count) {
+  for (let i = 0; i < count; i++) {
+    await equip(names);
+    await bot.consume();
+    log(`ate ${names.split(',')[0]} ${i + 1}/${count}`);
+  }
+}
+
+async function craft(names, count) {
+  const item = pick(bot.registry.itemsByName, names);
+  if (!item) throw new Error(`unknown item ${names}`);
+  const recipe = bot.recipesFor(item.id, null, 1, null)[0];
+  if (!recipe) throw new Error(`no recipe for ${names} with this inventory`);
+  await bot.craft(recipe, count, null);
+  log(`crafted ${item.name} x${count}`);
+}
+
+async function attack(names, seconds) {
+  // 1.8 names mobs "Chicken", newer versions "chicken"
+  const wanted = names.toLowerCase().split(',');
+  const end = Date.now() + seconds * 1000;
+  let hit = false;
+  while (Date.now() < end) {
+    const mob = bot.nearestEntity((e) => wanted.includes((e.name || '').toLowerCase()) && e.position.distanceTo(bot.entity.position) < 5);
+    if (!mob && !hit && Date.now() < end - 1000) {
+      // Not tracked yet (just summoned): look again shortly
+      await sleep(500);
+      continue;
+    }
+    if (!mob) {
+      const near = Object.values(bot.entities).filter((e) => e !== bot.entity && e.position.distanceTo(bot.entity.position) < 8);
+      log(`no ${names} left nearby (near: ${near.map((e) => `${e.name}@${e.position.distanceTo(bot.entity.position).toFixed(1)}`).join(', ') || 'nothing'})`);
+      return;
+    }
+    await bot.lookAt(mob.position.offset(0, mob.height / 2, 0));
+    bot.attack(mob);
+    hit = true;
+    await sleep(600);
+  }
+}
+
+async function smelt(names, count) {
+  const { Vec3 } = require('vec3');
+  await place('furnace,lit_furnace', 1);
+  const furnaceBlock = pick(bot.registry.blocksByName, 'furnace');
+  const block = bot.findBlock({ matching: furnaceBlock.id, maxDistance: 4 });
+  if (!block) throw new Error('the furnace was not placed');
+  const furnace = await bot.openFurnace(block);
+  const input = pick(bot.registry.itemsByName, names);
+  await furnace.putFuel(pick(bot.registry.itemsByName, 'coal').id, null, 1);
+  await furnace.putInput(input.id, null, count);
+  // An item takes 10 seconds; take each one out as it is done, like a player waiting at the furnace
+  let total = 0;
+  const end = Date.now() + count * 15000;
+  while (total < count && Date.now() < end) {
+    await sleep(2000);
+    if (!furnace.outputItem()) continue;
+    const taken = await furnace.takeOutput();
+    if (taken) {
+      total += taken.count;
+      log(`took ${taken.count}x ${taken.name} (${total}/${count})`);
+    }
+  }
+  furnace.close();
+}
+
+async function race(kind, arg) {
+  const [names, amount] = arg.split(':');
+  const n = Number(amount || 1);
+  try {
+    if (kind === 'dig') await dig(names, n);
+    else if (kind === 'place') await place(names, n);
+    else if (kind === 'eat') await eat(names, n);
+    else if (kind === 'craft') await craft(names, n);
+    else if (kind === 'attack') await attack(names, n);
+    else if (kind === 'smelt') await smelt(names, n);
+  } catch (e) {
+    log(`${kind} failed: ${e.message}`);
+  }
+}
 
 // ---------------------------------------------------------------------------------------------
 // autoplay: answers the games whose answer can be read or worked out from chat.
@@ -165,6 +310,7 @@ function play(message) {
       const names = matches.map((m) => (typeof m === 'string' ? m : m.match));
       console.log(`[BOT ${username}] [tab] ${text} -> ${names.join(', ')}`);
     }
+    else if (['dig', 'place', 'eat', 'craft', 'attack', 'smelt'].includes(kind)) await race(kind, arg);
     else if (kind === 'quit') await quit();
     else if (kind === 'join') await connect();
     else if (kind === 'autoplay') {

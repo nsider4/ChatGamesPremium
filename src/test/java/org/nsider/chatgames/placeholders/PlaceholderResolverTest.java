@@ -145,6 +145,35 @@ class PlaceholderResolverTest {
     }
 
     @Test
+    void racePlaceholders() {
+        assertEquals("-", resolve("race_target"));
+        assertEquals("-", resolve("race_progress"));
+        PlaceholderResolver.Status race = new PlaceholderResolver.Status(GameType.MINE, -1, "Diamond Ore", 5, 2);
+        assertEquals("Diamond Ore", resolve("race_target", alex(), race));
+        assertEquals("5", resolve("race_amount", alex(), race));
+        assertEquals("2", resolve("race_progress", alex(), race));
+        assertEquals("mine", resolve("current_game", alex(), race));
+    }
+
+    @Test
+    void raceTimesOnlyCountInTheirOwnList() {
+        List<LeaderboardSnapshot.TimeRow> times = Arrays.asList(
+                new LeaderboardSnapshot.TimeRow(ALEX, GameType.CRAFT, 0.5),
+                new LeaderboardSnapshot.TimeRow(ALEX, GameType.MATH, 3.0),
+                new LeaderboardSnapshot.TimeRow(STEVE, GameType.MATH, 2.0));
+        LeaderboardSnapshot board = LeaderboardSnapshot.build(Collections.<LeaderboardSnapshot.Row>emptyList(), times, NAMES::get);
+        assertEquals("Steve", board.fastest(1).getName(), "Alex's 0.5s craft race isn't a typing time");
+        assertEquals(3.0, board.fastest(2).getValue());
+        assertEquals("Alex", board.fastest(GameType.CRAFT, 1).getName());
+
+        ChatGamesPlayer data = new ChatGamesPlayer(ALEX);
+        data.recordTime(GameType.CRAFT, 0.5);
+        data.recordTime(GameType.MATH, 3.0);
+        assertEquals(3.0, data.getBestOverall());
+        assertEquals(0.5, data.getFastest(GameType.CRAFT));
+    }
+
+    @Test
     void onlyTheTopOfEachListGetsANameLookup() {
         List<LeaderboardSnapshot.Row> points = new ArrayList<>();
         for (int i = 1; i <= 1000; i++) points.add(new LeaderboardSnapshot.Row(id(i), i));

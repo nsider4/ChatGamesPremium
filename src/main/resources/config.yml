@@ -78,12 +78,13 @@ fastest-typers-top: true
 #PlaceholderAPI placeholders (needs PlaceholderAPI installed):
 #  You:          %chatgames_points%, %chatgames_wins%, %chatgames_wins_<game>%, %chatgames_race_wins%,
 #                %chatgames_global_played%, %chatgames_global_won%, %chatgames_toggle%, %chatgames_sound_toggle%
-#  Your times:   %chatgames_personal_best% (any game), %chatgames_fastest_<game>%
+#  Your times:   %chatgames_personal_best% (any chat game), %chatgames_fastest_<game>% (races too)
 #  Your place:   %chatgames_show_current_pos_top% (points), %chatgames_show_current_pos_fastest% (best time)
 #  Points top:   %chatgames_top_<n>% (name), %chatgames_points_top_<n>%, %chatgames_total_points%
-#  Fastest top:  %chatgames_fastest_<n>% (name), %chatgames_fastest_time_<n>%,
+#  Fastest top:  %chatgames_fastest_<n>% (name, chat games), %chatgames_fastest_time_<n>%,
 #                %chatgames_fastest_<game>_<n>%, %chatgames_fastest_<game>_time_<n>%
 #  Right now:    %chatgames_game_running%, %chatgames_current_game%, %chatgames_next_game_in% (seconds)
+#  Race:         %chatgames_race_target%, %chatgames_race_amount%, %chatgames_race_progress% (yours)
 #  <game> is a game's name as in games.yml (e.g. unscramble, guess_the_number); <n> is a place (1, 2, 3...).
 placeholders:
   #How often the leaderboard placeholders (top_<n>, fastest_<n>, positions...) are rebuilt, in seconds.

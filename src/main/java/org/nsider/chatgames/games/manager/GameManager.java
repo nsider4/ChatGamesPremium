@@ -51,21 +51,19 @@ public class GameManager {
     /**
      * Starts a chat game or race now.
      *
-     * @param args optional values for the round, e.g. the word to use
+     * @param args optional values for the round, e.g. the word to use, or a race's target and amount
      * @return false if something is already running, the game can't be generated, or a plugin cancelled it
      */
     public boolean startGame(@Nonnull GameType type, @Nonnull String... args) {
         boolean started;
         if (type.isRace()) {
-            if (plugin.isInGame()) return false;
             try {
-                plugin.getRaceBuilder().startRace(type);
+                started = plugin.getRaceManager().start(type, args);
             } catch (RuntimeException e) {
                 // Free the slot, or no game could ever start again
-                if (plugin.isInGame()) plugin.getRaceBuilder().endRace();
+                if (!plugin.getRaceManager().stop(false)) endGame();
                 throw e;
             }
-            started = plugin.isInGame();
         } else {
             started = plugin.getGameBuilder().start(type, args);
         }
@@ -157,8 +155,8 @@ public class GameManager {
                         current.getResultsByPlace()));
             }
             endGame();
-        } else {
-            plugin.getRaceBuilder().endRace();
+        } else if (!plugin.getRaceManager().stop(true)) {
+            endGame();
         }
         return true;
     }
