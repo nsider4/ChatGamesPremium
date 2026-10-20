@@ -1,6 +1,7 @@
 package org.nsider.chatgames.model.player;
 
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.placeholders.LeaderboardSnapshot;
 import org.nsider.chatgames.utils.database.QueryUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 
@@ -9,8 +10,11 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * Reads and writes one player's data across the ChatGames tables.
@@ -212,6 +216,46 @@ public final class PlayerRepository {
                 }
             }
             return removed > 0;
+        }
+    }
+
+    /**
+     * Reads every player's points and every fastest time, for the leaderboards behind
+     * the placeholders. Rows for unknown games or malformed UUIDs are skipped.
+     */
+    @Nonnull
+    public LeaderboardSnapshot readLeaderboards(@Nonnull Function<UUID, String> names) throws SQLException {
+        try (Connection connection = connections.get()) {
+            List<LeaderboardSnapshot.Row> points = QueryUtils.query(connection,
+                    "SELECT UUID, POINTS FROM " + mainTable + " WHERE POINTS > 0", rs -> {
+                        List<LeaderboardSnapshot.Row> rows = new ArrayList<>();
+                        while (rs.next()) {
+                            UUID uuid = parseUuid(rs.getString("UUID"));
+                            if (uuid != null) rows.add(new LeaderboardSnapshot.Row(uuid, rs.getInt("POINTS")));
+                        }
+                        return rows;
+                    });
+            List<LeaderboardSnapshot.TimeRow> times = QueryUtils.query(connection,
+                    "SELECT UUID, game_name, fastest_time FROM " + fastestTable + " WHERE fastest_time > 0", rs -> {
+                        List<LeaderboardSnapshot.TimeRow> rows = new ArrayList<>();
+                        while (rs.next()) {
+                            UUID uuid = parseUuid(rs.getString("UUID"));
+                            GameType game = GameType.fromName(rs.getString("game_name"));
+                            if (uuid != null && game != null) {
+                                rows.add(new LeaderboardSnapshot.TimeRow(uuid, game, rs.getDouble("fastest_time")));
+                            }
+                        }
+                        return rows;
+                    });
+            return LeaderboardSnapshot.build(points, times, names);
+        }
+    }
+
+    private static UUID parseUuid(String text) {
+        try {
+            return text == null ? null : UUID.fromString(text);
+        } catch (IllegalArgumentException e) {
+            return null;
         }
     }
 }

@@ -30,6 +30,8 @@ public class MainTask {
     @Getter
     private volatile ChatGamesScheduler.Task task;
 
+    /** When the next scheduled round runs, in epoch millis; read by placeholders on any thread. */
+    private volatile long nextRoundAt;
     /** Set and read on the main/global thread only. */
     private GameType lastGame;
 
@@ -58,6 +60,7 @@ public class MainTask {
      */
     private void scheduleNext() {
         long delayTicks = plugin.getGameConfigManager().getNextGameDelay();
+        nextRoundAt = System.currentTimeMillis() + delayTicks * 50L;
         task = plugin.getScheduler().globalLater(() -> {
             if (!taskEnabled) return;
             try {
@@ -69,6 +72,14 @@ public class MainTask {
                 scheduleNext();
             }
         }, delayTicks);
+    }
+
+    /**
+     * @return whole seconds until the rotation's next round, or -1 if the rotation is off
+     */
+    public long getSecondsUntilNextGame() {
+        if (!taskEnabled) return -1;
+        return Math.max(0, (nextRoundAt - System.currentTimeMillis() + 999) / 1000);
     }
 
     /**

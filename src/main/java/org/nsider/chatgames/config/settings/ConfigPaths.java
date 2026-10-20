@@ -220,6 +220,20 @@ public enum ConfigPaths {
             ConfigType.BOOLEAN
     ),
 
+    /** How often the leaderboards behind the PlaceholderAPI placeholders are rebuilt, in seconds. */
+    PLACEHOLDER_REFRESH_SECONDS(
+            ConfigFile.CONFIG,
+            "placeholders.refresh-seconds",
+            ConfigType.INTEGER
+    ),
+
+    /** What a placeholder shows when there is nothing to show (an empty leaderboard place, no time yet). */
+    PLACEHOLDER_EMPTY_VALUE(
+            ConfigFile.CONFIG,
+            "placeholders.empty-value",
+            ConfigType.STRING
+    ),
+
     /** Global sound volume used for all ChatGames sounds. */
     GAME_SOUND_VOLUME(
             ConfigFile.CONFIG,

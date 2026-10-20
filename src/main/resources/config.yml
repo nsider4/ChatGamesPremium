@@ -75,6 +75,23 @@ count-all-players: false
 #In true, it will create a top for the fastest typers(/chatgames fastest). Otherwise, in false, this top type will be off.
 fastest-typers-top: true
 
+#PlaceholderAPI placeholders (needs PlaceholderAPI installed):
+#  You:          %chatgames_points%, %chatgames_wins%, %chatgames_wins_<game>%, %chatgames_race_wins%,
+#                %chatgames_global_played%, %chatgames_global_won%, %chatgames_toggle%, %chatgames_sound_toggle%
+#  Your times:   %chatgames_personal_best% (any game), %chatgames_fastest_<game>%
+#  Your place:   %chatgames_show_current_pos_top% (points), %chatgames_show_current_pos_fastest% (best time)
+#  Points top:   %chatgames_top_<n>% (name), %chatgames_points_top_<n>%, %chatgames_total_points%
+#  Fastest top:  %chatgames_fastest_<n>% (name), %chatgames_fastest_time_<n>%,
+#                %chatgames_fastest_<game>_<n>%, %chatgames_fastest_<game>_time_<n>%
+#  Right now:    %chatgames_game_running%, %chatgames_current_game%, %chatgames_next_game_in% (seconds)
+#  <game> is a game's name as in games.yml (e.g. unscramble, guess_the_number); <n> is a place (1, 2, 3...).
+placeholders:
+  #How often the leaderboard placeholders (top_<n>, fastest_<n>, positions...) are rebuilt, in seconds.
+  #They are also rebuilt after every game with a winner. Your own points, wins and times are always live.
+  refresh-seconds: 60
+  #Shown when there is nothing to show: an empty leaderboard place, no best time yet, no game running...
+  empty-value: ''
+
 #Sound to send to players when a chat event starts!
 GameSounds:
   volume: 0.5

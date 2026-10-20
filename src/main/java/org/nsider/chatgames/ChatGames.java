@@ -29,6 +29,8 @@ import org.nsider.chatgames.managers.MilestoneManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.model.player.PlayerRepository;
 import org.nsider.chatgames.other.UpdateChecker;
+import org.nsider.chatgames.placeholders.ChatGamesExpansion;
+import org.nsider.chatgames.placeholders.LeaderboardCache;
 import org.nsider.chatgames.races.RaceBuilder;
 import org.nsider.chatgames.reward.RewardManager;
 import org.nsider.chatgames.tasks.ExpirationTask;
@@ -63,6 +65,8 @@ public final class ChatGames extends JavaPlugin {
     private LanguageManager languageManager;
     private GlobalGameController globalGameController;
     private MainTask mainTask;
+    private LeaderboardCache leaderboardCache;
+    private ChatGamesExpansion placeholderExpansion;
     private boolean isPlaceHolderAPIEnabled = false;
     private volatile boolean updateNeeded = false;
     // Set on the main thread, read by async chat threads
@@ -96,6 +100,7 @@ public final class ChatGames extends JavaPlugin {
         ChallengeManager.initialize(this);
         MilestoneManager.loadMilestones();
         ChatGamesPlayerManager.loadOnlinePlayers();
+        this.leaderboardCache = new LeaderboardCache(this, playerRepository);
 
         // 5. Game systems
         this.languageManager = new LanguageManager(this);
@@ -124,11 +129,16 @@ public final class ChatGames extends JavaPlugin {
             new ChatGamesCommand(this).bind(command);
         }
 
-        // 8. Integrations. The PlaceholderAPI expansion is registered in step 7 of the recode.
+        // 8. Integrations
         this.isPlaceHolderAPIEnabled = pluginManager.getPlugin("PlaceholderAPI") != null;
+        if (isPlaceHolderAPIEnabled) {
+            this.placeholderExpansion = new ChatGamesExpansion(this);
+            placeholderExpansion.register();
+        }
 
         // 9. Scheduled tasks
         startGameRotation();
+        leaderboardCache.start();
         scheduler.asyncTimer(ChatGamesPlayerManager::saveAll, AUTOSAVE_TICKS, AUTOSAVE_TICKS);
         checkForUpdate();
     }
@@ -144,6 +154,12 @@ public final class ChatGames extends JavaPlugin {
         }
         if (globalGameController != null) {
             globalGameController.stop();
+        }
+        if (placeholderExpansion != null) {
+            placeholderExpansion.unregister();
+        }
+        if (leaderboardCache != null) {
+            leaderboardCache.stop();
         }
         if (inGame) {
             // A running chat game has a Game object; otherwise the running round is a race
@@ -187,6 +203,7 @@ public final class ChatGames extends JavaPlugin {
         MilestoneManager.loadMilestones();
         mainTask.reloadEnabledGames();
         startGameRotation();
+        leaderboardCache.start();
         return success;
     }
 

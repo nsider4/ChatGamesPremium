@@ -365,6 +365,17 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - Custom race values (`/chatgames mine <material> <amount>`) go to step 8 with the race rebuild. Until then, a race starts with random values.
     - `profile`, `menu`, `admin`, `debug`, `global` and `event` arrive with their features in step 9.
   - **Test tooling:** `scripts/bot.js` gained `tab:<text>` (prints the server's completions) and `play:on|off` (autoplay in the background). `boot-test.py` strips colour codes, so coloured console replies are shown.
+- [x] **Step 7: PlaceholderAPI** (2026-10-20). 79 tests. Tested live through `/papi parse` (as the player, as an offline player, server-wide, and after `/papi reload`) on Spigot 1.8.8 with PAPI 2.11.6, and on Paper 1.21.1 and Folia 26.1.2 with PAPI 2.12.3.
+  - **Nothing blocks:** every placeholder is answered from memory, so scoreboard and tab plugins can ask from any thread as often as they like. Personal values come from the player cache. Leaderboards come from a `LeaderboardSnapshot` that `LeaderboardCache` rebuilds off-thread every `placeholders.refresh-seconds` (default 60) and after every game with a winner. It saves online players first, so their newest points count. 1.9.9 ran database queries and `.join()`ed them inside the placeholder.
+  - **Ported from 1.9.9** (same names and meaning): `points`, `toggle`, `top_<n>`, `points_top_<n>`, `personal_best`, `fastest_<n>`, `fastest_time_<n>`, `show_current_pos_top`, `show_current_pos_fastest`.
+  - **New:**
+    - `wins`, `wins_<game>`, `race_wins`, `global_played`, `global_won`, `sound_toggle`
+    - `fastest_<game>` (your best), `fastest_<game>_<n>`, `fastest_<game>_time_<n>`, `total_points`
+    - `game_running`, `current_game`, `next_game_in`
+    - Game names with underscores (`guess_the_number`) parse correctly.
+  - **Ranks:** players with equal points share a place (1, 2, 2, 4), as in 1.9.9. Only the top 100 of each list get a name lookup, but everyone has a rank.
+  - **Times** show 3 decimals. An empty place shows `placeholders.empty-value` (default empty, as in 1.9.9). The full list is documented in config.yml above the `placeholders` section.
+  - **Moved to step 9,** with their features: `daily_*`, `weekly_*`, `streak_*` and `event_*`.
 
 ---
 

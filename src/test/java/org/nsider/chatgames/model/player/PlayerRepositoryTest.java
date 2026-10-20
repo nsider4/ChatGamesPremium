@@ -50,6 +50,34 @@ class PlayerRepositoryTest {
     }
 
     @Test
+    void leaderboardsReadEveryPlayersPointsAndTimes() throws SQLException {
+        UUID first = UUID.randomUUID();
+        UUID second = UUID.randomUUID();
+        UUID noPoints = UUID.randomUUID();
+        ChatGamesPlayer a = repository.load(first);
+        a.addPoints(5);
+        a.recordTime(GameType.GUESS_THE_NUMBER, 3.5);
+        repository.save(a.snapshot());
+        ChatGamesPlayer b = repository.load(second);
+        b.addPoints(9);
+        b.recordTime(GameType.GUESS_THE_NUMBER, 1.5);
+        b.recordTime(GameType.MATH, 2.0);
+        repository.save(b.snapshot());
+        repository.load(noPoints);
+
+        org.nsider.chatgames.placeholders.LeaderboardSnapshot board =
+                repository.readLeaderboards(uuid -> uuid.equals(first) ? "First" : "Second");
+        assertEquals("Second", board.points(1).getName());
+        assertEquals(9, (int) board.points(1).getValue());
+        assertEquals("First", board.points(2).getName());
+        assertEquals(null, board.points(3), "players with 0 points aren't ranked");
+        assertEquals(14, board.getTotalPoints());
+        assertEquals("Second", board.fastest(GameType.GUESS_THE_NUMBER, 1).getName());
+        assertEquals(3.5, board.fastest(GameType.GUESS_THE_NUMBER, 2).getValue());
+        assertEquals(2, board.fastestRank(first));
+    }
+
+    @Test
     void everythingSurvivesASaveAndReload() throws SQLException {
         UUID uuid = UUID.randomUUID();
         ChatGamesPlayer player = repository.load(uuid);

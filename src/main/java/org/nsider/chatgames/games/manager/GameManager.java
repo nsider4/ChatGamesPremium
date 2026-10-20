@@ -37,6 +37,8 @@ public class GameManager {
     /** Set on the main/global thread, read by async chat threads. Null while no game takes answers. */
     @Getter @Nullable private volatile Game game;
     private final List<ChatGamesScheduler.Task> roundTasks = new ArrayList<>();
+    /** The game or race started last; only meaningful while {@link ChatGames#isInGame()}. */
+    @Nullable private volatile GameType lastStarted;
 
     public GameManager(ChatGames plugin) {
         this.plugin = plugin;
@@ -53,6 +55,7 @@ public class GameManager {
      * @return false if something is already running, the game can't be generated, or a plugin cancelled it
      */
     public boolean startGame(@Nonnull GameType type, @Nonnull String... args) {
+        boolean started;
         if (type.isRace()) {
             if (plugin.isInGame()) return false;
             try {
@@ -62,9 +65,20 @@ public class GameManager {
                 if (plugin.isInGame()) plugin.getRaceBuilder().endRace();
                 throw e;
             }
-            return plugin.isInGame();
+            started = plugin.isInGame();
+        } else {
+            started = plugin.getGameBuilder().start(type, args);
         }
-        return plugin.getGameBuilder().start(type, args);
+        if (started) lastStarted = type;
+        return started;
+    }
+
+    /**
+     * @return the game or race running now (including a Memorize list still on screen), or null
+     */
+    @Nullable
+    public GameType getCurrentGame() {
+        return plugin.isInGame() ? lastStarted : null;
     }
 
     /**
@@ -98,6 +112,8 @@ public class GameManager {
         Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(game.getGameType(), game.getAnswer(), game.getResultsByPlace()));
         if (game.hasWinners()) {
             announcer.announceWinners(game);
+            // Points and times changed: the placeholders' leaderboards catch up now rather than at the next refresh
+            plugin.getLeaderboardCache().refresh();
         } else {
             announcer.announceTimeExpired(game);
         }
