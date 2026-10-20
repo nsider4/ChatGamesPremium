@@ -6,7 +6,7 @@ Analysis date: 2026-10-20. The baseline is `Downloads/ChatGames-Premium-1.9.9.ja
 
 ## 0. Target: what ChatGames-Premium 2.0.0 will be
 
-This is the finished feature set the plan builds toward. Items marked *(new)* weren't in 1.9.9. Items marked *(my call)* are design decisions I made where the recode left them open; change them if you meant something else.
+This is the finished feature set the plan builds toward. Items marked *(new)* weren't in 1.9.9. Items marked *(my call)* are design decisions I made where your brief left a detail open. Section 0.1 at the end checks this list against your feature checklist of 2026-10-20.
 
 **Platforms**
 - Spigot, Paper and their forks, Minecraft 1.8.8 → 26.x, from one jar.
@@ -14,22 +14,34 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 - SQLite or MySQL storage, with a connection pool.
 - Automatic upgrade from 1.9.9: player data and config files are migrated on first start, with backups kept. *(new)*
 
-**Chat games (13)**
+**Chat games (14)**
 - Answer in chat. Each game has its own settings in `games.yml`:
-  - on/off, number of winners, time limit, case sensitivity
+  - on/off, rotation weight, number of winners, time limit, case sensitivity
   - title/subtitle, and its own messages and rewards
 - The games:
   - **Unscramble**, **Unreverse**, **Reaction**, **Fill-out** (letters hidden by difficulty %): word lists in `words.yml`.
   - **Hoverable:** hover the chat text to see the word.
   - **Clickable:** first to click wins.
-  - **Random:** type a random string; length range and character set are configurable, including a custom set.
-  - **Math:** configurable operators and difficulty.
+  - **Random:** type a random string. Length range and character set are configurable, including a custom set.
+  - **Math:** configurable operators and difficulty. Two modes:
+    - *solve*: `7 x 3 - 4 = ?`
+    - *missing value*: `3 + ? - 4 = 10`. *(This is what the recode's Sequence game currently does; it becomes a Math mode.)*
+  - **Sequence** *(new)*: complete a number sequence, e.g. `3, 6, 12, 24, ?`.
+    - Patterns: add, multiply, squares, alternating two steps, and Fibonacci-style.
+    - Difficulty controls which patterns are used and how big the numbers get.
   - **Variable:** symbol equations such as ★ + ★ = 10.
   - **Guess the Number:** a range is shown.
   - **Trivia:** questions with multiple accepted answers.
-  - **Memorize** *(was Shopping List)*: a list is shown, chat is cleared, then the list must be typed back.
-  - **Sequence** *(new)*: solve for the missing number in an equation.
-- "Wrong case" hint, with its own sound, when the answer is right except for capitalisation.
+  - **Memorize** *(generalised from Shopping List)*: a list is shown, chat is cleared, and players type the list back.
+    - Content comes from pools: words, numbers, colours, blocks/items (translated), mobs, symbols, or "shopping list" (items with amounts, the 1.9.9 game).
+    - Configurable list length, display time, and whether order matters.
+  - **Word Association** *(new)*: three clues, one hidden link. Example: `Obsidian • Flint • Steel` → *Nether Portal*.
+    - Each round accepts several answers and aliases (`nether portal`, `portal`).
+    - Hard rounds reveal the clues one at a time. Answering with fewer clues shown counts as a faster place.
+    - Ships with about 60 Minecraft associations in `associations.yml`, at easy/medium/hard levels.
+- Players who are right except for capitalisation get a "wrong case" hint, with its own sound.
+- **Hints** *(new, my suggestion)*: if nobody has answered by a configurable % of the time, a hint is shown. Examples: Unscramble shows the first letter, Fill-out reveals one more letter, Word Association reveals the next clue.
+- **Countdown display** *(new, my suggestion)*: the time left is shown on a boss bar (1.9+) or the action bar (1.8). This can be switched off per game.
 
 **Races (7)**
 - Hunt (kill mobs), Mine, Place, Fish, Eat, Craft, Smelt.
@@ -37,82 +49,198 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 - Options: count or ignore spawner mobs, and allow or deny creative mode.
 - Legacy and modern material and mob names are both accepted.
 
-**Global game** *(new)*
-- **Global Reaction:** a word is announced, and *everyone* who types it within N seconds gets the participation reward.
-- It starts either by chance after a regular game (`chance_trigger_percent`) or by command.
-- Its messages and rewards are configurable. *(my call: rewards go in `rewards.yml` under `global_word`)*
+**Global games** *(new)*
+- In a global game *everyone* who solves the round within N seconds is rewarded, instead of just the first N players.
+  - Everyone who succeeds gets the participation reward.
+  - The first three also get place rewards.
+- Global games reuse the normal games' generators, so supporting another one is just a config entry. The list in `global_games.yml`:
+  - **Global Reaction** (already in the recode), **Global Unscramble**, **Global Math**, **Global Sequence**, **Global Trivia**, **Global Fill-out**, **Global Word Association**
+  - **Global Race**: everyone who mines, kills, catches etc. N of something in the time window. This reuses the race listeners.
+- A global game starts by chance after a regular game (`chance_trigger_percent`), on its own interval, by command, or as a step in an event.
+- Each global game has its own messages and rewards.
+
+**Game events** *(new)*
+- Defined in `events.yml`. An event is a named, ordered list of steps. A step is any chat game, race or global game, with optional overrides (time limit, difficulty, winners), plus a pause between steps.
+- Starting an event:
+  - by command (`/chatgames event start <name>`) or from the admin menu
+  - optionally on a schedule: day-of-week + time, e.g. "Saturday 20:00"
+  - optionally only when a minimum number of players is online
+- While an event runs, the normal game rotation is paused. It resumes when the event ends or is stopped.
+- Scoring:
+  - Each step awards event points per place, configurable (e.g. 1st = 5, 2nd = 3, 3rd = 1). Taking part in a global step also earns points.
+  - Wins still count towards global stats, points, challenges and streaks as usual.
+- When the event ends:
+  - The event leaderboard is broadcast, and every participant is told their own place and points.
+  - Rewards go to the top places and to all participants.
+  - The results go to Discord if the webhook is on.
+- Event stats are stored separately, so each event has its own history: runs played, total event wins, best place. `/chatgames event top <name>` shows the all-time event leaderboard.
 
 **Scheduling**
 - A game every X minutes, or a random delay between min and max (seconds or minutes). Each game re-rolls the delay. *(fixed: in 1.9.9 it was rolled once)*
+- **Weighted rotation, no repeats** *(new, my suggestion)*: each game has a weight, and the same game never runs twice in a row.
 - Minimum players online, with options to exclude vanished players or players without the play permission.
-- **Presets** *(new)*: named sets of games, switchable by command, e.g. weekend set or minimal set.
+- **Presets** *(new)*: admins create named sets of enabled games and load them by command or menu.
+  - Ships with: weekend set, minimal set, full rotation.
+  - `/chatgames preset save <name>` saves the current enabled games as a new preset.
 - Disabled worlds, an optional permission to play, and an option to allow or deny starting games from disabled worlds.
 
 **Winners and rewards**
 - Multiple places per game, with per-place rewards. The fastest time is recorded for each winner.
-- Reward actions: `[consolecmd]`, `[playercmd]`, `[playermsg]`, `[broadcast]`, `[player_as_op]` *(kept from 1.9.9 if it still works on 26.x; otherwise removed)*, and direct item give. If the inventory is full, the item drops.
+- Reward actions:
+  - `[consolecmd]`, `[playercmd]`, `[playermsg]`, `[broadcast]`
+  - `[player_as_op]` *(kept from 1.9.9 if it still works on 26.x; otherwise removed)*
+  - direct item give; if the inventory is full, the item drops
 - Chance-based rewards (`50%~ command`) and permission-gated rewards (`has:perm`).
 - Rewards have a minimum-players requirement.
+- **Anti-macro** *(new, my suggestion)*: an answer typed faster than a per-game minimum time (default 400 ms for typing games) is rejected and logged. This stops chat bots from winning every Reaction.
 
 **Progression**
-- Points: +1 per win, plus admin add/remove/set.
-- **Milestones** *(new)*: run commands at point thresholds (`milestones.yml`).
-- **Daily challenge** *(new)*: win N games today, then claim a reward. *(my call: N is configurable, default 3. 1.9.9 hard-coded 3)*
-- **Daily streak** *(new)*: consecutive days the daily challenge was completed. *(my call: currently it counts every win; I'll make it count days)*
-- **Weekly challenge** *(new)*: win N games this week, then claim a reward. Resets weekly.
-- **Server-wide daily goal** *(new, my call for what "global daily / global streak" was meant to be)*: all players together win N games in a day, and everyone who contributed gets a reward. The player's "global streak" counts consecutive days they contributed.
+- Points: +1 per win (configurable per game), plus admin add/remove/set.
+- **Milestones** *(new)*: commands that run at point thresholds (`milestones.yml`).
+- **Daily challenges** *(new)*: a set of challenges for everyone, reset every day, defined in `challenges.yml`.
+  - Challenge types:
+    - win N games, or win N games of a specific type
+    - win N races
+    - take part in N global games, or win N global games
+    - answer in under N seconds
+    - earn N points
+    - take part in an event
+  - Each challenge has its own reward. *(my call: you pick how many are active each day, either a fixed list or N drawn at random from a pool)*
+- **Weekly challenges** *(new)*: the same system with a 7-day reset. *(my call: the reset day is configurable, Monday by default)*
+- **Claiming**: rewards are claimed from the Challenges menu once a challenge shows "Ready to claim", or with `/chatgames claim`. Unclaimed rewards expire when the challenge resets.
+- **Streaks** *(new)*: three streak types, each with a 7-day reward ladder. You configure 7 rewards, and day 8 onward repeats day 7. *(my call; it can be set to loop back to day 1 instead)*
+  - **Challenge streak**: days in a row on which you completed *all* the daily challenges.
+  - **Daily win streak**: days in a row on which you won at least one game.
+  - **Global streak**: days in a row on which you took part in at least one global game.
+  - Each streak tracks its current and longest value. Missing a day resets the current streak.
+  - Streak rewards are claimed in the Streaks menu.
 
 **Leaderboards**
 - Top points.
 - Fastest typers overall.
-- **Fastest per game** *(new)*.
+- **Fastest per game** *(new)*. Your overall best time is still kept.
+- **Per-event leaderboards** *(new)*.
 - Your own position and best time are shown under each list.
 
-**GUI** *(new, my call: small player menu)*
-- `/chatgames menu`, built with your InventoryManager library.
-- Contents: game and sound toggles, your stats, the leaderboards, and challenge progress with claim buttons.
-- Fully configurable in a `menus.yml`.
+**Menus** *(new)*, built with your InventoryManager. Every item, title and slot is configurable in `menus.yml`.
+- **Main menu**, `/chatgames menu`:
+  - Profile, Challenges, Streaks and Leaderboards
+  - your game and sound toggles
+- **Profile**, `/chatgames profile [player]`:
+  - games won, by type and in total; races won
+  - fastest time overall and your best per game
+  - global games played and won
+  - events played, event wins and best event place
+  - current and longest daily, challenge and global streaks
+  - points, milestones reached, and challenges completed
+- **Challenges**: daily and weekly tabs. Each challenge shows its progress bar and status (in progress, ready to claim, claimed), and you click to claim.
+- **Streaks**: three sections (challenge, daily, global). Each shows the 7-day ladder with today highlighted and claimable days clickable.
+- **Admin menu**, `/chatgames admin`, permission `chatgames.admin`:
+  - Start a game: opens a page with every game and race.
+  - Global games: start one.
+  - Events: start or stop events.
+  - Toggle: your own setting. ToggleAll: everyone's.
+  - Presets: load a preset.
+  - Logs: pick how many recent entries (10/25/50/100) and they are printed in chat.
+  - Reload.
+  - Stop the current game.
+- **Debug menu**, `/chatgames debug`, permission `chatgames.debug`:
+  - Pick any game to run as a private test. Only you see it; there are no rewards and nothing is saved to stats.
+  - The menu shows the generated question and the answer.
+  - Buttons:
+    - answer correctly now
+    - answer correctly after X ms (100/500/1000/5000)
+    - wrong answer
+    - wrong case
+    - let it time out
+  - Each run reports:
+    - generation time
+    - whether the mock answer was accepted
+    - the measured answer time compared with the injected delay
+    - which messages and sounds fired
+  - A "run all" button tests every enabled game in turn and prints a pass/fail summary.
 
 **Messages and presentation**
 - Everything is in `messages.yml`: `<center>` text, hex colours on 1.16+, and PlaceholderAPI placeholders inside messages.
+- **Message code rewrite** *(new)*: the current `messages` classes (one class per game per message type, built from long string-replace chains) are replaced by one small builder: `Msg.of(key).with("%player%", name).send(target)`, plus a typed `MessageKey` enum. Each game declares only the placeholders it adds. This also makes the per-player sending that Folia needs simple.
 - Titles/subtitles per game.
-- Sounds for start, win, time-expired and wrong-case, with volume and pitch. The correct sound is picked for every version.
-- Material and mob names are translated into the server language (`lang`), using downloaded translation files.
+- Sounds for start, win, time-expired, wrong-case and hint, with volume and pitch. The correct sound is picked for every version.
+- Block, item and mob names are translated into the server language (`lang`):
+  - **Translation files are updated to the latest version (26.x)** *(new)*. A script regenerates `nsider4/mine-translator` from Mojang's official language assets and keeps only the block/item/entity/enchantment/effect keys, so the files are about 10x smaller.
+  - The plugin re-downloads a translation file when it is from an older version (1.9.9 only downloaded missing files).
 
 **Commands** (`/chatgames`, alias `/chatgame`)
 - Players:
-  - `help`, `top`, `fastest [game]` *(game arg new)*, `points [player]`
+  - `help`, `menu`, `profile [player]`, `challenges`, `streaks`, `claim`
+  - `top`, `fastest [game]`, `points [player]`
   - `toggle`, `togglesound`
-  - `menu` *(new)*, `challenges` *(new)*, `claim <daily|weekly>` *(new)*
+  - `event top <name>`
 - Admin:
-  - `<game> [args]` and `any`: start a specific or random game; `<race> [material/mob] [amount]` for custom races.
-  - `stop` *(new)*: end the current game with no winner.
-  - `global [word]` *(new)*, `preset <name>` *(new)*
-  - `reload`, `toggleAll`, `logs`, `remove <player>`
+  - Starting games:
+    - `<game> [args]` / `any`: start a specific or random game
+    - `<race> [material/mob] [amount]`: start a custom race
+    - `global <game>`: start a global game
+  - `stop`: end the current game with no winner
+  - `event start|stop|list <name>`
+  - `preset load|save|list <name>`
+  - `admin`, `debug`
+  - `reload`, `toggleAll`, `logs [amount]`, `remove <player>`
   - `+points`, `-points`, `setpoints <player> <amount>`
+  - `challenges reset <player>`, `streak set <player> <type> <days>`
 - `shoppinglist` still works as an alias for `memorize`.
 - All subcommands tab-complete. Every permission is declared in `plugin.yml`.
 
 **PlaceholderAPI** (`%chatgames_…%`)
 - From 1.9.9: `points`, `toggle`, `top_<n>`, `points_top_<n>`, `personal_best`, `fastest_<n>`, `fastest_time_<n>`, `show_current_pos_top`, `show_current_pos_fastest`.
 - New:
-  - `sound_toggle`
+  - `sound_toggle`, `wins`, `wins_<game>`
   - `fastest_<game>` (your best time), `fastest_<game>_<n>` and `fastest_<game>_time_<n>`
-  - `daily_wins`, `daily_goal`, `daily_streak`, `weekly_wins`, `global_streak`
+  - `daily_completed`, `daily_total`, `weekly_completed`, `weekly_total`
+  - `streak_<daily|challenge|global>` and `streak_<…>_longest`
+  - `global_played`, `global_won`
+  - `event_running`, `event_name`, `event_points`, `event_place`
   - `current_game`, `time_left`
 - All of them are served from memory, so a scoreboard never waits on the database.
 
 **Integrations and admin tools**
-- Discord webhook for winners: embed, avatar, fields.
-- Game logs to the console and/or a file, viewable in-game with `/chatgames logs`.
+- Discord webhook for winners and event results: embed, avatar, fields.
+- Game logs to the console and/or a file, viewable in-game with `/chatgames logs` or the admin menu.
 - Update check against Spigot, with a notice for OPs on join.
 - `/chatgames reload` reloads every file without a restart.
 
 **Developer API**
 - `ChatGamesStartEvent` *(now actually cancellable; in 1.9.9 cancelling did nothing)*.
 - `ChatGamesEndEvent`, which carries the game, answer, and winners with places and times.
+- `ChatGamesEventStartEvent` / `ChatGamesEventEndEvent` *(new)*, for game events.
 
----
+### 0.1 Your checklist (2026-10-20) → where it lives
+
+| Request | Status before | Where in 2.0.0 |
+|---|---|---|
+| Easier-to-read message classes | not in plan | Message code rewrite (step 5) |
+| General memorization game | Memorize existed, shopping-list only | Memorize content pools (step 5) |
+| Daily challenges + claim menu | data model only | Challenges + Challenges menu (step 9) |
+| Streaks: challenge / daily / global, 7-day setup | the recode counted wins, not days | Streaks + Streaks menu (step 9) |
+| Weekly challenges | data model only | Challenges (step 9) |
+| Milestones | done in config, not wired | step 5 |
+| Fastest time per game + overall | DB table only | steps 4–5 |
+| Sequence-completion math game | recode had missing-value equations | new Sequence; old one becomes a Math mode (step 5) |
+| Global games | Reaction skeleton | 8 global games (step 9) |
+| Admin menu | empty `Menu` enum | Admin menu (step 9b) |
+| `/chatgames profile` menu | not present | Profile menu + new stats columns (steps 4, 9b) |
+| Preset loader | config only | Presets incl. `preset save` (step 9) |
+| Debug menu | not present | Debug menu (step 9b) |
+| Update language files | files are from March 2023 | translation script + version check (step 9c) |
+| Word Association | new | step 9a |
+| Game events | new | step 9a |
+| More global games | new | step 9 |
+| Suggestions | | hints, countdown bar, weighted no-repeat rotation, anti-macro (steps 5, 9) |
+
+**Other suggestions, not in scope unless you want them:**
+- monthly "seasons", where leaderboards reset with rewards for the top 3
+- per-game opt-out, so a player can hide one game they dislike
+- BungeeCord/Velocity sync, so one game runs across a network
+
 
 ## Progress (branch `recode-2.0`)
 
@@ -451,15 +579,26 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
 3. **Bootstrap.**
    - Write `onEnable`/`onDisable` in a clear order: configs → version → DB + migrations → caches → managers → listeners → commands → PAPI → tasks.
    - Add `reloadAll()`.
-4. **Player cache lifecycle.** Load on join (also for players already online at enable), save on quit, `saveAll` on disable plus periodically. Remove direct DB reads from game code.
-5. **Core game loop end to end.** Fix bugs 7–16, award points and fastest times, add the time-expired message, and add the missing `memorize`/`sequence` messages.
+4. **Player cache lifecycle.** Load on join (also for players already online at enable), save on quit, `saveAll` on disable plus periodically. Remove direct DB reads from game code. Add the stats the profile needs: wins per game, races won, global played/won, events, streak current/longest, challenges completed.
+5. **Core game loop end to end.**
+   - Fix bugs 7–16, award points and fastest times, wire milestones, add the time-expired message.
+   - Replace the message classes with the `Msg` builder.
+   - Generalise Memorize (content pools), add the new Sequence, and turn the old one into Math's missing-value mode.
+   - Add hints, the countdown bar, weighted no-repeat rotation and anti-macro.
 6. **Commands + tab completion.** Port every 1.9.9 subcommand, then add `preset`, `challenge`/`claim` and per-game `fastest <game>`. Sync permissions in `plugin.yml`/`PermissionKey`.
 7. **PlaceholderAPI expansion.** Port the 1.9.9 placeholders and add new ones. Serve them from the cache, with no `.join()` on DB futures; 1.9.9 blocked the main thread there.
 8. **Races.**
    - Port the `ChatRaces` listener using XSeries types, then `loadRaces()`.
    - Build the win flow: rewards, messages, end event, `endRace`.
    - Keep the spawner-mob and creative-mode rules.
-9. **New features.** Challenges (rules, rewards, reset), global games (scheduling, messages, rewards) and presets. Then decide on the GUI: build a small main menu or cut it from 2.0.0.
+9. **New features.**
+   - Challenges: types, daily/weekly reset, claims.
+   - Streaks: three types, 7-day ladders.
+   - Global games: a generic global mode over the existing generators, plus Global Race.
+   - Presets, including `preset save`.
+   - 9a. **Word Association** game, and **game events**: `events.yml`, the runner that pauses the rotation, event scoring and stats tables, the end leaderboard, schedules.
+   - 9b. **Menus**: main, profile, challenges, streaks, admin, debug (mock answers + timing report).
+   - 9c. **Translations**: a script that rebuilds `mine-translator` from Mojang's latest language assets; a version check so outdated files re-download. Pushing to the GitHub repo is your call.
 10. **1.9.9 → 2.0.0 migration.**
     - DB: `fastest` column → fastest-times table.
     - Config: split the old `config.yml` into `games.yml`/`add-ons.yml`, rename `chatRaces.yml` → `races.yml`, and `shoppinglist` → `memorize`.
