@@ -3,9 +3,15 @@ package org.nsider.chatgames.placeholders;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.Stat;
+import org.nsider.chatgames.progression.ChallengeConfig;
+import org.nsider.chatgames.progression.ChallengeTracker;
+import org.nsider.chatgames.progression.Period;
+import org.nsider.chatgames.progression.StreakTracker;
+import org.nsider.chatgames.progression.StreakType;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
+import java.time.LocalDate;
 import java.util.Locale;
 
 /**
@@ -48,13 +54,27 @@ public final class PlaceholderResolver {
     @Nullable private final ChatGamesPlayer data;
     private final Status status;
     private final String empty;
+    private final ChallengeConfig challenges;
+    private final LocalDate today;
 
     public PlaceholderResolver(@Nonnull LeaderboardSnapshot board, @Nullable ChatGamesPlayer data,
                                @Nonnull Status status, @Nonnull String empty) {
+        this(board, data, status, empty, ChallengeConfig.EMPTY, LocalDate.now());
+    }
+
+    /**
+     * @param challenges for the daily and weekly placeholders
+     * @param today      in the challenges' time zone, for those and the streaks
+     */
+    public PlaceholderResolver(@Nonnull LeaderboardSnapshot board, @Nullable ChatGamesPlayer data,
+                               @Nonnull Status status, @Nonnull String empty,
+                               @Nonnull ChallengeConfig challenges, @Nonnull LocalDate today) {
         this.board = board;
         this.data = data;
         this.status = status;
         this.empty = empty;
+        this.challenges = challenges;
+        this.today = today;
     }
 
     /**
@@ -84,8 +104,22 @@ public final class PlaceholderResolver {
             case "race_target": return status.raceTarget == null ? empty : status.raceTarget;
             case "race_amount": return status.raceTarget == null ? empty : String.valueOf(status.raceAmount);
             case "race_progress": return status.raceTarget == null ? empty : String.valueOf(status.raceProgress);
+            case "challenges_completed": return stat(Stat.CHALLENGES_COMPLETED);
+            case "daily_completed": return completed(Period.DAILY);
+            case "daily_total": return String.valueOf(challenges.active(Period.DAILY, today).size());
+            case "weekly_completed": return completed(Period.WEEKLY);
+            case "weekly_total": return String.valueOf(challenges.active(Period.WEEKLY, today).size());
             default:
                 break;
+        }
+
+        if (key.startsWith("streak_")) {
+            String rest = key.substring("streak_".length());
+            boolean longest = rest.endsWith("_longest");
+            StreakType type = StreakType.fromName(longest ? rest.substring(0, rest.length() - "_longest".length()) : rest);
+            if (type == null) return null;
+            if (data == null) return "0";
+            return String.valueOf(longest ? StreakTracker.longest(data, type) : StreakTracker.current(data, type, today));
         }
 
         if (key.startsWith("wins_")) {
@@ -104,6 +138,10 @@ public final class PlaceholderResolver {
             return fastest(key.substring("fastest_".length()));
         }
         return null;
+    }
+
+    private String completed(Period period) {
+        return data == null ? "0" : String.valueOf(ChallengeTracker.completed(data, challenges, period, today));
     }
 
     /**

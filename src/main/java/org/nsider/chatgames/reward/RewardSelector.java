@@ -57,23 +57,34 @@ public final class RewardSelector {
         ConfigurationSection drawn = rewardDraw.draw(random);
         if (drawn != null) chosen.add(drawn);
 
+        List<String> lines = new ArrayList<>();
+        for (ConfigurationSection reward : chosen) lines.addAll(reward.getStringList("data"));
+        return fromLines(lines, hasPermission, random, invalid);
+    }
+
+    /**
+     * Step 3 alone, for rewards that are a plain list of lines (challenges, streaks).
+     *
+     * @return the commands to run, in order
+     */
+    @Nonnull
+    public static List<String> fromLines(@Nonnull List<String> lines, @Nonnull Predicate<String> hasPermission,
+                                         @Nonnull Random random, @Nonnull Consumer<String> invalid) {
         List<String> commands = new ArrayList<>();
         Draw<String> commandDraw = new Draw<>();
-        for (ConfigurationSection reward : chosen) {
-            for (String line : reward.getStringList("data")) {
-                String command = withoutPermission(line, hasPermission);
-                if (command == null || command.isEmpty()) continue;
-                int separator = command.indexOf(CHANCE_SEPARATOR);
-                if (separator < 0) {
-                    commands.add(command);
-                    continue;
-                }
-                try {
-                    commandDraw.add(Double.parseDouble(command.substring(0, separator).trim()),
-                            command.substring(separator + CHANCE_SEPARATOR.length()).trim());
-                } catch (NumberFormatException e) {
-                    invalid.accept(line);
-                }
+        for (String line : lines) {
+            String command = withoutPermission(line, hasPermission);
+            if (command == null || command.isEmpty()) continue;
+            int separator = command.indexOf(CHANCE_SEPARATOR);
+            if (separator < 0) {
+                commands.add(command);
+                continue;
+            }
+            try {
+                commandDraw.add(Double.parseDouble(command.substring(0, separator).trim()),
+                        command.substring(separator + CHANCE_SEPARATOR.length()).trim());
+            } catch (NumberFormatException e) {
+                invalid.accept(line);
             }
         }
         String extra = commandDraw.draw(random);

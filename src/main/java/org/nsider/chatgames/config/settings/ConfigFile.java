@@ -23,7 +23,9 @@ public enum ConfigFile {
     ADDONS(ConfigManager::getAddons),
     MILESTONES(ConfigManager::getMilestones),
     GLOBAL_GAMES(ConfigManager::getGlobalGames),
-    PRESETS(ConfigManager::getPresets);
+    PRESETS(ConfigManager::getPresets),
+    CHALLENGES(ConfigManager::getChallenges),
+    STREAKS(ConfigManager::getStreaks);
 
     private final Supplier<FileConfiguration> supplier;
 

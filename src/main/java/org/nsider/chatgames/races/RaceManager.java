@@ -15,10 +15,12 @@ import org.nsider.chatgames.events.ChatGamesStartEvent;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.globalgames.GlobalGameConfig;
 import org.nsider.chatgames.managers.TopManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.model.player.Stat;
+import org.nsider.chatgames.progression.Activity;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.chatgames.utils.management.TimeUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
@@ -49,6 +51,8 @@ public final class RaceManager {
     private volatile Map<GameType, RaceData> data = Collections.emptyMap();
     @Nullable private volatile Race current;
     @Nullable private ChatGamesScheduler.Task expiry;
+    /** Who finished the running global race, by place. */
+    private final List<PlayerResult> finishers = Collections.synchronizedList(new ArrayList<PlayerResult>());
 
     public RaceManager(@Nonnull ChatGames plugin) {
         this.plugin = plugin;
@@ -94,12 +98,27 @@ public final class RaceManager {
      *         exists on this version, or a plugin cancelled it (a console warning says which)
      */
     public boolean start(@Nonnull GameType type, @Nonnull String... args) {
-        Race race = prepare(type, args);
+        return start(prepare(type, null, args));
+    }
+
+    /**
+     * Starts a global race: everyone who gets there within the global time limit finishes.
+     * Main/global thread.
+     *
+     * @return false for the same reasons as {@link #start(GameType, String...)}
+     */
+    public boolean startGlobal(@Nonnull GameType type, @Nonnull GlobalGameConfig.Entry global, @Nonnull String... args) {
+        return start(prepare(type, global, args));
+    }
+
+    private boolean start(@Nullable Race race) {
         if (race == null) return false;
+        GameType type = race.getType();
 
         GameManager manager = plugin.getGameManager();
         if (!manager.tryBegin()) return false;
         current = race;
+        finishers.clear();
         ChatGamesStartEvent event = new ChatGamesStartEvent(type, null);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
@@ -114,7 +133,7 @@ public final class RaceManager {
     }
 
     @Nullable
-    private Race prepare(GameType type, String[] args) {
+    private Race prepare(GameType type, @Nullable GlobalGameConfig.Entry global, String[] args) {
         RaceData races = getData(type);
         String target;
         int amount;
@@ -146,9 +165,9 @@ public final class RaceManager {
                     + " is not a valid " + (type == GameType.HUNT ? "mob" : "material") + " on this server version.");
             return null;
         }
-        int time = section(type).getInt("timeToComplete_seconds", DEFAULT_TIME_LIMIT);
+        int time = global != null ? global.getDurationSeconds() : section(type).getInt("timeToComplete_seconds", DEFAULT_TIME_LIMIT);
         return new Race(type, resolved, resolved.displayName(plugin.getLanguageManager()), amount,
-                races.getRewards(resolved.getName(), amount), time > 0 ? time : DEFAULT_TIME_LIMIT);
+                races.getRewards(resolved.getName(), amount), time > 0 ? time : DEFAULT_TIME_LIMIT, global != null);
     }
 
     /**
@@ -157,9 +176,21 @@ public final class RaceManager {
      * @param race the race the action was checked against (a newer one may have started since)
      */
     public void progress(@Nonnull Race race, @Nonnull Player player, int amount) {
-        if (!race.getProgress().add(player.getUniqueId(), amount)) return;
+        int place = race.getProgress().addAndPlace(player.getUniqueId(), amount);
+        if (place == 0) return;
         double seconds = race.getElapsedSeconds();
-        plugin.getScheduler().global(() -> win(race, player, seconds));
+        if (race.isGlobal()) {
+            plugin.getScheduler().global(() -> finish(race, player, seconds, place));
+        } else {
+            plugin.getScheduler().global(() -> win(race, player, seconds));
+        }
+    }
+
+    /** A player made it in a global race, which goes on until time is up. */
+    private void finish(Race race, Player player, double seconds, int place) {
+        if (current != race) return;
+        finishers.add(new PlayerResult(player.getUniqueId(), seconds, place));
+        plugin.getGlobalGameManager().award(player, race.getType(), seconds, place);
     }
 
     private void win(Race race, Player player, double seconds) {
@@ -194,12 +225,25 @@ public final class RaceManager {
         GameSoundManager.playGameSound(player, "win");
 
         plugin.getGameUtils().giveRaceRewards(type.getConfigKey(), player, race.getRewards());
+        plugin.getProgressionManager().record(player, Activity.win(type, seconds, Math.max(0, points)));
         plugin.getLeaderboardCache().refresh();
         end(race);
+        plugin.getGlobalGameManager().afterRegularGame();
     }
 
     private void expire(Race race) {
         if (current != race || !race.getProgress().close()) return;
+        if (race.isGlobal()) {
+            List<PlayerResult> results;
+            synchronized (finishers) {
+                results = new ArrayList<>(finishers);
+            }
+            results.sort((a, b) -> Integer.compare(a.getPlace(), b.getPlace()));
+            Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(race.getType(), null, results));
+            plugin.getGlobalGameManager().announceEnd(race.getType(), race.getAmount() + " " + race.getDisplayName(), results);
+            end(race);
+            return;
+        }
         Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(race.getType(), null, Collections.<PlayerResult>emptyList()));
         Msg message = message(race, "time_expired_message");
         for (Player player : players()) {
@@ -208,6 +252,7 @@ public final class RaceManager {
             if (plugin.getGameManager().gamesIsToggled(player)) GameSoundManager.playGameSound(player, "time-expired");
         }
         end(race);
+        plugin.getGlobalGameManager().afterRegularGame();
     }
 
     /**
@@ -235,7 +280,10 @@ public final class RaceManager {
     }
 
     private void announceStart(Race race) {
-        Msg message = message(race, "gameStartAnnouncement");
+        Msg message = race.isGlobal()
+                ? plugin.getGlobalGameManager().startMessage(race.getType(), race.getTimeLimitSeconds())
+                        .with("%value%", race.getDisplayName()).with("%amount%", race.getAmount())
+                : message(race, "gameStartAnnouncement");
         ConfigurationSection settings = section(race.getType());
         String title = fill(race, settings.getString("titleMessage", ""));
         String subtitle = fill(race, settings.getString("subtitleMessage", ""));

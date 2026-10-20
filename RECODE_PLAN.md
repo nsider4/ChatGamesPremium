@@ -411,6 +411,31 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - `RewardSelector` is now pure and thread-safe and follows the 1.9.9 rules (`minimum-players`, one reward drawn by `chance`, `N%~` lines, `has:` permissions). Unit-tested, and verified live on a chat game and on races.
   - **Config files load as UTF-8** on every version: on 1.8 on Windows, ✓ ✯ had shown as "âœ“".
   - **Test tooling:** `scripts/bot.js` gained `dig`, `place`, `eat`, `craft`, `attack` and `smelt`.
+- [x] **Step 9 (part 1): Challenges, streaks, global games** (2026-10-20). 118 tests. Tested live on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2, with a bot and PlaceholderAPI.
+  - **Challenges (`progression/`, `challenges.yml`):**
+    - Daily and weekly sets, `fixed` or `random` (N drawn per period, the same for everyone).
+    - Weekly `reset-day`, and a `timezone` for when days start.
+    - Types: `WIN_GAMES`, `WIN_GAME`, `WIN_RACES`, `PLAY_GLOBAL`, `WIN_GLOBAL`, `FAST_WIN`, `EARN_POINTS`, `PLAY_EVENT`.
+    - Progress lives in the stats table (`challenge.<period>.<id>`). It resets to 0 on a new period, so there is one row per challenge id.
+    - Claims are atomic. Rewards use the rewards.yml line format (`%~`, `has:`).
+  - **Streaks (`streaks.yml`):**
+    - Challenge, daily-win and global, as days in a row, with current and longest.
+    - 7-day ladder; after day 7 it `repeat`s or `loop`s.
+    - Every unclaimed day of a living streak can be claimed. A missed day restarts the streak and loses unclaimed days.
+  - **Commands:**
+    - `challenges`, `streaks`, `claim`
+    - Admin: `challenges reset <player>`, `streak set <player> <type> <days>` (works for offline players)
+    - New permissions `chatgames.challenges|streaks|claim|challenges.reset|streaks.set|global`.
+  - **Placeholders:** `daily_completed`, `daily_total`, `weekly_completed`, `weekly_total`, `challenges_completed`, `streak_<type>`, `streak_<type>_longest`.
+  - **Removed:** the v1 daily fields, the `<table>_daily` table (recode-only, never in 1.9.9) and `ChallengeManager`.
+  - **Global games (`globalgames/`, `global_games.yml`):**
+    - Any chat game except Memorize and Guess the Number, or any race, runs as a normal `Game`/`Race` with `global` set. Places never run out and the game ends when time is up.
+    - Everyone who makes it gets points, `global_played`, participation rewards, and their place's rewards. The first `rewarded-places` (3) count as wins for `global_won`, `WIN_GLOBAL` and the daily streak.
+    - Answers are always hidden, including a repeated answer. The first live run showed a second "creeper" in chat; now fixed.
+    - Start: by chance after a regular game (`chance-after-game`, `delay-seconds`), on a timer (`interval-minutes`), or with `/chatgames global <game> [values]`.
+    - Shared `rewards` with per-game overrides, and the global messages in the same file.
+    - Global race: `RaceProgress` in global mode gives each finisher a place, atomically. Tested with 8 threads.
+  - **Bug found by the tests:** `%challenge%` inside a reward line left the name's own `%amount%` unfilled.
 
 ---
 

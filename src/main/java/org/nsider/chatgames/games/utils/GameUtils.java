@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
+import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
 import java.util.List;
@@ -42,6 +43,23 @@ public class GameUtils {
      */
     public void giveRaceRewards(String race, Player player, List<String> names) {
         plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().raceRewards(race, player, names), player));
+    }
+
+    /**
+     * Gives a player who made it in a global game their rewards from global_games.yml.
+     */
+    public void giveGlobalRewards(GameType type, Player player, int place) {
+        plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().globalRewards(type, player, place), player));
+    }
+
+    /**
+     * Gives a player reward lines in the rewards.yml {@code data} format (challenges, streaks).
+     *
+     * @param what names the source in console warnings, e.g. "daily challenge win_5"
+     */
+    public void giveLineRewards(String what, Player player, List<String> lines) {
+        if (lines.isEmpty()) return;
+        plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().lineRewards(what, player, lines), player));
     }
 
     private void processRewards(List<String> rewards, Player player) {

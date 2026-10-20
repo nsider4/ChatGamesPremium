@@ -10,6 +10,7 @@ import org.nsider.inventorymanager.extras.Nonnull;
 public enum PermissionKey {
     START_TYPE("chatgames.start.<type>", "Allows starting one game or race by command, e.g. chatgames.start.unscramble.", "op"),
     START_ALL("chatgames.start.*", "Allows starting any game or race, and starting games from disabled worlds.", "op"),
+    GLOBAL("chatgames.global", "Allows starting a global game or race by command.", "op"),
     STOP("chatgames.stop", "Allows stopping the running game with no winner.", "op"),
     TOP("chatgames.top", "Allows viewing the top players by points.", "true"),
     FASTEST_TOP("chatgames.fastesttop", "Allows viewing the fastest players, overall or per game.", "true"),
@@ -26,7 +27,12 @@ public enum PermissionKey {
     TOGGLE_ALL("chatgames.toggleAll", "Allows turning the automatic game rotation on or off.", "op"),
     PRESET("chatgames.preset", "Allows listing, loading and saving game presets.", "op"),
     REMOVE("chatgames.remove", "Allows removing a player from the database.", "op"),
-    LOGS("chatgames.logs", "Allows viewing the game logs.", "op");
+    LOGS("chatgames.logs", "Allows viewing the game logs.", "op"),
+    CHALLENGES("chatgames.challenges", "Allows viewing your daily and weekly challenges.", "true"),
+    STREAKS("chatgames.streaks", "Allows viewing your streaks.", "true"),
+    CLAIM("chatgames.claim", "Allows claiming finished challenges and streak rewards.", "true"),
+    CHALLENGES_RESET("chatgames.challenges.reset", "Allows clearing a player's challenge progress.", "op"),
+    STREAKS_SET("chatgames.streaks.set", "Allows setting a player's streak.", "op");
 
     private final String permission;
     private final String description;

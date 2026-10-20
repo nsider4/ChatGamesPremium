@@ -16,6 +16,7 @@ import org.nsider.chatgames.managers.TopManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.model.player.Stat;
+import org.nsider.chatgames.progression.Activity;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
 import org.nsider.inventorymanager.extras.Nonnull;
@@ -37,7 +38,7 @@ public final class AnswerHandler {
     /**
      * Handles a chat message.
      *
-     * @return true if it won a place (the caller may then hide the message)
+     * @return true if it won a place, or repeated a global game's answer (the caller may then hide the message)
      */
     public boolean onChat(@Nonnull Player player, @Nonnull String message) {
         Game game = plugin.getGameManager().getGame();
@@ -61,7 +62,11 @@ public final class AnswerHandler {
     private boolean submit(Player player, Game game, String message) {
         Round round = game.getRound();
         GameSettings settings = game.getSettings();
-        if (round == null || settings == null || game.isFinished() || game.hasResult(player.getUniqueId())) return false;
+        if (round == null || settings == null || game.isFinished()) return false;
+        if (game.hasResult(player.getUniqueId())) {
+            // Saying the answer again in a global game would hand it to everyone still playing
+            return game.isGlobal() && AnswerChecker.check(round, message, settings.isCaseSensitive()) == AnswerChecker.Result.CORRECT;
+        }
         GameManager manager = plugin.getGameManager();
         if (!manager.gamesIsToggled(player) || !manager.worldEnabled(player)) return false;
 
@@ -84,6 +89,11 @@ public final class AnswerHandler {
         PlayerResult placed = game.claimPlace(player.getUniqueId());
         if (placed == null) return false; // every place was taken a moment earlier
 
+        if (game.isGlobal()) {
+            // Everyone has until the time limit, which ends the game
+            plugin.getGlobalGameManager().award(player, game.getGameType(), placed.getTime(), placed.getPlace());
+            return true;
+        }
         award(player, game, settings, placed);
         if (game.isFull()) {
             plugin.getScheduler().global(() -> manager.conclude(game));
@@ -108,5 +118,6 @@ public final class AnswerHandler {
             TopManager.recordTime(player, type, placed.getTime());
         }
         plugin.getGameUtils().giveRewards(type.getConfigKey(), player, placed.getPlace());
+        plugin.getProgressionManager().record(player, Activity.win(type, placed.getTime(), settings.getPoints()));
     }
 }

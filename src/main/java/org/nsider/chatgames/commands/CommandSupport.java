@@ -35,6 +35,14 @@ public final class CommandSupport {
         if (!message.isEmpty()) MessageUtils.sendMessage(sender, message);
     }
 
+    /**
+     * @return a message from messages.yml, for use inside another message
+     */
+    @Nonnull
+    public static String message(@Nonnull MessageKey key, @Nonnull String... placeholders) {
+        return ConfigManager.getMessages().get(key, placeholders);
+    }
+
     public static void usage(@Nonnull CommandSender sender, @Nonnull String usage) {
         send(sender, MessageKey.USAGE, "%usage%", usage);
     }

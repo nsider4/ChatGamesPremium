@@ -6,7 +6,6 @@ import org.nsider.chatgames.utils.database.QueryUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,15 +37,13 @@ public final class PlayerRepository {
     private final String mainTable;
     private final String fastestTable;
     private final String statsTable;
-    private final String dailyTable;
 
     public PlayerRepository(@Nonnull ConnectionSource connections, @Nonnull String mainTable,
-                            @Nonnull String fastestTable, @Nonnull String statsTable, @Nonnull String dailyTable) {
+                            @Nonnull String fastestTable, @Nonnull String statsTable) {
         this.connections = connections;
         this.mainTable = mainTable;
         this.fastestTable = fastestTable;
         this.statsTable = statsTable;
-        this.dailyTable = dailyTable;
     }
 
     /**
@@ -70,16 +67,6 @@ public final class PlayerRepository {
                     + "stat VARCHAR(64) NOT NULL,"
                     + "stat_value BIGINT NOT NULL,"
                     + "PRIMARY KEY (UUID, stat))");
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + dailyTable + " ("
-                    + "UUID VARCHAR(36) NOT NULL,"
-                    + "WinsToday INT NOT NULL,"
-                    + "RewardClaimed BOOLEAN NOT NULL,"
-                    + "LastUpdated DATE NOT NULL,"
-                    + "ChallengeStreak INT NOT NULL,"
-                    + "DailyStreak INT NOT NULL,"
-                    + "GlobalStreak INT NOT NULL,"
-                    + "WeeklyWins INT NOT NULL,"
-                    + "PRIMARY KEY (UUID))");
         }
     }
 
@@ -122,22 +109,8 @@ public final class PlayerRepository {
                 }
                 return null;
             }, id);
-
-            QueryUtils.query(connection, "SELECT * FROM " + dailyTable + " WHERE UUID = ?", rs -> {
-                if (!rs.next()) return null;
-                Date lastUpdated = rs.getDate("LastUpdated");
-                if (lastUpdated != null) player.setLastUpdated(lastUpdated.toLocalDate());
-                player.setWinsToday(rs.getInt("WinsToday"));
-                player.setRewardClaimed(rs.getBoolean("RewardClaimed"));
-                player.setChallengeStreak(rs.getInt("ChallengeStreak"));
-                player.setDailyStreak(rs.getInt("DailyStreak"));
-                player.setGlobalStreak(rs.getInt("GlobalStreak"));
-                player.setWeeklyWins(rs.getInt("WeeklyWins"));
-                return null;
-            }, id);
         }
 
-        player.resetDailyIfNeeded();
         // Loading isn't a change; only what happens from here on needs saving
         player.snapshot();
         return player;
@@ -184,13 +157,6 @@ public final class PlayerRepository {
                     }
                 }
 
-                try (PreparedStatement daily = connection.prepareStatement("REPLACE INTO " + dailyTable
-                        + " (UUID, WinsToday, RewardClaimed, LastUpdated, ChallengeStreak, DailyStreak, GlobalStreak, WeeklyWins)"
-                        + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
-                    QueryUtils.executeUpdate(daily, id, data.winsToday, data.rewardClaimed, Date.valueOf(data.lastUpdated),
-                            data.challengeStreak, data.dailyStreak, data.globalStreak, data.weeklyWins);
-                }
-
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -210,7 +176,7 @@ public final class PlayerRepository {
         String id = uuid.toString();
         try (Connection connection = connections.get()) {
             int removed = 0;
-            for (String table : new String[]{mainTable, fastestTable, statsTable, dailyTable}) {
+            for (String table : new String[]{mainTable, fastestTable, statsTable}) {
                 try (PreparedStatement delete = connection.prepareStatement("DELETE FROM " + table + " WHERE UUID = ?")) {
                     removed += QueryUtils.executeUpdate(delete, id);
                 }

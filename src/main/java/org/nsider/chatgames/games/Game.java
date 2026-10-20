@@ -49,6 +49,9 @@ public class Game {
     @Nullable
     private final GameSettings settings;
 
+    /** Everyone who answers in time places; see {@link org.nsider.chatgames.globalgames.GlobalGameManager}. */
+    private final boolean global;
+
     private final long startedAtNanos = System.nanoTime();
 
     @Getter(lombok.AccessLevel.NONE)
@@ -65,22 +68,30 @@ public class Game {
      * @param maxWinners How many players can win; at least 1.
      */
     public Game(GameType gameType, String answer, int maxWinners) {
-        this(gameType, answer, maxWinners, null, null);
+        this(gameType, answer, maxWinners, null, null, false);
     }
 
     /**
      * A game for a generated round, played with the given settings.
      */
     public Game(@Nonnull Round round, @Nonnull GameSettings settings) {
-        this(round.getType(), round.getMainAnswer(), settings.getWinners(), round, settings);
+        this(round, settings, false);
     }
 
-    private Game(GameType gameType, String answer, int maxWinners, Round round, GameSettings settings) {
+    /**
+     * @param global true for a global game: places never run out, it only ends when time is up
+     */
+    public Game(@Nonnull Round round, @Nonnull GameSettings settings, boolean global) {
+        this(round.getType(), round.getMainAnswer(), global ? Integer.MAX_VALUE : settings.getWinners(), round, settings, global);
+    }
+
+    private Game(GameType gameType, String answer, int maxWinners, Round round, GameSettings settings, boolean global) {
         this.gameType = gameType;
         this.answer = answer;
         this.maxWinners = Math.max(1, maxWinners);
         this.round = round;
         this.settings = settings;
+        this.global = global;
     }
 
     /**

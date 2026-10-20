@@ -20,6 +20,9 @@ public final class Stat {
     /** Global games finished in a rewarded place. */
     public static final String GLOBAL_WON = "global_won";
 
+    /** Daily and weekly challenges completed (claimed or not). */
+    public static final String CHALLENGES_COMPLETED = "challenges_completed";
+
     /** Milestones reached but not yet paid out, as "milestone_pending.<points>" = 1. */
     public static final String MILESTONE_PENDING_PREFIX = "milestone_pending.";
 

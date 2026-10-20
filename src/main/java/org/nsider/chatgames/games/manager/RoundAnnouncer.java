@@ -43,12 +43,18 @@ public final class RoundAnnouncer {
         this.plugin = plugin;
     }
 
-    /** The question. For Memorize this shows the list to remember. */
-    public void announceStart(@Nonnull Round round, @Nonnull GameSettings settings) {
+    /**
+     * The question. For Memorize this shows the list to remember.
+     *
+     * @param global a global game: its announcement from global_games.yml goes first
+     */
+    public void announceStart(@Nonnull Round round, @Nonnull GameSettings settings, boolean global) {
         Msg message = base(round, settings, "gameStartAnnouncement").component(round.getComponent());
+        Msg header = global ? plugin.getGlobalGameManager().startMessage(round.getType(), settings.getTimeSeconds()) : null;
         for (Player player : players()) {
             if (!canPlay(player)) continue;
             GameSoundManager.playGameSound(player, "game-start");
+            if (header != null) header.send(player);
             message.send(player);
             if (round.getMemorizeSeconds() == 0) {
                 sendTitle(player, round, settings);

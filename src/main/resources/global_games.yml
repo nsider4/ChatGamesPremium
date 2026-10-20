@@ -1,6 +1,142 @@
+#GLOBAL GAMES
+#
+#In a global game everyone who answers (or, in a global race, gets there) within the time
+#limit is rewarded, not just the first few. Every player who makes it gets the participation
+#rewards and the points below; the first places also get their place's rewards.
+#Answers to a global game are always hidden from chat, so they can't be copied.
+#
+#Global games start by chance after a regular game, on a timer, or with
+#/chatgames global <game> [values] (the same values as starting the game normally).
 
-global_word:
-  enable: true
-  duration_seconds: 30
-  broadcast_prompt: "&eGlobal Game! Type &b%word% &eto join!"
-  chance_trigger_percent: 5
+triggers:
+  #Percent chance that a global game starts after a regular game or race ends (0 = never).
+  chance-after-game: 10
+  #Seconds between the regular game ending and the global game starting.
+  delay-seconds: 5
+  #Minutes between global games started on a timer (0 = off).
+  interval-minutes: 0
+  #Players needed online for a global game to start by itself (the command ignores this).
+  minimum-players: 2
+
+#How many of the first places count as winning a global game: they get their place's rewards
+#and count for WIN_GLOBAL challenges, the daily win streak and %chatgames_global_won%.
+rewarded-places: 3
+
+#Used by every game below that has no 'rewards' of its own. The same format as rewards.yml
+#(chance, minimum-players, '<chance>%~ ' and 'has:<permission>' all work).
+rewards:
+  participation:
+    reward_1:
+      data:
+        - '[consolecmd] give %player% iron_ingot 2'
+  1:
+    reward_1:
+      data:
+        - '[consolecmd] give %player% diamond 1'
+  2:
+    reward_1:
+      data:
+        - '[consolecmd] give %player% gold_ingot 3'
+  3:
+    reward_1:
+      data:
+        - '[consolecmd] give %player% iron_ingot 5'
+
+messages:
+  #Shown above the game's own question. %time% is the time limit in seconds, %game% the game.
+  start:
+    - '&6&l» GLOBAL GAME! &fEveryone who answers within &e%time%s &fwins!'
+  #Shown instead of the race's own start message. %amount% and %value% are the goal.
+  race_start:
+    - ''
+    - '&6&l» GLOBAL RACE! &fEveryone who gets &e%amount% %value% &fwithin &e%time%s &fwins!'
+    - ''
+  #To each player who makes it. %place% is their place, %points% what they earned.
+  solved: '&8[%prefix%&8] &aYou made it in &f%time%s &aas &f#%place%&a! &7(+%points% points)'
+  #%count% is how many made it; %winner_<n>% and %time_<n>% the first three.
+  #%correct_answer% is the answer, or for a race its goal (e.g. 16 Stone).
+  end:
+    - '&6&l» GLOBAL GAME OVER! &e%count% &fplayer(s) made it. &7(%correct_answer%)'
+    - '&f  1. &e%winner_1% &7%time_1%s  &f2. &e%winner_2% &7%time_2%s  &f3. &e%winner_3% &7%time_3%s'
+  nobody:
+    - '&6&l» GLOBAL GAME OVER! &cNobody made it in time. &7(%correct_answer%)'
+
+#The games that can be played globally. Memorize and Guess the Number can't.
+#  enabled: whether it can start (by chance, timer or command)
+#  duration_seconds: how long everyone has
+#  points: what every player who makes it earns
+#  rewards: optional, replaces the shared rewards above for this game
+games:
+  reaction:
+    enabled: true
+    duration_seconds: 20
+    points: 1
+  unscramble:
+    enabled: true
+    duration_seconds: 30
+    points: 1
+  math:
+    enabled: true
+    duration_seconds: 25
+    points: 1
+  sequence:
+    enabled: true
+    duration_seconds: 30
+    points: 1
+  trivia:
+    enabled: true
+    duration_seconds: 30
+    points: 1
+  fillout:
+    enabled: true
+    duration_seconds: 30
+    points: 1
+  unreverse:
+    enabled: false
+    duration_seconds: 30
+    points: 1
+  random:
+    enabled: false
+    duration_seconds: 25
+    points: 1
+  variable:
+    enabled: false
+    duration_seconds: 30
+    points: 1
+  hoverable:
+    enabled: false
+    duration_seconds: 25
+    points: 1
+  clickable:
+    enabled: false
+    duration_seconds: 20
+    points: 1
+  #Global races: everyone who gets the amount in time. Targets and amounts come from races.yml.
+  mine:
+    enabled: true
+    duration_seconds: 90
+    points: 1
+  hunt:
+    enabled: true
+    duration_seconds: 90
+    points: 1
+  place:
+    enabled: false
+    duration_seconds: 90
+    points: 1
+  fish:
+    enabled: false
+    duration_seconds: 120
+    points: 1
+  eat:
+    enabled: false
+    duration_seconds: 90
+    points: 1
+  craft:
+    enabled: false
+    duration_seconds: 90
+    points: 1
+  furnace:
+    enabled: false
+    duration_seconds: 120
+    points: 1

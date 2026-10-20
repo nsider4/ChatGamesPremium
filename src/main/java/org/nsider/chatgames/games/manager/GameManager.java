@@ -9,6 +9,7 @@ import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.games.Game;
+import org.nsider.chatgames.globalgames.GlobalGameConfig;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
@@ -55,17 +56,32 @@ public class GameManager {
      * @return false if something is already running, the game can't be generated, or a plugin cancelled it
      */
     public boolean startGame(@Nonnull GameType type, @Nonnull String... args) {
+        return startGame(type, null, args);
+    }
+
+    /**
+     * Starts a global game or race now, with its settings from global_games.yml.
+     *
+     * @return false if something is already running, the game can't be generated, or a plugin cancelled it
+     */
+    public boolean startGlobal(@Nonnull GameType type, @Nonnull GlobalGameConfig.Entry global, @Nonnull String... args) {
+        return startGame(type, global, args);
+    }
+
+    private boolean startGame(GameType type, @Nullable GlobalGameConfig.Entry global, String[] args) {
         boolean started;
         if (type.isRace()) {
             try {
-                started = plugin.getRaceManager().start(type, args);
+                started = global == null ? plugin.getRaceManager().start(type, args)
+                        : plugin.getRaceManager().startGlobal(type, global, args);
             } catch (RuntimeException e) {
                 // Free the slot, or no game could ever start again
                 if (!plugin.getRaceManager().stop(false)) endGame();
                 throw e;
             }
         } else {
-            started = plugin.getGameBuilder().start(type, args);
+            started = global == null ? plugin.getGameBuilder().start(type, args)
+                    : plugin.getGameBuilder().startGlobal(type, global, args);
         }
         if (started) lastStarted = type;
         return started;
@@ -108,7 +124,9 @@ public class GameManager {
         cancelRoundTasks();
 
         Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(game.getGameType(), game.getAnswer(), game.getResultsByPlace()));
-        if (game.hasWinners()) {
+        if (game.isGlobal()) {
+            plugin.getGlobalGameManager().announceEnd(game.getGameType(), game.getAnswer(), game.getResultsByPlace());
+        } else if (game.hasWinners()) {
             announcer.announceWinners(game);
             // Points and times changed: the placeholders' leaderboards catch up now rather than at the next refresh
             plugin.getLeaderboardCache().refresh();
@@ -118,6 +136,7 @@ public class GameManager {
         if (this.game == game) {
             endGame();
         }
+        if (!game.isGlobal()) plugin.getGlobalGameManager().afterRegularGame();
     }
 
     /**

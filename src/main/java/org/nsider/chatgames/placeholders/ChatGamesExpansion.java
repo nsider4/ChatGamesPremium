@@ -7,6 +7,7 @@ import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
+import org.nsider.chatgames.progression.ProgressionManager;
 import org.nsider.chatgames.races.Race;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
@@ -63,7 +64,8 @@ public class ChatGamesExpansion extends PlaceholderExpansion {
                 plugin.getGameManager().getCurrentGame(), plugin.getMainTask().getSecondsUntilNextGame(),
                 race == null ? null : race.getDisplayName(), race == null ? 0 : race.getAmount(),
                 race == null || player == null ? 0 : race.getProgress().getCount(player.getUniqueId()));
+        ProgressionManager progression = plugin.getProgressionManager();
         return new PlaceholderResolver(plugin.getLeaderboardCache().getSnapshot(), data, status,
-                empty == null ? "" : empty).resolve(params);
+                empty == null ? "" : empty, progression.getChallenges(), progression.today()).resolve(params);
     }
 }

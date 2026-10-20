@@ -24,6 +24,8 @@ public class ConfigManager {
     @Getter private static Milestones milestones;
     @Getter private static GlobalGames globalGames;
     @Getter private static Presets presets;
+    @Getter private static Challenges challenges;
+    @Getter private static Streaks streaks;
 
     private ConfigManager() {}
 
@@ -47,6 +49,8 @@ public class ConfigManager {
         milestones = new Milestones();
         globalGames = new GlobalGames();
         presets = new Presets();
+        challenges = new Challenges();
+        streaks = new Streaks();
 
         // Messages read messages.yml, so they are built last
         messages = new Messages();
@@ -71,7 +75,9 @@ public class ConfigManager {
                 & races.reload()
                 & milestones.reload()
                 & globalGames.reload()
-                & presets.reload();
+                & presets.reload()
+                & challenges.reload()
+                & streaks.reload();
 
         messages = new Messages();
         return success;
@@ -160,6 +166,24 @@ public class ConfigManager {
         public Presets() {
             super(plugin, "presets");
             options().copyHeader(true);
+        }
+    }
+
+    /**
+     * Daily and weekly challenges
+     */
+    public static class Challenges extends YamlConfig {
+        public Challenges() {
+            super(plugin, "challenges");
+        }
+    }
+
+    /**
+     * The streak reward ladders
+     */
+    public static class Streaks extends YamlConfig {
+        public Streaks() {
+            super(plugin, "streaks");
         }
     }
 }

@@ -14,6 +14,8 @@ import org.nsider.chatgames.games.round.Round;
 import org.nsider.chatgames.games.round.RoundContext;
 import org.nsider.chatgames.games.round.RoundGenerator;
 import org.nsider.chatgames.games.round.RoundGenerators;
+import org.nsider.chatgames.globalgames.GlobalGameConfig;
+import org.nsider.chatgames.globalgames.GlobalGameManager;
 
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
@@ -42,9 +44,23 @@ public class GameBuilder {
      * @return true if the game started
      */
     public boolean start(@Nonnull GameType type, @Nonnull String... args) {
+        return start(type, null, args);
+    }
+
+    /**
+     * Starts a global game: everyone who answers within the global time limit places.
+     *
+     * @return true if the game started
+     */
+    public boolean startGlobal(@Nonnull GameType type, @Nonnull GlobalGameConfig.Entry global, @Nonnull String... args) {
+        return start(type, global, args);
+    }
+
+    private boolean start(GameType type, @Nullable GlobalGameConfig.Entry global, String[] args) {
         Round round = generate(type, args);
         if (round == null) return false;
-        GameSettings settings = plugin.getGameConfigManager().settings(type);
+        GameSettings settings = global == null ? plugin.getGameConfigManager().settings(type)
+                : new GameSettings(type, GlobalGameManager.settingsFor(GameConfigManager.section(ConfigManager.getGames(), type), global));
 
         GameManager manager = plugin.getGameManager();
         if (!manager.tryBegin()) return false;
@@ -57,15 +73,15 @@ public class GameBuilder {
         }
 
         RoundAnnouncer announcer = manager.getAnnouncer();
-        announcer.announceStart(round, settings);
+        announcer.announceStart(round, settings, global != null);
         if (round.getMemorizeSeconds() > 0) {
             // Answers open once the list is gone; endGame() cancels this if the game is stopped meanwhile
             manager.addTask(plugin.getScheduler().globalLater(() -> {
                 announcer.announceMemorizeOver(round, settings);
-                open(round, settings);
+                open(round, settings, global != null);
             }, round.getMemorizeSeconds() * 20L));
         } else {
-            open(round, settings);
+            open(round, settings, global != null);
         }
         return true;
     }
@@ -93,9 +109,9 @@ public class GameBuilder {
         }
     }
 
-    private void open(Round round, GameSettings settings) {
+    private void open(Round round, GameSettings settings, boolean global) {
         GameManager manager = plugin.getGameManager();
-        Game game = new Game(round, settings);
+        Game game = new Game(round, settings, global);
         manager.activate(game);
 
         manager.addTask(plugin.getScheduler().globalLater(() -> manager.conclude(game), settings.getTimeSeconds() * 20L));

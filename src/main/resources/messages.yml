@@ -34,6 +34,7 @@ game_not_started: '&8[%prefix%&8] &cThe %game% game couldn''t start with those v
 no_games_enabled: '&8[%prefix%&8] &cNo games are enabled at the moment.'
 game_stopped: '&8[%prefix%&8] &fThe current game has been stopped with no winner.'
 no_game_running: '&8[%prefix%&8] &cNo chat game is running right now.'
+global_not_enabled: '&8[%prefix%&8] &f%game% &cisn''t enabled as a global game in global_games.yml.'
 unknown_game: '&8[%prefix%&8] &cThere is no game called &f%game%&c.'
 
 presets:
@@ -46,6 +47,34 @@ presets:
   list_entry: '&7- &f%preset%%active% &8(%games%)'
   active_marker: ' &a(active)'
   list_empty: '&8[%prefix%&8] &cNo presets are configured in presets.yml.'
+
+challenges:
+  completed: '&8[%prefix%&8] &a%period% challenge complete: &f%challenge%&a! Claim it with &f/chatgames claim&a.'
+  claimed: '&8[%prefix%&8] &aYou claimed &f%challenge%&a!'
+  nothing_to_claim: '&8[%prefix%&8] &cYou have nothing to claim right now.'
+  #/chatgames challenges. %period% is 'daily' or 'weekly' below; %resets% is the time left, e.g. 5h 12m
+  header: '&8[%prefix%&8] &e%period% challenges &7(%completed%/%total% done, resets in %resets%)'
+  entry: '&7- %challenge% &8- &7%description% &f%progress%/%amount% %status%'
+  status_in_progress: ''
+  status_ready: '&a[Ready to claim]'
+  status_claimed: '&7[Claimed]'
+  none: '&8[%prefix%&8] &cThere are no challenges right now.'
+  daily: 'Daily'
+  weekly: 'Weekly'
+  reset: '&8[%prefix%&8] &fReset &c%player%&f''s daily and weekly challenge progress.'
+
+streaks:
+  grew: '&8[%prefix%&8] &aYour %streak% &ais now &f%days% &aday(s)! Claim the reward with &f/chatgames claim&a.'
+  #%days% is one day, or a range such as 3-5 when several days are claimed at once
+  claimed: '&8[%prefix%&8] &aYou claimed your %streak% &areward (day %days%)!'
+  header: '&8[%prefix%&8] &eStreaks:'
+  entry: '&7- %streak% &8- &f%days% &7day(s), best &f%longest% %status%'
+  status_ready: '&a[%unclaimed% to claim]'
+  status_today: '&7[done today]'
+  status_waiting: '&e[not done today]'
+  none: '&8[%prefix%&8] &cStreaks are turned off.'
+  set: '&8[%prefix%&8] &fSet &c%player%&f''s %streak% &fto &a%days% &fday(s).'
+  unknown: '&8[%prefix%&8] &cThere is no streak called &f%type%&c. Use challenge, daily or global.'
 
 logs:
   no_logs: "&cNo logs available or an error occurred."
@@ -110,17 +139,23 @@ help_command:
   - '&a/chatgames top &f- &3Shows the top 10 players with most points.'
   - '&a/chatgames fastest [game] &f- &3Shows the fastest winners, overall or for one game.'
   - '&a/chatgames points [player] &f- &3Shows your points (or another player''s).'
+  - '&a/chatgames challenges &f- &3Shows your daily and weekly challenges.'
+  - '&a/chatgames streaks &f- &3Shows your streaks.'
+  - '&a/chatgames claim &f- &3Claims finished challenges and streak rewards.'
   - '&a/chatgames toggle [player] &f- &3Turns chat games on or off for you.'
   - '&a/chatgames togglesound [player] &f- &3Turns chat game sounds on or off.'
   - '&6'
   - '&c&lADMIN:'
   - '&a/chatgames (game) [values] &f- &3Starts that game now, optionally with your own word/values.'
   - '&a/chatgames any &f- &3Starts the game the rotation would pick next.'
+  - '&a/chatgames global <game> [values] &f- &3Starts a global game: everyone who answers in time wins.'
   - '&a/chatgames stop &f- &3Ends the running game with no winner.'
   - '&a/chatgames toggleAll &f- &3Turns the automatic game rotation on or off.'
   - '&a/chatgames preset <list|load|save> [name] &f- &3Manages game presets.'
   - '&a/chatgames +points|-points|setpoints <player> <amount> &f- &3Changes a player''s points.'
   - '&a/chatgames remove <player> &f- &3Deletes a player''s data.'
+  - '&a/chatgames challenges reset <player> &f- &3Clears a player''s challenge progress.'
+  - '&a/chatgames streak set <player> <challenge|daily|global> <days> &f- &3Sets a player''s streak.'
   - '&a/chatgames logs [amount] &f- &3Shows the last game logs.'
   - '&a/chatgames reload &f- &3Reloads the configuration files.'
   - '&6'

@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +31,7 @@ class PlayerRepositoryTest {
     void createDatabase() throws SQLException {
         url = "jdbc:sqlite:" + folder.resolve("test.db");
         repository = new PlayerRepository(() -> DriverManager.getConnection(url),
-                "chatgames", "chatgames_fastest_times", "chatgames_stats", "chatgames_daily");
+                "chatgames", "chatgames_fastest_times", "chatgames_stats");
         repository.createTables();
         // Running it twice must be harmless: it runs on every startup
         repository.createTables();
@@ -88,8 +87,7 @@ class PlayerRepositoryTest {
         player.incrementStat(Stat.wins(GameType.MATH), 2);
         player.recordTime(GameType.MATH, 2.5);
         player.recordTime(GameType.UNSCRAMBLE, 4.25);
-        player.setWinsToday(2);
-        player.setDailyStreak(5);
+        player.setStat("streak.daily.current", 5);
         repository.save(player.snapshot());
 
         ChatGamesPlayer loaded = repository.load(uuid);
@@ -101,9 +99,7 @@ class PlayerRepositoryTest {
         assertEquals(2.5, loaded.getFastest(GameType.MATH));
         assertEquals(4.25, loaded.getFastest(GameType.UNSCRAMBLE));
         assertEquals(2.5, loaded.getBestOverall());
-        assertEquals(2, loaded.getWinsToday());
-        assertEquals(5, loaded.getDailyStreak());
-        assertEquals(LocalDate.now(), loaded.getLastUpdated());
+        assertEquals(5, loaded.getStat("streak.daily.current"));
     }
 
     @Test
@@ -172,7 +168,7 @@ class PlayerRepositoryTest {
         repository.save(player.snapshot());
 
         assertTrue(repository.delete(uuid));
-        for (String table : new String[]{"chatgames", "chatgames_fastest_times", "chatgames_stats", "chatgames_daily"}) {
+        for (String table : new String[]{"chatgames", "chatgames_fastest_times", "chatgames_stats"}) {
             assertEquals(0, count(table, uuid), table);
         }
         assertFalse(repository.delete(uuid), "nothing left to delete");

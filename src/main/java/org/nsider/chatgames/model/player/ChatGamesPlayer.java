@@ -2,7 +2,6 @@ package org.nsider.chatgames.model.player;
 
 import org.nsider.chatgames.enums.GameType;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -26,15 +25,6 @@ public final class ChatGamesPlayer {
     private int points;
     private boolean toggled = true;
     private boolean soundEnabled = true;
-
-    // Daily challenge v1 fields, kept until the challenge system is rebuilt in step 9
-    private int winsToday;
-    private boolean rewardClaimed;
-    private LocalDate lastUpdated = LocalDate.now();
-    private int challengeStreak;
-    private int dailyStreak;
-    private int globalStreak;
-    private int weeklyWins;
 
     private final Map<String, Long> stats = new HashMap<>();
     private final Set<String> dirtyStats = new HashSet<>();
@@ -166,45 +156,6 @@ public final class ChatGamesPlayer {
         return Collections.unmodifiableMap(new EnumMap<>(fastest));
     }
 
-    /* ------------------------------------------ daily challenge v1 ------------------------------ */
-
-    public synchronized int getWinsToday() { return winsToday; }
-    public synchronized void setWinsToday(int winsToday) { this.winsToday = winsToday; }
-    public synchronized boolean isRewardClaimed() { return rewardClaimed; }
-    public synchronized void setRewardClaimed(boolean rewardClaimed) { this.rewardClaimed = rewardClaimed; }
-    public synchronized LocalDate getLastUpdated() { return lastUpdated; }
-    public synchronized void setLastUpdated(LocalDate lastUpdated) { this.lastUpdated = lastUpdated; }
-    public synchronized int getChallengeStreak() { return challengeStreak; }
-    public synchronized void setChallengeStreak(int challengeStreak) { this.challengeStreak = challengeStreak; }
-    public synchronized int getDailyStreak() { return dailyStreak; }
-    public synchronized void setDailyStreak(int dailyStreak) { this.dailyStreak = dailyStreak; }
-    public synchronized int getGlobalStreak() { return globalStreak; }
-    public synchronized void setGlobalStreak(int globalStreak) { this.globalStreak = globalStreak; }
-    public synchronized int getWeeklyWins() { return weeklyWins; }
-    public synchronized void setWeeklyWins(int weeklyWins) { this.weeklyWins = weeklyWins; }
-
-    public synchronized boolean isDailyComplete() {
-        return winsToday >= 3;
-    }
-
-    public synchronized boolean canClaimReward() {
-        return isDailyComplete() && !rewardClaimed;
-    }
-
-    public synchronized void markClaimed() {
-        if (canClaimReward()) {
-            rewardClaimed = true;
-        }
-    }
-
-    public synchronized void resetDailyIfNeeded() {
-        if (!LocalDate.now().equals(lastUpdated)) {
-            winsToday = 0;
-            rewardClaimed = false;
-            lastUpdated = LocalDate.now();
-        }
-    }
-
     /* ------------------------------------------ persistence ------------------------------------- */
 
     /**
@@ -230,9 +181,7 @@ public final class ChatGamesPlayer {
         dirtyStats.clear();
         dirtyFastest.clear();
 
-        return new Snapshot(uuid, points, toggled, soundEnabled,
-                winsToday, rewardClaimed, lastUpdated, challengeStreak, dailyStreak, globalStreak, weeklyWins,
-                changedStats, changedTimes);
+        return new Snapshot(uuid, points, toggled, soundEnabled, changedStats, changedTimes);
     }
 
     /**
@@ -252,30 +201,15 @@ public final class ChatGamesPlayer {
         final int points;
         final boolean toggled;
         final boolean soundEnabled;
-        final int winsToday;
-        final boolean rewardClaimed;
-        final LocalDate lastUpdated;
-        final int challengeStreak;
-        final int dailyStreak;
-        final int globalStreak;
-        final int weeklyWins;
         final Map<String, Long> stats;
         final Map<GameType, Double> fastest;
 
-        Snapshot(UUID uuid, int points, boolean toggled, boolean soundEnabled, int winsToday, boolean rewardClaimed,
-                 LocalDate lastUpdated, int challengeStreak, int dailyStreak, int globalStreak, int weeklyWins,
+        Snapshot(UUID uuid, int points, boolean toggled, boolean soundEnabled,
                  Map<String, Long> stats, Map<GameType, Double> fastest) {
             this.uuid = uuid;
             this.points = points;
             this.toggled = toggled;
             this.soundEnabled = soundEnabled;
-            this.winsToday = winsToday;
-            this.rewardClaimed = rewardClaimed;
-            this.lastUpdated = lastUpdated;
-            this.challengeStreak = challengeStreak;
-            this.dailyStreak = dailyStreak;
-            this.globalStreak = globalStreak;
-            this.weeklyWins = weeklyWins;
             this.stats = stats;
             this.fastest = fastest;
         }

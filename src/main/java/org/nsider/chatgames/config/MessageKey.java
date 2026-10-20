@@ -240,6 +240,121 @@ public enum MessageKey {
             "messages",
             "presets.list_empty",
             "&8[%prefix%&8] &cNo presets are configured in presets.yml."
+    ),
+    CHALLENGE_COMPLETED(
+            "messages",
+            "challenges.completed",
+            "&8[%prefix%&8] &a%period% challenge complete: &f%challenge%&a! Claim it with &f/chatgames claim&a."
+    ),
+    CHALLENGE_CLAIMED(
+            "messages",
+            "challenges.claimed",
+            "&8[%prefix%&8] &aYou claimed &f%challenge%&a!"
+    ),
+    NOTHING_TO_CLAIM(
+            "messages",
+            "challenges.nothing_to_claim",
+            "&8[%prefix%&8] &cYou have nothing to claim right now."
+    ),
+    CHALLENGES_HEADER(
+            "messages",
+            "challenges.header",
+            "&8[%prefix%&8] &e%period% challenges &7(%completed%/%total% done, resets in %resets%)"
+    ),
+    CHALLENGES_ENTRY(
+            "messages",
+            "challenges.entry",
+            "&7- %challenge% &8- &7%description% &f%progress%/%amount% %status%"
+    ),
+    CHALLENGE_STATUS_PROGRESS(
+            "messages",
+            "challenges.status_in_progress",
+            ""
+    ),
+    CHALLENGE_STATUS_READY(
+            "messages",
+            "challenges.status_ready",
+            "&a[Ready to claim]"
+    ),
+    CHALLENGE_STATUS_CLAIMED(
+            "messages",
+            "challenges.status_claimed",
+            "&7[Claimed]"
+    ),
+    CHALLENGES_NONE(
+            "messages",
+            "challenges.none",
+            "&8[%prefix%&8] &cThere are no challenges right now."
+    ),
+    CHALLENGES_DAILY(
+            "messages",
+            "challenges.daily",
+            "Daily"
+    ),
+    CHALLENGES_WEEKLY(
+            "messages",
+            "challenges.weekly",
+            "Weekly"
+    ),
+    CHALLENGES_RESET(
+            "messages",
+            "challenges.reset",
+            "&8[%prefix%&8] &fReset &c%player%&f's daily and weekly challenge progress."
+    ),
+    STREAK_GREW(
+            "messages",
+            "streaks.grew",
+            "&8[%prefix%&8] &aYour %streak% &ais now &f%days% &aday(s)! Claim the reward with &f/chatgames claim&a."
+    ),
+    STREAK_CLAIMED(
+            "messages",
+            "streaks.claimed",
+            "&8[%prefix%&8] &aYou claimed your %streak% &areward (day %days%)!"
+    ),
+    STREAKS_HEADER(
+            "messages",
+            "streaks.header",
+            "&8[%prefix%&8] &eStreaks:"
+    ),
+    STREAKS_ENTRY(
+            "messages",
+            "streaks.entry",
+            "&7- %streak% &8- &f%days% &7day(s), best &f%longest% %status%"
+    ),
+    STREAK_STATUS_READY(
+            "messages",
+            "streaks.status_ready",
+            "&a[%unclaimed% to claim]"
+    ),
+    STREAK_STATUS_TODAY(
+            "messages",
+            "streaks.status_today",
+            "&7[done today]"
+    ),
+    STREAK_STATUS_WAITING(
+            "messages",
+            "streaks.status_waiting",
+            "&e[not done today]"
+    ),
+    STREAKS_NONE(
+            "messages",
+            "streaks.none",
+            "&8[%prefix%&8] &cStreaks are turned off."
+    ),
+    STREAK_SET(
+            "messages",
+            "streaks.set",
+            "&8[%prefix%&8] &fSet &c%player%&f's %streak% &fto &a%days% &fday(s)."
+    ),
+    GLOBAL_NOT_ENABLED(
+            "messages",
+            "global_not_enabled",
+            "&8[%prefix%&8] &f%game% &cisn't enabled as a global game in global_games.yml."
+    ),
+    STREAK_UNKNOWN(
+            "messages",
+            "streaks.unknown",
+            "&8[%prefix%&8] &cThere is no streak called &f%type%&c. Use challenge, daily or global."
     );
 
     private final String fileName;

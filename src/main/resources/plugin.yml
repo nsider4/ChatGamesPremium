@@ -40,6 +40,9 @@ permissions:
       chatgames.start.eat: true
       chatgames.start.craft: true
       chatgames.start.furnace: true
+  chatgames.global:
+    description: 'Allows starting a global game or race by command.'
+    default: op
   chatgames.stop:
     description: 'Allows stopping the running game with no winner.'
     default: op
@@ -90,6 +93,21 @@ permissions:
     default: op
   chatgames.logs:
     description: 'Allows viewing the game logs.'
+    default: op
+  chatgames.challenges:
+    description: 'Allows viewing your daily and weekly challenges.'
+    default: true
+  chatgames.streaks:
+    description: 'Allows viewing your streaks.'
+    default: true
+  chatgames.claim:
+    description: 'Allows claiming finished challenges and streak rewards.'
+    default: true
+  chatgames.challenges.reset:
+    description: 'Allows clearing a player''s challenge progress.'
+    default: op
+  chatgames.streaks.set:
+    description: 'Allows setting a player''s streak.'
     default: op
   chatgames.start.unscramble:
     description: 'Allows starting unscramble by command.'

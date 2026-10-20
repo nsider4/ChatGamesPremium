@@ -5,11 +5,14 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
+import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.globalgames.GlobalGameManager;
 import org.nsider.chatgames.utils.gameplay.CommandUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,6 +52,28 @@ public class RewardManager {
     public List<String> raceRewards(@Nonnull String race, @Nonnull Player player, @Nonnull List<String> names) {
         if (names.isEmpty()) return Collections.emptyList();
         return select(race, ConfigManager.getRewards().getConfigurationSection(RACE_REWARDS), names, player);
+    }
+
+    /**
+     * @param place the player's place among those who made it, 1 for first
+     * @return the participation rewards plus the place's, from global_games.yml
+     */
+    @Nonnull
+    public List<String> globalRewards(@Nonnull GameType type, @Nonnull Player player, int place) {
+        List<String> commands = new ArrayList<>();
+        for (ConfigurationSection section : GlobalGameManager.rewardSections(type, place)) {
+            commands.addAll(select("global " + type.getConfigKey(), section, null, player));
+        }
+        return commands;
+    }
+
+    /**
+     * @param lines reward lines, as in a reward's {@code data}
+     */
+    @Nonnull
+    public List<String> lineRewards(@Nonnull String what, @Nonnull Player player, @Nonnull List<String> lines) {
+        return RewardSelector.fromLines(lines, player::hasPermission, plugin.getRandom(),
+                line -> plugin.getLogger().severe("Invalid chance in a " + what + " reward: " + line));
     }
 
     private List<String> select(String game, @Nullable ConfigurationSection rewards, @Nullable List<String> only, Player player) {

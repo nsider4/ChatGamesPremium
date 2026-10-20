@@ -18,12 +18,11 @@ import org.nsider.chatgames.games.builder.GameBuilder;
 import org.nsider.chatgames.games.manager.GameConfigManager;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.utils.GameUtils;
-import org.nsider.chatgames.globalgames.GlobalGameController;
+import org.nsider.chatgames.globalgames.GlobalGameManager;
 import org.nsider.chatgames.listeners.ChatListener;
 import org.nsider.chatgames.listeners.DiscordListener;
 import org.nsider.chatgames.listeners.LogListener;
 import org.nsider.chatgames.listeners.LoginListener;
-import org.nsider.chatgames.managers.ChallengeManager;
 import org.nsider.chatgames.managers.LanguageManager;
 import org.nsider.chatgames.managers.MilestoneManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
@@ -32,6 +31,7 @@ import org.nsider.chatgames.other.UpdateChecker;
 import org.nsider.chatgames.placeholders.ChatGamesExpansion;
 import org.nsider.chatgames.placeholders.LeaderboardCache;
 import org.nsider.chatgames.races.RaceListener;
+import org.nsider.chatgames.progression.ProgressionManager;
 import org.nsider.chatgames.races.RaceManager;
 import org.nsider.chatgames.reward.RewardManager;
 import org.nsider.chatgames.tasks.MainTask;
@@ -60,9 +60,10 @@ public final class ChatGames extends JavaPlugin {
     private GameManager gameManager;
     private LogUtils logUtils;
     private RaceManager raceManager;
+    private ProgressionManager progressionManager;
     private RewardManager rewardManager;
     private LanguageManager languageManager;
-    private GlobalGameController globalGameController;
+    private GlobalGameManager globalGameManager;
     private MainTask mainTask;
     private LeaderboardCache leaderboardCache;
     private ChatGamesExpansion placeholderExpansion;
@@ -96,7 +97,6 @@ public final class ChatGames extends JavaPlugin {
 
         // 4. Player cache, including anyone already online after a /reload
         ChatGamesPlayerManager.initialize(this, playerRepository);
-        ChallengeManager.initialize(this);
         MilestoneManager.loadMilestones();
         ChatGamesPlayerManager.loadOnlinePlayers();
         this.leaderboardCache = new LeaderboardCache(this, playerRepository);
@@ -110,8 +110,9 @@ public final class ChatGames extends JavaPlugin {
         this.logUtils = new LogUtils(this);
         this.gameManager = new GameManager(this);
         this.raceManager = new RaceManager(this);
+        this.progressionManager = new ProgressionManager(this);
         this.rewardManager = new RewardManager(this);
-        this.globalGameController = new GlobalGameController(this);
+        this.globalGameManager = new GlobalGameManager(this);
         this.mainTask = new MainTask(this);
 
         // 6. Listeners
@@ -151,8 +152,8 @@ public final class ChatGames extends JavaPlugin {
         if (mainTask != null) {
             mainTask.cancel();
         }
-        if (globalGameController != null) {
-            globalGameController.stop();
+        if (globalGameManager != null) {
+            globalGameManager.shutdown();
         }
         if (placeholderExpansion != null) {
             placeholderExpansion.unregister();
@@ -196,6 +197,8 @@ public final class ChatGames extends JavaPlugin {
 
         MilestoneManager.loadMilestones();
         raceManager.load();
+        progressionManager.load();
+        globalGameManager.load();
         mainTask.reloadEnabledGames();
         startGameRotation();
         leaderboardCache.start();
@@ -223,7 +226,7 @@ public final class ChatGames extends JavaPlugin {
 
         String mainTable = ConfigValue.getString(ConfigPaths.TABLE_NAME);
         this.playerRepository = new PlayerRepository(dataHandler::getConnection, mainTable,
-                ConfigValue.getString(ConfigPaths.FASTEST_TIMES_TABLE), mainTable + "_stats", mainTable + "_daily");
+                ConfigValue.getString(ConfigPaths.FASTEST_TIMES_TABLE), mainTable + "_stats");
         return QueryInitializer.initialize(this, playerRepository);
     }
 

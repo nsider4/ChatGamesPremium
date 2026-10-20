@@ -56,6 +56,14 @@ public class StartGameCommand extends SubCommand {
      * Starts a game for a command sender, with the checks every start command shares.
      */
     static void start(@Nonnull ChatGames plugin, @Nonnull CommandSender sender, @Nonnull GameType type, @Nonnull String[] args) {
+        start(plugin, sender, type, args, false);
+    }
+
+    /**
+     * @param global start it as a global game
+     */
+    static void start(@Nonnull ChatGames plugin, @Nonnull CommandSender sender, @Nonnull GameType type, @Nonnull String[] args,
+                      boolean global) {
         if (sender instanceof Player && !plugin.getGameManager().worldEnabled((Player) sender)
                 && !ConfigValue.getBoolean(ConfigPaths.ALLOW_STARTING_WHEN_DISABLED)
                 && !sender.hasPermission(PermissionKey.START_ALL.getPermission())) {
@@ -71,7 +79,7 @@ public class StartGameCommand extends SubCommand {
             }
             boolean started;
             try {
-                started = plugin.getGameManager().startGame(type, args);
+                started = global ? plugin.getGlobalGameManager().start(type, args) : plugin.getGameManager().startGame(type, args);
             } catch (RuntimeException e) {
                 plugin.getLogger().log(Level.SEVERE, "Could not start " + type.getConfigKey(), e);
                 started = false;
@@ -107,7 +115,13 @@ public class StartGameCommand extends SubCommand {
     @Nonnull
     @Override
     public List<String> tabComplete(@Nonnull CommandSender sender, @Nonnull String[] args) {
-        if (type.isRace()) return raceSuggestions(args);
+        return suggestions(plugin, type, args);
+    }
+
+    /** Suggestions for a game's values: a race's targets and amounts, nothing for chat games. */
+    @Nonnull
+    static List<String> suggestions(@Nonnull ChatGames plugin, @Nonnull GameType type, @Nonnull String[] args) {
+        if (type.isRace()) return raceSuggestions(plugin, type, args);
         if (args.length != 1) return Collections.emptyList();
         // A hint of what each game accepts
         switch (type) {
@@ -132,7 +146,7 @@ public class StartGameCommand extends SubCommand {
     }
 
     /** The targets races.yml lists, then their amounts; any other valid name also works. */
-    private List<String> raceSuggestions(String[] args) {
+    private static List<String> raceSuggestions(ChatGames plugin, GameType type, String[] args) {
         RaceData data = plugin.getRaceManager().getData(type);
         if (args.length == 1) {
             List<String> targets = new ArrayList<>();

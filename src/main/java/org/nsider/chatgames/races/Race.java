@@ -22,17 +22,25 @@ public final class Race {
     private final List<String> rewards;
     private final int timeLimitSeconds;
     private final RaceProgress progress;
+    /** Everyone who reaches the amount in time finishes; see {@link RaceProgress}. */
+    private final boolean global;
     private final long startNanos = System.nanoTime();
 
     public Race(@Nonnull GameType type, @Nonnull RaceTarget target, @Nonnull String displayName, int amount,
                 @Nonnull List<String> rewards, int timeLimitSeconds) {
+        this(type, target, displayName, amount, rewards, timeLimitSeconds, false);
+    }
+
+    public Race(@Nonnull GameType type, @Nonnull RaceTarget target, @Nonnull String displayName, int amount,
+                @Nonnull List<String> rewards, int timeLimitSeconds, boolean global) {
         this.type = type;
         this.target = target;
         this.displayName = displayName;
         this.amount = amount;
         this.rewards = rewards;
         this.timeLimitSeconds = timeLimitSeconds;
-        this.progress = new RaceProgress(amount);
+        this.global = global;
+        this.progress = new RaceProgress(amount, global);
     }
 
     public double getElapsedSeconds() {
