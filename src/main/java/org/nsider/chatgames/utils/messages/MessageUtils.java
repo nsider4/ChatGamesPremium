@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.utils.gameplay.VersionUtils;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -64,40 +63,6 @@ public class MessageUtils {
         }
     }
 
-    public static String removePercentSymbols(String msg) {
-        if(msg.contains("%") && !msg.startsWith("$ ")) {
-            String[] split = msg.split("%");
-            for (int i = 0; i < split.length; i++) {
-                if(i % 2 != 0) {
-                    msg = msg.replaceAll(split[i], "");
-                }
-            }
-            msg = msg.replaceAll("%", "");
-        }
-
-        return msg;
-    }
-
-    /**
-     * Checks if the player's input matches the expected answer in the game.
-     *
-     * @param player       the player to check
-     * @param chatTextRaw  the raw input from the player
-     * @return true if the input matches, false otherwise
-     */
-    public static boolean textEqualsWord(Player player, String chatTextRaw) {
-        if (plugin.getGameManager().getGame() == null) {
-            return false;
-        }
-
-        return TextMatchUtils.textEqualsWord(
-                player,
-                chatTextRaw,
-                plugin.getGameManager().getGame(),
-                plugin
-        );
-    }
-
     /**
      * Colors a string by replacing color codes (e.g., &a, &b) and applying a prefix.
      *
@@ -106,7 +71,7 @@ public class MessageUtils {
      */
     public static String color(String message) {
         String prefixedMessage = message.replace("%prefix%", plugin.getConfig().getString("prefix", ""));
-        return ColorUtils.colorizeMessage(prefixedMessage, VersionUtils.getMCVersion());
+        return ColorUtils.colorizeMessage(prefixedMessage);
     }
 
     /**

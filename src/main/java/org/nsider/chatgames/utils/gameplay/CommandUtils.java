@@ -2,94 +2,32 @@ package org.nsider.chatgames.utils.gameplay;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.utils.messages.MessageUtils;
+
 import org.nsider.inventorymanager.extras.Nonnull;
 
-import java.util.List;
+public final class CommandUtils {
 
-/**
- * Utility class to handle command executions for different scenarios in the plugin.
- */
-public class CommandUtils {
-
-    private static ChatGames plugin;
+    private CommandUtils() {}
 
     /**
-     * Initializes the CommandUtils with the plugin instance.
+     * Runs a command as the player with operator rights, for {@code [player_as_op]} rewards.
      *
-     * @param plugin The instance of the {@link ChatGames} plugin.
+     * <p>1.9.9 used a fake {@code CommandSender} here, which modern servers reject for
+     * vanilla commands and which breaks on interface methods added after 1.8. The player
+     * is now made operator only for the duration of this one synchronous dispatch, and
+     * the {@code finally} takes it away again even if the command throws. Must run on
+     * the player's thread (the main thread outside Folia).</p>
      */
-    public void initialize(@Nonnull ChatGames plugin) {
-        CommandUtils.plugin = plugin;
-    }
-
-    /**
-     * Executes a list of commands based on predefined patterns.
-     *
-     * @param commands A list of command strings to be executed.
-     * @param player   The player who triggered the command.
-     */
-    public static void executeCommands(@Nonnull List<String> commands, @Nonnull Player player) {
-        for (String command : commands) {
-            String formattedCommand = command.replaceAll("%player%", player.getName());
-
-            if (formattedCommand.contains("[playercmd]")) {
-                executePlayerCommand(formattedCommand, player);
-            } else if (formattedCommand.contains("[consolecmd]")) {
-                executeConsoleCommand(formattedCommand);
-            } else if (formattedCommand.contains("[playermsg]")) {
-                sendPlayerMessage(formattedCommand, player);
-            } else if (formattedCommand.contains("[broadcast]")) {
-                broadcastMessage(formattedCommand, player);
-            }
+    public static void executeAsOp(@Nonnull Player player, @Nonnull String command) {
+        if (player.isOp()) {
+            Bukkit.dispatchCommand(player, command);
+            return;
         }
-    }
-
-    /**
-     * Executes a command as the player.
-     *
-     * @param command The command to be executed.
-     * @param player  The player who will execute the command.
-     */
-    private static void executePlayerCommand(@Nonnull String command, @Nonnull Player player) {
-        String cmd = command.replace("[playercmd] ", "");
-        Bukkit.dispatchCommand(player, cmd);
-    }
-
-    /**
-     * Executes a command as the console.
-     *
-     * @param command The command to be executed.
-     */
-    private static void executeConsoleCommand(@Nonnull String command) {
-        String cmd = command.replace("[consolecmd] ", "");
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
-    }
-
-    /**
-     * Sends a message to a player.
-     *
-     * @param command The command string containing the message.
-     * @param player  The player to whom the message will be sent.
-     */
-    private static void sendPlayerMessage(@Nonnull String command, @Nonnull Player player) {
-        String message = command.replace("[playermsg] ", "");
-        player.sendMessage(MessageUtils.color(message));
-    }
-
-    /**
-     * Broadcasts a message to all players in the enabled world.
-     *
-     * @param command The command string containing the broadcast message.
-     * @param player  The player who initiated the broadcast.
-     */
-    private static void broadcastMessage(@Nonnull String command, @Nonnull Player player) {
-        String message = command.replace("[broadcast] ", "");
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (plugin.getGameManager().worldEnabled(player)) {
-                onlinePlayer.sendMessage(MessageUtils.color(message));
-            }
+        player.setOp(true);
+        try {
+            Bukkit.dispatchCommand(player, command);
+        } finally {
+            player.setOp(false);
         }
     }
 }

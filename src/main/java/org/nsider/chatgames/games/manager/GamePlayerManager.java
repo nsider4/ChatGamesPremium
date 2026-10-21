@@ -4,7 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.database.queries.ValueQueries;
+import org.nsider.chatgames.model.player.ChatGamesPlayer;
+import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 
 import java.util.List;
 
@@ -19,7 +20,8 @@ public class GamePlayerManager {
         if (plugin.getGameConfigManager().isPermissionRequiredToPlay() && !player.hasPermission("chatgames.play")) {
             return false;
         }
-        return ValueQueries.getPlayerToggle(player);
+        ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());
+        return data != null && data.isToggled();
     }
 
     public boolean isWorldEnabled(Player player) {

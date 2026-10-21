@@ -1,8 +1,8 @@
 package org.nsider.chatgames.listeners;
 
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
@@ -13,6 +13,7 @@ import org.nsider.chatgames.other.DiscordWebhook;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.List;
 
 public class DiscordListener implements Listener {
 
@@ -30,21 +31,43 @@ public class DiscordListener implements Listener {
                 .ifPresent(winner -> scheduleDiscordMessage(winner, event.getType()));
     }
 
-    private void scheduleDiscordMessage(PlayerResult winner, GameType type) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                sendWinnerDiscordMessage(winner, type);
+    /**
+     * Posts a titled list (e.g. an event's final standings) to the configured webhook,
+     * off the main thread. Does nothing if no webhook URL is set.
+     */
+    public static void sendLines(ChatGames plugin, String title, List<String> lines) {
+        String webhookUrl = ConfigValue.getString(ConfigPaths.DISCORD_WEBHOOK_URL);
+        if (webhookUrl == null || webhookUrl.trim().isEmpty()) return;
+        DiscordWebhook webhook = new DiscordWebhook(webhookUrl);
+        webhook.setAvatarUrl(ConfigValue.getString(ConfigPaths.DISCORD_IMAGE_URL));
+        webhook.setUsername(ConfigValue.getString(ConfigPaths.DISCORD_USERNAME));
+        webhook.setTts(false);
+        webhook.addEmbed(new DiscordWebhook.EmbedObject()
+                .setTitle(plain(title))
+                .setDescription(plain(String.join("\n", lines)))
+                .setColor(Color.ORANGE));
+        plugin.getScheduler().async(() -> {
+            try {
+                webhook.execute();
+            } catch (IOException e) {
+                plugin.getLogger().severe("Failed to send Discord webhook: " + e.getMessage());
             }
-        }.runTaskAsynchronously(plugin);
+        });
+    }
+
+    /** Discord shows colour codes as text. */
+    private static String plain(String text) {
+        return ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', text));
+    }
+
+    private void scheduleDiscordMessage(PlayerResult winner, GameType type) {
+        plugin.getScheduler().async(() -> sendWinnerDiscordMessage(winner, type));
     }
 
     private void sendWinnerDiscordMessage(PlayerResult winner, GameType type) {
         String webhookUrl = ConfigValue.getString(ConfigPaths.DISCORD_WEBHOOK_URL);
-        if (webhookUrl == null || webhookUrl.isEmpty()) {
-            plugin.getLogger().warning("Discord webhook URL is not configured.");
-            return;
-        }
+        // No URL means the Discord add-on is off
+        if (webhookUrl == null || webhookUrl.trim().isEmpty()) return;
 
         try {
             DiscordWebhook webhook = createDiscordWebhook(winner, type, webhookUrl);

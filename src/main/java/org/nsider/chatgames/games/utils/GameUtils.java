@@ -1,18 +1,16 @@
 package org.nsider.chatgames.games.utils;
 
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.games.GameController;
-import org.nsider.chatgames.utils.management.TimeUtils;
-import org.bukkit.Bukkit;
+import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Game utilities.
@@ -25,75 +23,59 @@ public class GameUtils {
     }
 
     /**
-     * Determines if a player can check the current game.
-     *
-     * @param player The player to check.
-     * @return true if the player can participate, false otherwise.
-     */
-    public boolean canCheckGame(Player player) {
-        if (!plugin.isInGame() || plugin.getGameManager().getGame() == null) {
-            return false;
-        }
-
-        return plugin.getGameManager().gamesIsToggled(player)
-                && plugin.getGameManager().worldEnabled(player)
-                && !GameController.playerExists(player.getUniqueId());
-    }
-
-    /**
-     * Adds a winner and updates game statistics.
-     *
-     * @param player The player who won.
-     */
-    public void addWinner(OfflinePlayer player) {
-        TimeUtils.stopTimer();
-        double elapsedTime = Double.parseDouble(TimeUtils.getElapsedTime());
-        TimeUtils.setLastTimer(TimeUtils.getLastTimer() + elapsedTime);
-        GameController.addResult(player.getUniqueId(), TimeUtils.getLastTimer(), GameController.getResults().size() + 1);
-    }
-
-    /**
      * Gives rewards to a player based on their game performance.
      *
-     * @param game  The game type.
+     * @param game   The game type.
      * @param player The player to reward.
+     * @param place  The player's place, 1 for first.
      */
-    public void giveRewards(String game, Player player) {
+    public void giveRewards(String game, Player player, int place) {
         if (player == null) {
             return;
         }
 
-        Bukkit.getScheduler().runTask(plugin, () -> processRewards(game, player));
+        plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().chatGameRewards(game, player, place), player));
     }
 
     /**
-     * Processes and distributes rewards to the player.
+     * Gives a race winner the rewards races.yml lists for the race's target and amount.
      *
-     * @param game   The game type.
-     * @param player The player receiving rewards.
+     * @param names reward names from races.yml, found in rewards.yml under {@code races.rewards}
      */
-    private void processRewards(String game, Player player) {
-        List<String> rewards = getPlayerRewards(game, player);
-        if (rewards.isEmpty()) {
-            return;
-        }
+    public void giveRaceRewards(String race, Player player, List<String> names) {
+        plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().raceRewards(race, player, names), player));
+    }
 
+    /**
+     * Gives a player who took part in a global game their rewards from global_games.yml.
+     *
+     * @param sections the reward sections, e.g. {@code completed} and {@code top-contributors.1}
+     * @param contribution fills {@code %contribution%} in the rewards
+     */
+    public void giveGlobalRewards(GameType type, Player player, List<String> sections, int contribution) {
+        plugin.getScheduler().global(() -> {
+            List<String> rewards = new ArrayList<>();
+            for (String reward : plugin.getRewardManager().globalRewards(type, player, sections)) {
+                rewards.add(reward.replace("%contribution%", String.valueOf(contribution)));
+            }
+            processRewards(rewards, player);
+        });
+    }
+
+    /**
+     * Gives a player reward lines in the rewards.yml {@code data} format (challenges, streaks).
+     *
+     * @param what names the source in console warnings, e.g. "daily challenge win_5"
+     */
+    public void giveLineRewards(String what, Player player, List<String> lines) {
+        if (lines.isEmpty()) return;
+        plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().lineRewards(what, player, lines), player));
+    }
+
+    private void processRewards(List<String> rewards, Player player) {
         for (String reward : rewards) {
             processReward(player, reward);
         }
-    }
-
-    /**
-     * Retrieves rewards for a player based on game performance.
-     *
-     * @param game   The game type.
-     * @param player The player receiving rewards.
-     * @return List of rewards.
-     */
-    private List<String> getPlayerRewards(String game, Player player) {
-        PlayerResult playerResult = GameController.getPlayerResult(player.getUniqueId());
-        return (playerResult == null) ? Collections.emptyList()
-                : plugin.getRewardManager().loadGameRewards(game, player, playerResult.getPlace());
     }
 
     /**
@@ -108,7 +90,7 @@ public class GameUtils {
         if (isGiveCommand(parts)) {
             giveItemReward(player, parts);
         } else {
-            plugin.getRewardManager().executeCommands(Collections.singletonList(reward), player);
+            plugin.getRewardManager().executeCommand(reward, player);
         }
     }
 
@@ -123,25 +105,34 @@ public class GameUtils {
     }
 
     /**
-     * Parses and gives an item reward to the player.
-     *
-     * @param player The player receiving the reward.
-     * @param parts  The parts of the give command.
+     * Gives the item of a "<prefix> give <player> <item> [amount]" reward. Item names may be
+     * legacy or modern (XSeries maps them to this server's version). If the inventory is
+     * full the item drops at the player's feet.
      */
     private void giveItemReward(Player player, String[] parts) {
-        Material material = Material.getMaterial(parts[3].toUpperCase());
-        int amount = (parts.length > 4) ? Integer.parseInt(parts[4]) : 1;
-
-        if (material == null) {
-            return; //Invalid material, do nothing
+        Optional<XMaterial> material = XMaterial.matchXMaterial(parts[3]);
+        ItemStack item = material.isPresent() ? material.get().parseItem() : null;
+        if (item == null) {
+            plugin.getLogger().warning("Unknown item in a reward: " + parts[3]);
+            return;
         }
-
-        ItemStack rewardItem = new ItemStack(material, amount);
-        if (player.getInventory().firstEmpty() == -1) {
-            player.getWorld().dropItemNaturally(player.getLocation(), rewardItem);
-            MessageUtils.sendMessage(player, ConfigManager.getMessagesConfig().getString("inventory_full"));
-        } else {
-            player.getInventory().addItem(rewardItem);
+        int amount = 1;
+        if (parts.length > 4) {
+            try {
+                amount = Math.max(1, Integer.parseInt(parts[4]));
+            } catch (NumberFormatException e) {
+                plugin.getLogger().warning("Invalid amount in a reward: " + parts[4]);
+            }
         }
+        item.setAmount(amount);
+        // Inventories belong to the player's region on Folia
+        plugin.getScheduler().onPlayer(player, () -> {
+            if (player.getInventory().firstEmpty() == -1) {
+                player.getWorld().dropItemNaturally(player.getLocation(), item);
+                MessageUtils.sendMessage(player, ConfigManager.getMessagesConfig().getString("inventory_full"));
+            } else {
+                player.getInventory().addItem(item);
+            }
+        });
     }
 }

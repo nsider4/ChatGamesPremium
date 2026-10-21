@@ -10,15 +10,12 @@ import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.database.enums.DatabaseDriver;
 import org.nsider.chatgames.database.enums.JDBCUrlPrefix;
 import org.nsider.chatgames.database.enums.StorageType;
-import org.nsider.chatgames.database.queries.FastestTimeQueries;
-import org.nsider.chatgames.database.queries.ManagementQueries;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -30,9 +27,11 @@ import java.util.logging.Level;
  */
 public class HikariDatabase implements DataHandler {
 
+    private static final String LEGACY_MYSQL_DRIVER = "com.mysql.jdbc.Driver";
+
     private final ChatGames plugin;
     private HikariDataSource dataSource;
-    private final String driverClass;
+    private String driverClass;
     private final StorageType storageType;
     private final String jdbcUrlPrefix;
 
@@ -45,29 +44,46 @@ public class HikariDatabase implements DataHandler {
         try {
             Class.forName(this.driverClass);
         } catch (ClassNotFoundException e) {
-            plugin.getLogger().warning("No driver class found: " + driverClass);
+            // Servers before 1.16 bundle MySQL Connector 5.x, which only has the legacy class name
+            if (storageType == StorageType.MySQL && classExists(LEGACY_MYSQL_DRIVER)) {
+                this.driverClass = LEGACY_MYSQL_DRIVER;
+            } else {
+                plugin.getLogger().warning("No driver class found: " + driverClass);
+            }
         }
     }
 
     @Override
-    public void initialize() {
+    public boolean initialize() {
         FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = config.getConfigurationSection(storageType.name());
 
         if (section == null) {
-            plugin.getLogger().warning("Failed to load database config.");
-            return;
+            plugin.getLogger().severe("Missing the '" + storageType.name() + "' section in config.yml.");
+            return false;
         }
 
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setUsername(section.getString("user", "root"));
-        hikariConfig.setPassword(section.getString("password", "pa55w0rd"));
+        if (storageType == StorageType.MySQL) {
+            // No made-up default password: a missing one should fail visibly, not try a guess
+            hikariConfig.setUsername(section.getString("user", "root"));
+            hikariConfig.setPassword(section.getString("password", ""));
+        }
 
         String jdbcUrl = buildJdbcUrl(section);
         hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setDriverClassName(driverClass);
-        hikariConfig.setMaximumPoolSize(section.getInt("Pool-Settings.max-pool-size", 10));
-        hikariConfig.setMinimumIdle(section.getInt("Pool-Settings.min-idle", 10));
+        if (storageType == StorageType.SQLite) {
+            // SQLite allows one writer at a time; extra pooled connections only cause SQLITE_BUSY errors
+            hikariConfig.setMaximumPoolSize(1);
+            hikariConfig.setMinimumIdle(1);
+            // The SQLite driver bundled with 1.8-1.12 servers predates Connection.isValid(), which Hikari
+            // calls unless a test query is set; without this the pool fails with AbstractMethodError
+            hikariConfig.setConnectionTestQuery("SELECT 1");
+        } else {
+            hikariConfig.setMaximumPoolSize(section.getInt("Pool-Settings.max-pool-size", 10));
+            hikariConfig.setMinimumIdle(section.getInt("Pool-Settings.min-idle", 10));
+        }
         hikariConfig.setMaxLifetime(section.getLong("Pool-Settings.max-lifetime", 180000L));
         hikariConfig.setConnectionTimeout(section.getLong("Pool-Settings.time-out", 20000L));
         hikariConfig.setPoolName("ChatGamesHikariPool");
@@ -76,10 +92,29 @@ public class HikariDatabase implements DataHandler {
             hikariConfig.setKeepaliveTime(section.getLong("Pool-Settings.keep-alive-time", 60000L));
         } catch (NoSuchMethodError ignored) {}
 
-        hikariConfig.setDataSourceProperties(getProperties());
-        dataSource = new HikariDataSource(hikariConfig);
+        if (storageType == StorageType.MySQL) {
+            // MySQL Connector/J tuning; the SQLite driver doesn't know these options
+            hikariConfig.setDataSourceProperties(getProperties());
+        }
+        try {
+            // Opens the first connection, so a wrong host or password fails here
+            dataSource = new HikariDataSource(hikariConfig);
+        } catch (RuntimeException | LinkageError e) {
+            // LinkageError covers drivers too old for the JDBC calls the pool makes
+            plugin.getLogger().log(Level.SEVERE, "Could not connect to the " + storageType + " database.", e);
+            return false;
+        }
+        plugin.getLogger().info("Connected to the " + storageType + " database.");
+        return true;
+    }
 
-        setupDatabase();
+    private static boolean classExists(String name) {
+        try {
+            Class.forName(name);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     private String buildJdbcUrl(ConfigurationSection section) {
@@ -101,17 +136,6 @@ public class HikariDatabase implements DataHandler {
                     ConfigValue.getString(ConfigPaths.MYSQL_DATABASE),
                     ConfigValue.getString(ConfigPaths.MYSQL_CONNECTION_PARAMS)
             );
-        }
-    }
-
-    private void setupDatabase() {
-        try (Connection connection = getConnection(); Statement s = connection.createStatement()) {
-            s.executeUpdate(ManagementQueries.getSQLiteCreateChatGamesTable());
-            s.executeUpdate(FastestTimeQueries.getSQLiteCreateFastestTimesTable());
-            plugin.getLogger().info("Connected to the database successfully.");
-        } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to initialize database.");
-            e.printStackTrace();
         }
     }
 

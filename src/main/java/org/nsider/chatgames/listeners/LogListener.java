@@ -9,9 +9,9 @@ import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.events.ChatGamesStartEvent;
-import org.nsider.chatgames.games.manager.GameUtility;
 import org.nsider.chatgames.games.utils.PlayerResult;
 import org.nsider.chatgames.races.Race;
+import org.nsider.chatgames.races.RaceTarget;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,7 +29,7 @@ public class LogListener implements Listener {
 
     @EventHandler
     public void onGameStart(ChatGamesStartEvent event) {
-        String logMessage = GameUtility.isRace(event.getType())
+        String logMessage = event.getType().isRace()
                 ? formatRaceStartLog(event.getType())
                 : formatGameStartLog(event);
 
@@ -38,7 +38,7 @@ public class LogListener implements Listener {
 
     @EventHandler
     public void onGameEnd(ChatGamesEndEvent event) {
-        String logMessage = GameUtility.isRace(event.getType())
+        String logMessage = event.getType().isRace()
                 ? formatRaceEndLog(event)
                 : formatGameEndLog(event);
 
@@ -74,32 +74,29 @@ public class LogListener implements Listener {
      * Formats a log message for race start events.
      */
     private String formatRaceStartLog(GameType gameType) {
-        Race race = plugin.getRaceBuilder().getRace();
+        // Start and end events fire while the race is still the current one
+        Race race = plugin.getRaceManager().getCurrent();
         if (race == null) return "";
 
-        return GameUtility.isMaterialRace(gameType)
-                ? String.format("Race Starting: %s | Material: %s | Amount: %d",
-                gameType.name(), race.getMaterial().name(), race.getAmount())
-                : String.format("Race Starting: %s | Entity: %s | Amount: %d",
-                gameType.name(), race.getEntityType().getEntityType().name(), race.getAmount());
+        return String.format("Race Starting: %s | %s | Amount: %d", gameType.name(), target(race), race.getAmount());
     }
 
     /**
      * Formats a log message for race end events.
      */
     private String formatRaceEndLog(ChatGamesEndEvent event) {
-        Race race = plugin.getRaceBuilder().getRace();
+        Race race = plugin.getRaceManager().getCurrent();
         if (race == null) return "";
 
-        return GameUtility.isMaterialRace(event.getType())
-                ? String.format("Race Ending: %s | Has Winner: %s%s | Material: %s | Amount: %d",
+        return String.format("Race Ending: %s | Has Winner: %s%s | %s | Amount: %d",
                 event.getType().name(), event.hasWinner() ? "Yes" : "No",
                 event.hasWinner() ? " | Winners: " + formatWinners(event.getWinners()) : "",
-                race.getMaterial().name(), race.getAmount())
-                : String.format("Race Ending: %s | Has Winner: %s%s | Entity: %s | Amount: %d",
-                event.getType().name(), event.hasWinner() ? "Yes" : "No",
-                event.hasWinner() ? " | Winners: " + formatWinners(event.getWinners()) : "",
-                race.getEntityType().getEntityType().name(), race.getAmount());
+                target(race), race.getAmount());
+    }
+
+    private static String target(Race race) {
+        RaceTarget target = race.getTarget();
+        return (race.getType().isMaterialRace() ? "Material: " : "Entity: ") + target.getServerName();
     }
 
     /**
@@ -121,6 +118,7 @@ public class LogListener implements Listener {
      * Logs messages to the console and/or a log file.
      */
     private void log(String logMessage) {
+        if (logMessage.isEmpty()) return;
         if (ConfigValue.getBoolean(ConfigPaths.LOG_TO_CONSOLE)) {
             plugin.getLogger().info(logMessage);
         }

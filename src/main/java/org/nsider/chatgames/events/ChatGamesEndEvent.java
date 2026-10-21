@@ -1,5 +1,6 @@
 package org.nsider.chatgames.events;
 
+import java.util.Collections;
 import java.util.List;
 
 import lombok.Getter;
@@ -7,33 +8,35 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.games.GameController;
-import org.nsider.chatgames.games.manager.GameUtility;
 import org.nsider.chatgames.games.utils.PlayerResult;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 public class ChatGamesEndEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
-    private final ChatGames plugin;
     @Getter private final GameType type;
+    private final String answer;
     private boolean cancelled;
     @Getter private final List<PlayerResult> winners;
 
-    public ChatGamesEndEvent(ChatGames plugin, GameType type, List<PlayerResult> winners) {
-        this.plugin = plugin;
+    /**
+     * @param type    the game or race that ended
+     * @param answer  the answer, or null for races
+     * @param winners the winners ordered by place
+     */
+    public ChatGamesEndEvent(GameType type, String answer, List<PlayerResult> winners) {
         this.type = type;
+        this.answer = answer;
         this.cancelled = false;
-        this.winners = winners;
+        this.winners = Collections.unmodifiableList(winners);
     }
 
     public boolean hasAnswer() {
-        return !GameUtility.isRace(type);
+        return !type.isRace();
     }
 
     public String getAnswer() {
-        return this.plugin.getGameManager().getGame().getAnswer();
+        return answer;
     }
 
     public boolean hasWinner() {
@@ -41,11 +44,11 @@ public class ChatGamesEndEvent extends Event implements Cancellable {
     }
 
     public Double getTime(Player p) {
-        PlayerResult result = GameController.getPlayerResult(p.getUniqueId());
-        if (result != null) {
-            return result.getTime();
+        for (PlayerResult result : winners) {
+            if (result.getUuid().equals(p.getUniqueId())) {
+                return result.getTime();
+            }
         }
-
         return 0.0;
     }
 

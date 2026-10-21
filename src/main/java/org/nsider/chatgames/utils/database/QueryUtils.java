@@ -7,9 +7,11 @@ import java.sql.*;
 
 /**
  * Utility class for executing SQL queries.
- * Provides methods to execute SQL update queries with or without parameters.
+ * Provides methods to execute SQL queries and updates with bound parameters.
  */
-public class QueryUtils {
+public final class QueryUtils {
+
+    private QueryUtils() {}
 
     /**
      * Executes a SQL update query with parameters.
@@ -25,18 +27,35 @@ public class QueryUtils {
     }
 
     /**
-     * Executes a SQL query and returns the result set.
+     * Reads the rows of a result set. Called while the statement is still open.
      *
-     * @param conn The database connection. Must not be null.
-     * @param sql  The SQL query to execute. Must not be null.
-     * @param params The parameters to set in the prepared statement. Can be null or empty.
-     * @return The ResultSet of the query.
+     * @param <T> the value built from the rows
+     */
+    @FunctionalInterface
+    public interface ResultHandler<T> {
+        T handle(ResultSet resultSet) throws SQLException;
+    }
+
+    /**
+     * Executes a SQL query and maps its rows with {@code handler}.
+     *
+     * <p>The rows are read inside this method because closing the statement
+     * also closes its result set, so a {@link ResultSet} can't be returned.</p>
+     *
+     * @param conn    The database connection. Must not be null.
+     * @param sql     The SQL query to execute. Must not be null.
+     * @param handler Reads the result set into a value.
+     * @param params  The parameters to set in the prepared statement. Can be null or empty.
+     * @return whatever {@code handler} returns
      * @throws SQLException If a database access error occurs.
      */
-    public static ResultSet executeQuery(@Nonnull Connection conn, @Nonnull String sql, @Nullable Object... params) throws SQLException {
+    public static <T> T query(@Nonnull Connection conn, @Nonnull String sql, @Nonnull ResultHandler<T> handler,
+                              @Nullable Object... params) throws SQLException {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             setParameters(statement, params);
-            return statement.executeQuery();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return handler.handle(resultSet);
+            }
         }
     }
 

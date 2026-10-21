@@ -1,73 +1,56 @@
 package org.nsider.chatgames.managers;
 
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
-import org.nsider.chatgames.model.top.FastestData;
+import org.nsider.chatgames.utils.gameplay.MilestoneUtils;
 
-public class TopManager {
+import java.util.UUID;
 
-    public static void setPoints(OfflinePlayer player, int points) {
-        ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
-        if (cgPlayer != null) {
-            cgPlayer.setPoints(points);
-        }
-    }
+/**
+ * Points and fastest times. Works on cached data for online players; changes to
+ * offline players are loaded, applied and saved in the background.
+ */
+public final class TopManager {
 
+    private TopManager() {}
+
+    /**
+     * @return the player's points, or 0 if their data isn't loaded
+     */
     public static int getPoints(OfflinePlayer player) {
-        ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
-        return cgPlayer != null ? cgPlayer.getPoints() : 0;
+        ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());
+        return data != null ? data.getPoints() : 0;
     }
 
-    public static void addPoint(OfflinePlayer player, int amount) {
-        ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
-        if (cgPlayer != null) {
-            cgPlayer.setPoints(cgPlayer.getPoints() + amount);
-        }
+    /**
+     * Adds points (negative to remove) and runs any milestones crossed on the way up,
+     * straight away or, for an offline player, when they next join.
+     */
+    public static void addPoints(OfflinePlayer player, int amount) {
+        UUID uuid = player.getUniqueId();
+        ChatGamesPlayerManager.modify(uuid, data -> {
+            int before = data.getPoints();
+            int after = data.addPoints(amount);
+            MilestoneUtils.checkMilestones(data, before, after);
+        });
     }
 
-    public static void removePoints(OfflinePlayer player, int amount) {
-        ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
-        if (cgPlayer != null) {
-            cgPlayer.setPoints(Math.max(cgPlayer.getPoints() - amount, 0));
-        }
+    /**
+     * Sets points to an exact value. Milestones are not run: this is an admin correction.
+     */
+    public static void setPoints(OfflinePlayer player, int points) {
+        ChatGamesPlayerManager.modify(player.getUniqueId(), data -> data.setPoints(points));
     }
 
-    public static void setFastestTime(Player player, GameType game, double time) {
-        ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
-        if (cgPlayer != null) {
-            FastestData updated = cgPlayer.getFastestData().withGameTime(game, time);
-            cgPlayer.setFastestData(updated);
-        }
+    /**
+     * Records a winning time for an online player.
+     *
+     * @return true if it was a new personal best for that game
+     */
+    public static boolean recordTime(OfflinePlayer player, GameType game, double seconds) {
+        ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());
+        return data != null && data.recordTime(game, seconds);
     }
-
-    public static void setOverallFastest(Player player, double time) {
-        ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
-        if (cgPlayer != null) {
-            FastestData updated = cgPlayer.getFastestData().withOverallFastest(time);
-            cgPlayer.setFastestData(updated);
-        }
-    }
-
-    public static FastestData getFastestData(Player player) {
-        ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
-        return cgPlayer != null ? cgPlayer.getFastestData() : null;
-    }
-
-    public static boolean isFasterThan(Player player, GameType game, double newTime) {
-        FastestData fd = getFastestData(player);
-        if (fd == null) return false;
-        double current = fd.getTime(game);
-        return current == 0.0 || newTime < current;
-    }
-
-    public static boolean isFasterThanOverall(Player player, double newTime) {
-        FastestData fd = getFastestData(player);
-        if (fd == null) return false;
-        double current = fd.getBestOverall();
-        return current == 0.0 || newTime < current;
-    }
-
 }

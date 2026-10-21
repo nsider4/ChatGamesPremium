@@ -20,7 +20,7 @@ public class GameMessageManager {
             for (String msg : lore) {
                 if (replace.length >= 1) {
                     for (int i = 0; i < replace.length - 1; i += 2) {
-                        msg = msg.replaceAll(replace[i], replace[i + 1]);
+                        msg = msg.replace(replace[i], replace[i + 1]);
                     }
                 }
                 MessageUtils.sendMessage(p, msg);

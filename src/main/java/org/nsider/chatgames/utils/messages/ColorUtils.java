@@ -2,6 +2,7 @@ package org.nsider.chatgames.utils.messages;
 
 import org.bukkit.ChatColor;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.utils.gameplay.VersionUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,15 +23,14 @@ public class ColorUtils {
      * Colorizes a message, translating Minecraft color codes (&) and hex color codes (for Minecraft 1.16+).
      *
      * @param message the message to be colorized
-     * @param mcVersion the version of Minecraft
      * @return the colorized message
      */
-    protected static String colorizeMessage(String message, int mcVersion) {
-        //If the Minecraft version is 1.16 or higher, translate hex color codes
-        if (mcVersion >= 16) {
+    protected static String colorizeMessage(String message) {
+        if (VersionUtils.isAtLeast(1, 16)) {
             return translateHexColors(message);
         }
-        return message.replace("&", "§");
+        // Only "&" followed by a colour code is translated, so a plain "&" in text survives
+        return ChatColor.translateAlternateColorCodes('&', message);
     }
 
     /**

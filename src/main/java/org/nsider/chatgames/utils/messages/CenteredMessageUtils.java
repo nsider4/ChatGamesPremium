@@ -109,6 +109,17 @@ public class CenteredMessageUtils {
     }
 
     /**
+     * @return the spaces that centre text of this (coloured) content on a chat line
+     */
+    static String padding(String text) {
+        StringBuilder padding = new StringBuilder();
+        for (int i = getPaddingToCenter(text, 0); i > 0; i--) {
+            padding.append(' ');
+        }
+        return padding.toString();
+    }
+
+    /**
      * Sends a centered message to a CommandSender (e.g., a player or the console).
      * Each line of the message is centered individually.
      *

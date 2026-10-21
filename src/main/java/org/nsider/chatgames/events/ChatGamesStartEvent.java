@@ -4,30 +4,41 @@ import lombok.Getter;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.games.manager.GameUtility;
 
+import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
+
+/**
+ * Fired just before a chat game or race is announced. Cancelling it stops the
+ * game from starting; nothing has been shown to players yet.
+ */
 public class ChatGamesStartEvent extends Event implements Cancellable {
+
     private static final HandlerList HANDLERS = new HandlerList();
-    private final ChatGames plugin;
+
     @Getter private final GameType type;
+    @Nullable private final String answer;
     private boolean cancelled;
 
-    public ChatGamesStartEvent(ChatGames plugin, GameType type) {
-        this.plugin = plugin;
+    /**
+     * @param answer the answer, or null for races
+     */
+    public ChatGamesStartEvent(@Nonnull GameType type, @Nullable String answer) {
         this.type = type;
-        this.cancelled = false;
+        this.answer = answer;
     }
 
     public boolean hasAnswer() {
-        return !GameUtility.isRace(type);
+        return answer != null;
     }
 
+    @Nullable
     public String getAnswer() {
-        return this.plugin.getGameManager().getGame().getAnswer();
+        return answer;
     }
 
+    @Nonnull
     @Override
     public HandlerList getHandlers() {
         return HANDLERS;
@@ -37,6 +48,7 @@ public class ChatGamesStartEvent extends Event implements Cancellable {
         return HANDLERS;
     }
 
+    @Nonnull
     @Override
     public String getEventName() {
         return "ChatGamesStartEvent";

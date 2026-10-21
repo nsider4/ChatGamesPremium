@@ -3,12 +3,13 @@
 #############################
 check-update: true
 
-#These translations are for plugin sided things such as material and entity names that are used for races. 118 Language Types Supported!
+#These translations are for plugin sided things such as material and entity names that are used for races. Over 140 languages supported!
 #IT WILL ONLY TRANSLATE THOSE THINGS, CUSTOMIZABLE MESSAGES(messages.yml) HAVE TO BE CHANGED MANUALLY.
 #
 #See the ID for your language here: https://github.com/nsider4/mine-translator/blob/main/language_names.txt
 #
-#CHANGES ARE REGISTERED ONLY ON RESTART
+#The file is downloaded into translations/ and replaced automatically when names for a newer
+#Minecraft version are published. A change here applies on /chatgames reload.
 lang: 'en_us'
 
 #Storage type, available: SQLite or MySQL
@@ -75,6 +76,30 @@ count-all-players: false
 #In true, it will create a top for the fastest typers(/chatgames fastest). Otherwise, in false, this top type will be off.
 fastest-typers-top: true
 
+#PlaceholderAPI placeholders (needs PlaceholderAPI installed):
+#  You:          %chatgames_points%, %chatgames_wins%, %chatgames_wins_<game>%, %chatgames_race_wins%,
+#                %chatgames_global_played%, %chatgames_global_won%, %chatgames_toggle%, %chatgames_sound_toggle%
+#                %chatgames_events_played%, %chatgames_event_wins%, %chatgames_event_best_place% (0 = none yet)
+#  Your times:   %chatgames_personal_best% (any chat game), %chatgames_fastest_<game>% (races too)
+#  Your place:   %chatgames_show_current_pos_top% (points), %chatgames_show_current_pos_fastest% (best time)
+#  Points top:   %chatgames_top_<n>% (name), %chatgames_points_top_<n>%, %chatgames_total_points%
+#  Fastest top:  %chatgames_fastest_<n>% (name, chat games), %chatgames_fastest_time_<n>%,
+#                %chatgames_fastest_<game>_<n>%, %chatgames_fastest_<game>_time_<n>%
+#  Right now:    %chatgames_game_running%, %chatgames_current_game%, %chatgames_next_game_in% (seconds)
+#  Race:         %chatgames_race_target%, %chatgames_race_amount%, %chatgames_race_progress% (yours)
+#  Challenges:   %chatgames_daily_completed%, %chatgames_daily_total%, %chatgames_weekly_completed%,
+#                %chatgames_weekly_total%, %chatgames_challenges_completed% (all time)
+#  Streaks:      %chatgames_streak_<type>%, %chatgames_streak_<type>_longest% (<type> is challenge, daily or global)
+#  Game event:   %chatgames_event_running%, %chatgames_event_name%, %chatgames_event_step%, %chatgames_event_steps%,
+#                %chatgames_event_points% and %chatgames_event_place% (yours in the running event)
+#  <game> is a game's name as in games.yml (e.g. unscramble, guess_the_number); <n> is a place (1, 2, 3...).
+placeholders:
+  #How often the leaderboard placeholders (top_<n>, fastest_<n>, positions...) are rebuilt, in seconds.
+  #They are also rebuilt after every game with a winner. Your own points, wins and times are always live.
+  refresh-seconds: 60
+  #Shown when there is nothing to show: an empty leaderboard place, no best time yet, no game running...
+  empty-value: ''
+
 #Sound to send to players when a chat event starts!
 GameSounds:
   volume: 0.5
@@ -85,32 +110,4 @@ GameSounds:
   time-expired: 'minecraft:entity.villager.no'
   wrong-case: 'minecraft:block.note_block.bass'
 
-
-#Presets section
-active-preset: "none"
-
-presets:
-  weekend_set:
-    games:
-      - unscramble
-      - unreverse
-      - reaction
-
-  minimal_set:
-    games:
-      - reaction
-
-  full_rotation:
-    games:
-      - unscramble
-      - unreverse
-      - reaction
-      - guess_the_number
-      - shoppinglist
-      - clickable
-      - fillout
-      - hoverable
-      - random
-      - math
-      - variable
-      - trivia
+#Game presets (named sets of enabled games) live in presets.yml.

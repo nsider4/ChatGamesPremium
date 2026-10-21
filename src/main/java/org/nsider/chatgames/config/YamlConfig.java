@@ -3,13 +3,18 @@ package org.nsider.chatgames.config;
 import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.nsider.chatgames.ChatGames;
 
 /**
- * Represents a YAML configuration file for the ElytraTweaks plugin.
+ * Represents a YAML configuration file for the ChatGames plugin.
  * It provides methods to load, save, and create the configuration file
  * as well as manage the default configuration resource.
  */
@@ -22,7 +27,7 @@ public class YamlConfig extends YamlConfiguration {
     /**
      * Constructs a new YamlConfig instance.
      *
-     * @param plugin the ElytraTweaks plugin instance
+     * @param plugin the ChatGames plugin instance
      * @param path the path to the configuration file (without the extension)
      */
     public YamlConfig(ChatGames plugin, String path) {
@@ -34,13 +39,14 @@ public class YamlConfig extends YamlConfiguration {
     }
 
     /**
-     * Reloads the configuration file from disk.
+     * Reloads the configuration file from disk. Always read as UTF-8: Bukkit 1.8-1.11
+     * used the system charset, which on Windows turned symbols like ✓ into "âœ“".
      *
      * @return true if the file was successfully loaded, false otherwise
      */
     public boolean reload() {
-        try {
-            super.load(this.file);
+        try (Reader reader = new InputStreamReader(new FileInputStream(this.file), StandardCharsets.UTF_8)) {
+            super.load(reader);
         } catch (IOException | InvalidConfigurationException e) {
             this.plugin.getLogger().log(Level.SEVERE, "Failed to load configuration file {0}!", this.path);
             return false;
@@ -55,7 +61,7 @@ public class YamlConfig extends YamlConfiguration {
      */
     public boolean save() {
         try {
-            super.save(this.file);
+            Files.write(this.file.toPath(), saveToString().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             this.plugin.getLogger().log(Level.SEVERE, "Failed to save configuration file {0}!", this.path);
             return false;

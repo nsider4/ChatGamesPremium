@@ -29,10 +29,12 @@ public class TopPlayerQueries {
 
     private static ChatGames plugin;
     private static String tableName;
+    private static String fastestTable;
 
     public static void initialize(ChatGames instance) {
         plugin = instance;
         tableName = ConfigValue.getString(ConfigPaths.TABLE_NAME);
+        fastestTable = ConfigValue.getString(ConfigPaths.FASTEST_TIMES_TABLE);
     }
 
     private static Connection getConnection() throws SQLException {
@@ -48,65 +50,70 @@ public class TopPlayerQueries {
                 sql = "SELECT UUID, POINTS AS val FROM " + tableName + " WHERE POINTS > 0 ORDER BY POINTS DESC LIMIT 10";
                 break;
             case TypersTop:
-                sql = "SELECT UUID, MIN(fastest_time) AS val FROM game_fastest_times GROUP BY UUID ORDER BY val ASC LIMIT 10";
+                // Races are timed too, but the overall list is for chat games ("fastest typers")
+                sql = "SELECT UUID, MIN(fastest_time) AS val FROM " + fastestTable + " WHERE fastest_time > 0 AND game_name NOT IN ("
+                        + GameType.raceKeysForSql() + ") GROUP BY UUID ORDER BY val ASC LIMIT 10";
                 break;
             case GameTypersTop:
-                sql = "SELECT UUID, fastest_time AS val FROM game_fastest_times WHERE game_name = ? ORDER BY val ASC LIMIT 10";
+                sql = "SELECT UUID, fastest_time AS val FROM " + fastestTable + " WHERE game_name = ? AND fastest_time > 0 ORDER BY val ASC LIMIT 10";
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported top type: " + top);
         }
 
-        plugin.getTaskUtils().runAsyncTask(() -> {
+        // Online players' points and times live in the cache: save them first, and read on the
+        // player-data thread so the query runs after those saves
+        ChatGamesPlayerManager.saveAll();
+        ChatGamesPlayerManager.runAfterSaves(() -> {
+            List<TopData> rows = new ArrayList<>();
             try (Connection conn = getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
 
                 if (top == TopType.GameTypersTop && game.length == 1) {
-                    ps.setString(1, game[0].name().toLowerCase());
+                    ps.setString(1, game[0].getConfigKey());
                 }
 
                 try (ResultSet rs = ps.executeQuery()) {
-                    List<TopData> rows = new ArrayList<>();
                     int rank = 0;
 
                     while (rs.next()) {
                         UUID uuid = UUID.fromString(rs.getString("UUID"));
                         String name = Bukkit.getOfflinePlayer(uuid).getName();
+                        if (name == null) name = "?";
                         double value = rs.getDouble("val");
                         rows.add(new TopData(++rank, name, value));
                     }
-
-                    plugin.getTaskUtils().runSyncTask(() -> {
-                        int totalPoints = (top == TopType.POINTS) ? ValueQueries.getTotalPoints() : 0;
-
-                        if(game.length == 0) {
-                            double personal = getPersonalValue((Player) sender, top);
-                            new TopPresenter(sender, messages, top)
-                                    .present(rows, personal, totalPoints);
-                        } else {
-                            double personal = getPersonalValue((Player) sender, top, game[0]);
-                            new TopPresenter(sender, messages, top, game[0])
-                                    .present(rows, personal, totalPoints);
-                        }
-                    });
                 }
-
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Error loading leaderboard for " + top, e);
+                return;
             }
-        }, 0L);
+
+            // Opens its own connection, so only once the one above is closed: SQLite's pool holds one
+            int totalPoints = (top == TopType.POINTS) ? ValueQueries.getTotalPoints() : 0;
+            GameType gameType = game.length == 0 ? null : game[0];
+            double personal = sender instanceof Player
+                    ? (gameType == null
+                        ? getPersonalValue((Player) sender, top)
+                        : getPersonalValue((Player) sender, top, gameType))
+                    : 0;
+
+            plugin.getScheduler().global(() ->
+                    new TopPresenter(sender, messages, top, gameType).present(rows, personal, totalPoints));
+        });
     }
 
     private static double getPersonalValue(Player player, TopType top, GameType... game) {
         ChatGamesPlayer cgPlayer = ChatGamesPlayerManager.get(player.getUniqueId());
+        if (cgPlayer == null) return 0;
 
         switch (top) {
             case POINTS:
                 return cgPlayer.getPoints();
             case TypersTop:
-                return cgPlayer.getFastestData().getBestOverall();
+                return cgPlayer.getBestOverall();
             case GameTypersTop:
-                return cgPlayer.getFastestData().getTime(game[0]);
+                return cgPlayer.getFastest(game[0]);
             default:
                 return 0;
         }

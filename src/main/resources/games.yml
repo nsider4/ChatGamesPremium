@@ -1,9 +1,36 @@
 #############################
 ######    CHATGAMES    ######
 #############################
+#Settings every game accepts (a missing one uses the default shown):
+#  enable: true/false
+#  weight: 1             How likely the rotation is to pick this game compared to the others (0 = never).
+#                        The same game never runs twice in a row.
+#  winners: 1            How many players can win each round.
+#  points: 1             Points per win (/chatgames top).
+#  case-sensitive: false Players who are right except for capitalisation get the 'wrong_case' message.
+#  timeToGuess_seconds: 20
+#  min-answer-ms: 400    Correct answers faster than this are ignored and logged: nobody reads and types
+#                        that fast, chat bots do. 0 turns the check off.
+#  hints:                Hints appear while the round runs, using 'hint_message' in messages.yml.
+#    enable: false
+#    after-percent: 50   The first hint shows once this much of the time has passed; others are spread over the rest.
+#    max: 1              Up to 3.
+#  countdown:            Time left, on the action bar. Works on every version (1.8 to 26.x).
+#    enable: false
+#    last-seconds: 10    Only during the last N seconds; 0 shows it for the whole round.
+#  titleMessage / subtitleMessage: leave both empty to send no title.
 unscramble:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  hints:
+    enable: true
+    after-percent: 50
+    max: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   case-sensitive: true
   #The time users will have to guess, solve, write, etc in seconds.
@@ -15,6 +42,15 @@ unscramble:
 unreverse:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  hints:
+    enable: true
+    after-percent: 50
+    max: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   case-sensitive: true
   #The time users will have to guess, solve, write, etc in seconds.
@@ -26,6 +62,11 @@ unreverse:
 reaction:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   case-sensitive: true
   #The time users will have to guess, solve, write, etc in seconds.
@@ -37,6 +78,15 @@ reaction:
 guess_the_number:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  hints:
+    enable: true
+    after-percent: 50
+    max: 1
+  countdown:
+    enable: true
+    last-seconds: 10
   #Don't change this
   case-sensitive: false
 
@@ -49,26 +99,14 @@ guess_the_number:
   titleMessage: '&b%selection%'
   subtitleMessage: '&aWrite'
 
-shoppinglist:
-  enable: true
-  winners: 1
-
-  case-sensitive: false
-
-  listLength: 3
-
-  #The time users will have to memorize, solve, write, etc in seconds.
-  timeToMemorize: 7
-
-  #The time users will have to guess, solve, write, etc in seconds.
-  timeToGuess_seconds: 20
-  #Leave the following 2 empty to disable them
-  titleMessage: '&bMemorize'
-  subtitleMessage: '&aShopping List'
-
 clickable:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   #The time users will have to guess, solve, write, etc in seconds.
   timeToGuess_seconds: 20
@@ -79,6 +117,15 @@ clickable:
 fillout:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  hints:
+    enable: true
+    after-percent: 50
+    max: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   #This represents the percentage of hidden letters in the fillout game. Values can range from 1 to 100. Low numbers means less letters hidden.
   difficulty: 30
@@ -92,6 +139,11 @@ fillout:
 hoverable:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   case-sensitive: true
   #The time users will have to guess, solve, write, etc in seconds.
@@ -104,6 +156,11 @@ hoverable:
 random:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   case-sensitive: true
   #The time users will have to guess, solve, write, etc in seconds.
@@ -124,6 +181,15 @@ random:
 math:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  hints:
+    enable: true
+    after-percent: 50
+    max: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   #Don't change this
   case-sensitive: false
@@ -136,7 +202,15 @@ math:
   #4 - (1-9999)
   #5 - (1-99999)
   difficulty: 2
+  #How many operators each question has: 1 -> "12 + 7", 2 -> "12 + 7 x 3"
+  operations: 1
+  #solve: work out the result ("12 + 7 x 3").  missing-value: find the hidden number ("12 + ? x 3 = 33").
+  #Each round picks one of the listed modes.
+  modes:
+    - solve
+    - missing-value
   #Operators to use, the four listed are the ones available, you can remove if you don't want to use all of them. Always leave at least 1
+  #Divisions always come out as whole numbers.
   operators:
     - '+'
     - '-'
@@ -150,6 +224,11 @@ math:
 variable:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   #Don't change this
   case-sensitive: false
@@ -175,34 +254,66 @@ variable:
 sequence:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  hints:
+    enable: true
+    after-percent: 50
+    max: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   #Don't change this
   case-sensitive: false
 
   #The time users will have to guess, solve, write, etc in seconds.
-  timeToGuess_seconds: 20
+  timeToGuess_seconds: 25
 
-  #Number of operations to include in the equation. For example, 3 -> "3 + 4 - x = 10"
-  number-of-operations: 3
-
-  #Allowed operators in the equation
-  operators:
-    - '+'
-    - '-'
-    - 'x'
-    - '/'
+  #Players see a number sequence and type the next number, e.g. "3, 6, 12, 24, ?" -> 48
+  #Patterns: add (3, 7, 11), multiply (2, 6, 18), squares (4, 9, 16), alternating (5, 9, 7, 11), fibonacci (2, 3, 5, 8)
+  patterns:
+    - add
+    - multiply
+    - squares
+    - alternating
+    - fibonacci
+  #1-3. Higher difficulty allows harder patterns (squares and alternating from 2, fibonacci at 3) and bigger numbers.
+  difficulty: 2
+  #How many numbers are shown before the '?' (4-8)
+  shown-terms: 5
 
   #__Leave the following 2 empty to disable them__
   titleMessage: '&b%selection%'
-  subtitleMessage: '&aFind the missing value'
+  subtitleMessage: '&aComplete the sequence'
 
 memorize:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  hints:
+    enable: true
+    after-percent: 50
+    max: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   case-sensitive: false
 
   listLength: 3
+  #Each round takes its items from one of these pools (see words.yml -> memorize.pools):
+  #shopping_list, words, colors, numbers, blocks, mobs, or a list of your own
+  pools:
+    - shopping_list
+    - words
+    - colors
+    - numbers
+    - blocks
+    - mobs
+  #If false, the items can be typed in any order
+  order-matters: true
 
   #The time users will have to memorize, solve, write, etc in seconds.
   timeToMemorize: 7
@@ -213,9 +324,40 @@ memorize:
   titleMessage: '&bMemorize'
   subtitleMessage: '&aTry remembering this list!'
 
+#Three clues, one hidden link (associations are in words.yml).
+#difficulty: easy, medium, hard or mixed. Hard rounds show one clue and reveal the others
+#as hints, so keep hints on for them (max 2 shows all three clues).
+word_association:
+  enable: true
+  winners: 1
+  weight: 1
+  points: 1
+  difficulty: mixed
+  hints:
+    enable: true
+    after-percent: 34
+    max: 2
+  countdown:
+    enable: true
+    last-seconds: 10
+
+  case-sensitive: false
+  timeToGuess_seconds: 30
+  titleMessage: '&bWORD ASSOCIATION'
+  subtitleMessage: '&aCheck Chat!'
+
 trivia:
   enable: true
   winners: 1
+  weight: 1
+  points: 1
+  hints:
+    enable: true
+    after-percent: 50
+    max: 1
+  countdown:
+    enable: true
+    last-seconds: 10
 
   case-sensitive: false
   #The time users will have to guess, solve, write, etc in seconds.

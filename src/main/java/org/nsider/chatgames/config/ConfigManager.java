@@ -4,6 +4,10 @@ import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.nsider.chatgames.ChatGames;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.logging.Level;
+
 /**
  * Manages all configuration files and messages for the ChatGames plugin.
  * This class is responsible for initializing and reloading configuration files,
@@ -15,48 +19,95 @@ public class ConfigManager {
 
     @Getter private static Messages messages;
     @Getter private static FileConfiguration config;
-    @Getter private static MessagesConfig MessagesConfig;
-    @Getter private static Words Words;
-    @Getter private static Rewards Rewards;
-    @Getter private static Races Races;
-    @Getter private static Games Games;
-    @Getter private static Addons Addons;
-    @Getter private static Milestones Milestones;
+    @Getter private static MessagesConfig messagesConfig;
+    @Getter private static Words words;
+    @Getter private static Rewards rewards;
+    @Getter private static Races races;
+    @Getter private static Games games;
+    @Getter private static Addons addons;
+    @Getter private static Milestones milestones;
+    @Getter private static GlobalGames globalGames;
+    @Getter private static Presets presets;
+    @Getter private static Challenges challenges;
+    @Getter private static Streaks streaks;
+    @Getter private static Events events;
+    @Getter private static Menus menus;
 
+    private ConfigManager() {}
 
     /**
-     * Initializes the configuration manager and loads the configuration files.
+     * Loads every configuration file, then the messages built from them.
+     * Must run before anything reads {@link org.nsider.chatgames.config.settings.ConfigPaths}.
      *
      * @param plugin The instance of the ChatGames plugin to be used for loading configurations.
      */
     public static void initialize(ChatGames plugin) {
         ConfigManager.plugin = plugin;
-        messages = new Messages();
+        migrateFrom199(plugin);
+        plugin.saveDefaultConfig();
 
         config = plugin.getConfig();
-        MessagesConfig = new MessagesConfig();
-        Words = new Words();
-        Rewards = new Rewards();
-        Races = new Races();
-        Games = new Games();
-        Addons = new Addons();
-        Milestones = new Milestones();
+        messagesConfig = new MessagesConfig();
+        words = new Words();
+        rewards = new Rewards();
+        races = new Races();
+        games = new Games();
+        addons = new Addons();
+        milestones = new Milestones();
+        globalGames = new GlobalGames();
+        presets = new Presets();
+        challenges = new Challenges();
+        streaks = new Streaks();
+        events = new Events();
+        menus = new Menus();
+
+        // Messages read messages.yml, so they are built last
+        messages = new Messages();
+    }
+
+    private static void migrateFrom199(ChatGames plugin) {
+        if (!LegacyMigration.isNeeded(plugin.getDataFolder())) return;
+        try {
+            LegacyMigration.Result result = LegacyMigration.migrate(plugin.getDataFolder(), plugin::getResource);
+            StringBuilder carried = new StringBuilder();
+            for (Map.Entry<String, Integer> entry : result.carried.entrySet()) {
+                if (entry.getValue() > 0) carried.append(carried.length() == 0 ? "" : ", ").append(entry.getKey()).append(" (").append(entry.getValue()).append(')');
+            }
+            if (result.rewardsKept) carried.append(carried.length() == 0 ? "" : ", ").append("rewards.yml (kept)");
+            plugin.getLogger().log(Level.INFO, "Upgraded the 1.9.9 configuration. Your changes went to: {0}. The old files are in {1}.",
+                    new Object[]{carried.length() == 0 ? "nothing (all defaults)" : carried, result.backup.getPath()});
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Could not upgrade the 1.9.9 configuration; the old files are in backups/.", e);
+        }
     }
 
     /**
-     * Reloads all configuration files.
+     * Reloads all configuration files and the messages built from them.
      *
      * @return true if all configurations were reloaded successfully, false otherwise.
      */
     public static boolean reload() {
         plugin.reloadConfig();
-        return MessagesConfig.reload()
-                && Games.reload()
-                && Addons.reload()
-                && Words.reload()
-                && Rewards.reload()
-                && Races.reload()
-                && Milestones.reload();
+        // reloadConfig() replaces the FileConfiguration instance
+        config = plugin.getConfig();
+
+        // Non-short-circuiting so one broken file doesn't stop the others reloading
+        boolean success = messagesConfig.reload()
+                & games.reload()
+                & addons.reload()
+                & words.reload()
+                & rewards.reload()
+                & races.reload()
+                & milestones.reload()
+                & globalGames.reload()
+                & presets.reload()
+                & challenges.reload()
+                & streaks.reload()
+                & events.reload()
+                & menus.reload();
+
+        messages = new Messages();
+        return success;
     }
 
 
@@ -122,6 +173,62 @@ public class ConfigManager {
     public static class Milestones extends YamlConfig {
         public Milestones() {
             super(plugin, "milestones");
+        }
+    }
+
+    /**
+     * Configuration file for global games
+     */
+    public static class GlobalGames extends YamlConfig {
+        public GlobalGames() {
+            super(plugin, "global_games");
+        }
+    }
+
+    /**
+     * Game presets and the active one. The plugin writes this file itself
+     * ({@code /chatgames preset}), which is why it is apart from config.yml.
+     */
+    public static class Presets extends YamlConfig {
+        public Presets() {
+            super(plugin, "presets");
+            options().copyHeader(true);
+        }
+    }
+
+    /**
+     * Daily and weekly challenges
+     */
+    public static class Challenges extends YamlConfig {
+        public Challenges() {
+            super(plugin, "challenges");
+        }
+    }
+
+    /**
+     * The streak reward ladders
+     */
+    public static class Streaks extends YamlConfig {
+        public Streaks() {
+            super(plugin, "streaks");
+        }
+    }
+
+    /**
+     * Game events: series of games with their own scoring
+     */
+    public static class Events extends YamlConfig {
+        public Events() {
+            super(plugin, "events");
+        }
+    }
+
+    /**
+     * Menu layouts: titles, slots and items
+     */
+    public static class Menus extends YamlConfig {
+        public Menus() {
+            super(plugin, "menus");
         }
     }
 }
