@@ -355,6 +355,76 @@ public enum MessageKey {
             "messages",
             "streaks.unknown",
             "&8[%prefix%&8] &cThere is no streak called &f%type%&c. Use challenge, daily or global."
+    ),
+    EVENTS_UNKNOWN(
+            "messages",
+            "events.unknown",
+            "&8[%prefix%&8] &cThere is no event called &f%event%&c."
+    ),
+    EVENTS_STARTED(
+            "messages",
+            "events.started",
+            "&8[%prefix%&8] &fStarted the event %event%&f."
+    ),
+    EVENTS_ALREADY_RUNNING(
+            "messages",
+            "events.already_running",
+            "&8[%prefix%&8] &cAn event is already running: %event%&c."
+    ),
+    EVENTS_CANCELLED(
+            "messages",
+            "events.cancelled",
+            "&8[%prefix%&8] &cAnother plugin cancelled the event %event%&c."
+    ),
+    EVENTS_NOT_RUNNING(
+            "messages",
+            "events.not_running",
+            "&8[%prefix%&8] &cNo event is running."
+    ),
+    EVENTS_STOPPED(
+            "messages",
+            "events.stopped",
+            "&8[%prefix%&8] &fStopped the event %event%&f."
+    ),
+    EVENTS_LIST_HEADER(
+            "messages",
+            "events.list_header",
+            "&8[%prefix%&8] &eEvents:"
+    ),
+    EVENTS_LIST_ENTRY(
+            "messages",
+            "events.list_entry",
+            "&7- &f%id% &8(%event%&8) &7%steps% games, next: &f%next%%running%"
+    ),
+    EVENTS_LIST_RUNNING(
+            "messages",
+            "events.list_running",
+            " &a(running, game %step%/%steps%)"
+    ),
+    EVENTS_LIST_EMPTY(
+            "messages",
+            "events.list_empty",
+            "&8[%prefix%&8] &cNo events are set up in events.yml."
+    ),
+    EVENTS_NOT_SCHEDULED(
+            "messages",
+            "events.not_scheduled",
+            "not scheduled"
+    ),
+    EVENTS_TOP_HEADER(
+            "messages",
+            "events.top_header",
+            "&8[%prefix%&8] &eMost event points in %event%&e:"
+    ),
+    EVENTS_TOP_ENTRY(
+            "messages",
+            "events.top_entry",
+            "&c%spot%. &f%player% &8| &e%points% &7points"
+    ),
+    EVENTS_TOP_EMPTY(
+            "messages",
+            "events.top_empty",
+            "&8[%prefix%&8] &cNobody has scored in %event% &cyet."
     );
 
     private final String fileName;

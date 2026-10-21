@@ -121,8 +121,9 @@ public class MainTask {
      * Performs one round on the main thread (global region on Folia): starts a game if conditions are met.
      */
     private void doTask() {
-        // A game started by command, or a long game, may still be running: skip this round
-        if (plugin.isInGame() || !checkEnoughPlayers()) return;
+        // A game started by command, or a long game, may still be running: skip this round.
+        // A game event plays its own games.
+        if (plugin.isInGame() || plugin.getEventManager().isRunning() || !checkEnoughPlayers()) return;
         GameType type = pickNext();
         if (type != null && plugin.getGameManager().startGame(type)) {
             lastGame = type;

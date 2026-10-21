@@ -76,6 +76,22 @@ streaks:
   set: '&8[%prefix%&8] &fSet &c%player%&f''s %streak% &fto &a%days% &fday(s).'
   unknown: '&8[%prefix%&8] &cThere is no streak called &f%type%&c. Use challenge, daily or global.'
 
+events:
+  unknown: '&8[%prefix%&8] &cThere is no event called &f%event%&c.'
+  started: '&8[%prefix%&8] &fStarted the event %event%&f.'
+  already_running: '&8[%prefix%&8] &cAn event is already running: %event%&c.'
+  cancelled: '&8[%prefix%&8] &cAnother plugin cancelled the event %event%&c.'
+  not_running: '&8[%prefix%&8] &cNo event is running.'
+  stopped: '&8[%prefix%&8] &fStopped the event %event%&f.'
+  list_header: '&8[%prefix%&8] &eEvents:'
+  list_entry: '&7- &f%id% &8(%event%&8) &7%steps% games, next: &f%next%%running%'
+  list_running: ' &a(running, game %step%/%steps%)'
+  list_empty: '&8[%prefix%&8] &cNo events are set up in events.yml.'
+  not_scheduled: 'not scheduled'
+  top_header: '&8[%prefix%&8] &eMost event points in %event%&e:'
+  top_entry: '&c%spot%. &f%player% &8| &e%points% &7points'
+  top_empty: '&8[%prefix%&8] &cNobody has scored in %event% &cyet.'
+
 logs:
   no_logs: "&cNo logs available or an error occurred."
   header: "&8[%prefix%&8] &eLast &6%amount% &elogs:"
@@ -142,6 +158,7 @@ help_command:
   - '&a/chatgames challenges &f- &3Shows your daily and weekly challenges.'
   - '&a/chatgames streaks &f- &3Shows your streaks.'
   - '&a/chatgames claim &f- &3Claims finished challenges and streak rewards.'
+  - '&a/chatgames event [list|top <event>] &f- &3Shows the game events, or who scored most in one.'
   - '&a/chatgames toggle [player] &f- &3Turns chat games on or off for you.'
   - '&a/chatgames togglesound [player] &f- &3Turns chat game sounds on or off.'
   - '&6'
@@ -149,6 +166,7 @@ help_command:
   - '&a/chatgames (game) [values] &f- &3Starts that game now, optionally with your own word/values.'
   - '&a/chatgames any &f- &3Starts the game the rotation would pick next.'
   - '&a/chatgames global <game> [values] &f- &3Starts a global game: everyone who answers in time wins.'
+  - '&a/chatgames event start <event> | stop &f- &3Starts or stops a game event.'
   - '&a/chatgames stop &f- &3Ends the running game with no winner.'
   - '&a/chatgames toggleAll &f- &3Turns the automatic game rotation on or off.'
   - '&a/chatgames preset <list|load|save> [name] &f- &3Manages game presets.'

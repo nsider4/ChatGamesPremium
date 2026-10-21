@@ -9,6 +9,7 @@ import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
 import org.nsider.chatgames.games.Game;
+import org.nsider.chatgames.games.StartOptions;
 import org.nsider.chatgames.globalgames.GlobalGameConfig;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
@@ -56,7 +57,7 @@ public class GameManager {
      * @return false if something is already running, the game can't be generated, or a plugin cancelled it
      */
     public boolean startGame(@Nonnull GameType type, @Nonnull String... args) {
-        return startGame(type, null, args);
+        return startGame(type, StartOptions.NORMAL, args);
     }
 
     /**
@@ -65,23 +66,26 @@ public class GameManager {
      * @return false if something is already running, the game can't be generated, or a plugin cancelled it
      */
     public boolean startGlobal(@Nonnull GameType type, @Nonnull GlobalGameConfig.Entry global, @Nonnull String... args) {
-        return startGame(type, global, args);
+        return startGame(type, StartOptions.global(global), args);
     }
 
-    private boolean startGame(GameType type, @Nullable GlobalGameConfig.Entry global, String[] args) {
+    /**
+     * Starts a chat game or race with some settings replaced, and/or as a global game.
+     *
+     * @return false for the same reasons as {@link #startGame(GameType, String...)}
+     */
+    public boolean startGame(@Nonnull GameType type, @Nonnull StartOptions options, @Nonnull String... args) {
         boolean started;
         if (type.isRace()) {
             try {
-                started = global == null ? plugin.getRaceManager().start(type, args)
-                        : plugin.getRaceManager().startGlobal(type, global, args);
+                started = plugin.getRaceManager().start(type, options, args);
             } catch (RuntimeException e) {
                 // Free the slot, or no game could ever start again
                 if (!plugin.getRaceManager().stop(false)) endGame();
                 throw e;
             }
         } else {
-            started = global == null ? plugin.getGameBuilder().start(type, args)
-                    : plugin.getGameBuilder().startGlobal(type, global, args);
+            started = plugin.getGameBuilder().start(type, options, args);
         }
         if (started) lastStarted = type;
         return started;

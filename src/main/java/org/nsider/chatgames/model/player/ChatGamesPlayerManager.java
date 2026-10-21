@@ -9,6 +9,8 @@ import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -145,6 +147,25 @@ public final class ChatGamesPlayerManager {
             } catch (RuntimeException e) {
                 plugin.getLogger().log(Level.SEVERE, "A ChatGames data task failed", e);
             }
+        });
+    }
+
+    /**
+     * Reads the players with the highest value of a stat, after saving everyone so the
+     * online players' latest values count. The callback runs on the player-data thread,
+     * with an empty list if the query failed.
+     */
+    public static void topStat(@Nonnull String stat, int limit, @Nonnull Consumer<List<Map.Entry<UUID, Long>>> callback) {
+        saveAll();
+        io.execute(() -> {
+            List<Map.Entry<UUID, Long>> rows;
+            try {
+                rows = repository.topStat(stat, limit);
+            } catch (SQLException e) {
+                plugin.getLogger().log(Level.SEVERE, "Could not read the " + stat + " leaderboard", e);
+                rows = Collections.emptyList();
+            }
+            callback.accept(rows);
         });
     }
 

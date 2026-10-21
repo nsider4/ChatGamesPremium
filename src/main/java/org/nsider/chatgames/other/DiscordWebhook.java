@@ -383,8 +383,22 @@ public class DiscordWebhook {
             return builder.toString();
         }
 
+        /** A JSON string: quotes, backslashes, line breaks and other control characters escaped. */
         private String quote(String string) {
-            return "\"" + string + "\"";
+            StringBuilder out = new StringBuilder("\"");
+            for (char c : string.toCharArray()) {
+                switch (c) {
+                    case '"': out.append("\\\""); break;
+                    case '\\': out.append("\\\\"); break;
+                    case '\n': out.append("\\n"); break;
+                    case '\r': out.append("\\r"); break;
+                    case '\t': out.append("\\t"); break;
+                    default:
+                        if (c < 0x20) out.append(String.format("\\u%04x", (int) c));
+                        else out.append(c);
+                }
+            }
+            return out.append('"').toString();
         }
     }
 }

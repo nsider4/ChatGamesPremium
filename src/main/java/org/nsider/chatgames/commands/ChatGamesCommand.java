@@ -9,6 +9,7 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.commands.sub.AnyGameCommand;
 import org.nsider.chatgames.commands.sub.ChallengesCommand;
 import org.nsider.chatgames.commands.sub.ClaimCommand;
+import org.nsider.chatgames.commands.sub.EventCommand;
 import org.nsider.chatgames.commands.sub.GlobalCommand;
 import org.nsider.chatgames.commands.sub.HelpCommand;
 import org.nsider.chatgames.commands.sub.LogsCommand;
@@ -58,6 +59,7 @@ public class ChatGamesCommand implements TabExecutor {
         register(new ChallengesCommand(plugin));
         register(new StreaksCommand(plugin));
         register(new ClaimCommand(plugin));
+        register(new EventCommand(plugin));
         register(ToggleCommand.games());
         register(ToggleCommand.sound());
         register(new AnyGameCommand(plugin));

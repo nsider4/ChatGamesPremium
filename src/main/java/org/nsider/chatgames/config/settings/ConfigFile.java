@@ -25,7 +25,8 @@ public enum ConfigFile {
     GLOBAL_GAMES(ConfigManager::getGlobalGames),
     PRESETS(ConfigManager::getPresets),
     CHALLENGES(ConfigManager::getChallenges),
-    STREAKS(ConfigManager::getStreaks);
+    STREAKS(ConfigManager::getStreaks),
+    EVENTS(ConfigManager::getEvents);
 
     private final Supplier<FileConfiguration> supplier;
 

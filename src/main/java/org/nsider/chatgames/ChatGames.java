@@ -14,6 +14,7 @@ import org.nsider.chatgames.database.DataHandler;
 import org.nsider.chatgames.database.HikariDatabase;
 import org.nsider.chatgames.database.QueryInitializer;
 import org.nsider.chatgames.database.enums.StorageType;
+import org.nsider.chatgames.gameevents.EventManager;
 import org.nsider.chatgames.games.builder.GameBuilder;
 import org.nsider.chatgames.games.manager.GameConfigManager;
 import org.nsider.chatgames.games.manager.GameManager;
@@ -64,6 +65,7 @@ public final class ChatGames extends JavaPlugin {
     private RewardManager rewardManager;
     private LanguageManager languageManager;
     private GlobalGameManager globalGameManager;
+    private EventManager eventManager;
     private MainTask mainTask;
     private LeaderboardCache leaderboardCache;
     private ChatGamesExpansion placeholderExpansion;
@@ -113,6 +115,7 @@ public final class ChatGames extends JavaPlugin {
         this.progressionManager = new ProgressionManager(this);
         this.rewardManager = new RewardManager(this);
         this.globalGameManager = new GlobalGameManager(this);
+        this.eventManager = new EventManager(this);
         this.mainTask = new MainTask(this);
 
         // 6. Listeners
@@ -122,6 +125,7 @@ public final class ChatGames extends JavaPlugin {
         pluginManager.registerEvents(new LogListener(this), this);
         pluginManager.registerEvents(new RaceListener(this), this);
         pluginManager.registerEvents(new DiscordListener(this), this);
+        pluginManager.registerEvents(eventManager, this);
 
         // 7. Command
         PluginCommand command = getCommand("chatgames");
@@ -154,6 +158,9 @@ public final class ChatGames extends JavaPlugin {
         }
         if (globalGameManager != null) {
             globalGameManager.shutdown();
+        }
+        if (eventManager != null) {
+            eventManager.shutdown();
         }
         if (placeholderExpansion != null) {
             placeholderExpansion.unregister();
@@ -199,6 +206,7 @@ public final class ChatGames extends JavaPlugin {
         raceManager.load();
         progressionManager.load();
         globalGameManager.load();
+        eventManager.load();
         mainTask.reloadEnabledGames();
         startGameRotation();
         leaderboardCache.start();

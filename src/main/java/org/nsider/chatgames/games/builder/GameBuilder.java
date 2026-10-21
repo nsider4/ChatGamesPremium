@@ -1,6 +1,7 @@
 package org.nsider.chatgames.games.builder;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.enums.GameType;
@@ -15,7 +16,7 @@ import org.nsider.chatgames.games.round.RoundContext;
 import org.nsider.chatgames.games.round.RoundGenerator;
 import org.nsider.chatgames.games.round.RoundGenerators;
 import org.nsider.chatgames.globalgames.GlobalGameConfig;
-import org.nsider.chatgames.globalgames.GlobalGameManager;
+import org.nsider.chatgames.games.StartOptions;
 
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
@@ -44,7 +45,7 @@ public class GameBuilder {
      * @return true if the game started
      */
     public boolean start(@Nonnull GameType type, @Nonnull String... args) {
-        return start(type, null, args);
+        return start(type, StartOptions.NORMAL, args);
     }
 
     /**
@@ -53,14 +54,23 @@ public class GameBuilder {
      * @return true if the game started
      */
     public boolean startGlobal(@Nonnull GameType type, @Nonnull GlobalGameConfig.Entry global, @Nonnull String... args) {
-        return start(type, global, args);
+        return start(type, StartOptions.global(global), args);
     }
 
-    private boolean start(GameType type, @Nullable GlobalGameConfig.Entry global, String[] args) {
-        Round round = generate(type, args);
+    /**
+     * Starts a game with some of its settings replaced, and/or as a global game.
+     *
+     * @return true if the game started
+     */
+    public boolean start(@Nonnull GameType type, @Nonnull StartOptions options, @Nonnull String... args) {
+        // Overridden settings (an event's difficulty, say) also reach the round generator
+        ConfigurationSection section = options.isPlain() ? GameConfigManager.section(ConfigManager.getGames(), type)
+                : options.apply(GameConfigManager.section(ConfigManager.getGames(), type));
+        Round round = generate(type, section, args);
         if (round == null) return false;
-        GameSettings settings = global == null ? plugin.getGameConfigManager().settings(type)
-                : new GameSettings(type, GlobalGameManager.settingsFor(GameConfigManager.section(ConfigManager.getGames(), type), global));
+        GameSettings settings = options.isPlain() ? plugin.getGameConfigManager().settings(type)
+                : new GameSettings(type, section);
+        boolean global = options.isGlobal();
 
         GameManager manager = plugin.getGameManager();
         if (!manager.tryBegin()) return false;
@@ -73,15 +83,15 @@ public class GameBuilder {
         }
 
         RoundAnnouncer announcer = manager.getAnnouncer();
-        announcer.announceStart(round, settings, global != null);
+        announcer.announceStart(round, settings, global);
         if (round.getMemorizeSeconds() > 0) {
             // Answers open once the list is gone; endGame() cancels this if the game is stopped meanwhile
             manager.addTask(plugin.getScheduler().globalLater(() -> {
                 announcer.announceMemorizeOver(round, settings);
-                open(round, settings, global != null);
+                open(round, settings, global);
             }, round.getMemorizeSeconds() * 20L));
         } else {
-            open(round, settings, global != null);
+            open(round, settings, global);
         }
         return true;
     }
@@ -93,10 +103,15 @@ public class GameBuilder {
      */
     @Nullable
     public Round generate(@Nonnull GameType type, @Nonnull String... args) {
+        return generate(type, GameConfigManager.section(ConfigManager.getGames(), type), args);
+    }
+
+    @Nullable
+    private Round generate(GameType type, @Nullable ConfigurationSection settings, String[] args) {
         RoundGenerator generator = RoundGenerators.get(type);
         if (generator == null) return null;
         RoundContext context = new RoundContext(
-                GameConfigManager.section(ConfigManager.getGames(), type),
+                settings,
                 ConfigManager.getWords(),
                 GameConfigManager.section(ConfigManager.getMessagesConfig(), type),
                 plugin.getRandom(),

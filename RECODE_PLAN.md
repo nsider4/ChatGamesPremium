@@ -437,6 +437,22 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - Global race: `RaceProgress` in global mode gives each finisher a place, atomically. Tested with 8 threads.
   - **Bug found by the tests:** `%challenge%` inside a reward line left the name's own `%amount%` unfilled.
 
+- [x] **Step 9a: Word Association + game events** (2026-10-21). 128 tests. Events tested live with a bot and PlaceholderAPI on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2.
+  - **Word Association** (21bd456): three clues, guess the word. Easy/medium/hard rounds, and a hint reveals a clue. It is also a global game.
+  - **Game events (`gameevents/`, `events.yml`):**
+    - An event is an ordered list of steps. A step is any chat game or race, optionally `global`, with `time`, `winners`, `args` and any other games.yml `settings` replaced for that step only (`StartOptions`). An event's difficulty therefore also reaches the round generator.
+    - `pause-seconds` between steps. A step ends on `ChatGamesEndEvent` however it ended: solved, timed out or stopped. A step that can't start is skipped with a console warning, and one blocked by a game started by hand waits up to 30 s.
+    - Start: `/chatgames event start <id>`, or a `schedule` (`SATURDAY 20:00`, `DAILY 18:30`, in the challenges.yml time zone) with `minimum-players`.
+    - While an event runs, the rotation and the global-game triggers wait.
+    - Scoring: `points` per place in each step, plus `participation-points` for anyone else who makes it (global steps). Ties are broken by who scored first.
+    - At the end, the standings are broadcast, each player is told their place, and rewards go out by place, with `participation` as the fallback. `PLAY_EVENT` challenge progress is recorded, and the results are posted to Discord if a webhook is set.
+    - Stats per event, in the stats table: `event.<id>.played|points|wins|best`. `/chatgames event top <id>` reads `points`.
+  - **Commands:** `event [list]`, `event top <id>`, and `event start <id>`/`event stop` (needs `chatgames.event.manage`), with tab completion. New permissions: `chatgames.event` and `chatgames.event.manage`.
+  - **Placeholders:** `event_running`, `event_name`, `event_step`, `event_steps`, `event_points`, `event_place`.
+  - **API:** `ChatGamesEventStartEvent` (cancellable; says whether the schedule started it) and `ChatGamesEventEndEvent` (final standings, or `wasStopped()`).
+  - **Global games** now go through the same `StartOptions` path; `GlobalGameManager.settingsFor` is gone.
+  - **The admin menu's "start event" button** comes with the menus in 9b.
+
 ---
 
 ## 1. Where you left off

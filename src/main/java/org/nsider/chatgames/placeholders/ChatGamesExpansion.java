@@ -5,12 +5,15 @@ import org.bukkit.OfflinePlayer;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
+import org.nsider.chatgames.gameevents.EventManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.progression.ProgressionManager;
 import org.nsider.chatgames.races.Race;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
+
+import java.util.UUID;
 
 /**
  * {@code %chatgames_<id>%} for PlaceholderAPI. The values are documented in
@@ -64,6 +67,13 @@ public class ChatGamesExpansion extends PlaceholderExpansion {
                 plugin.getGameManager().getCurrentGame(), plugin.getMainTask().getSecondsUntilNextGame(),
                 race == null ? null : race.getDisplayName(), race == null ? 0 : race.getAmount(),
                 race == null || player == null ? 0 : race.getProgress().getCount(player.getUniqueId()));
+        EventManager.Run event = plugin.getEventManager().getRunning();
+        if (event != null) {
+            UUID uuid = player == null ? null : player.getUniqueId();
+            status = status.withEvent(event.getDefinition().getName(), event.getStepNumber(),
+                    event.getDefinition().getSteps().size(),
+                    uuid == null ? 0 : event.getScores().points(uuid), uuid == null ? 0 : event.getScores().place(uuid));
+        }
         ProgressionManager progression = plugin.getProgressionManager();
         return new PlaceholderResolver(plugin.getLeaderboardCache().getSnapshot(), data, status,
                 empty == null ? "" : empty, progression.getChallenges(), progression.today()).resolve(params);

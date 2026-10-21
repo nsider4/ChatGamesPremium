@@ -32,7 +32,9 @@ public enum PermissionKey {
     STREAKS("chatgames.streaks", "Allows viewing your streaks.", "true"),
     CLAIM("chatgames.claim", "Allows claiming finished challenges and streak rewards.", "true"),
     CHALLENGES_RESET("chatgames.challenges.reset", "Allows clearing a player's challenge progress.", "op"),
-    STREAKS_SET("chatgames.streaks.set", "Allows setting a player's streak.", "op");
+    STREAKS_SET("chatgames.streaks.set", "Allows setting a player's streak.", "op"),
+    EVENT("chatgames.event", "Allows listing game events and viewing their leaderboards.", "true"),
+    EVENT_MANAGE("chatgames.event.manage", "Allows starting and stopping game events.", "op");
 
     private final String permission;
     private final String description;

@@ -2,7 +2,6 @@ package org.nsider.chatgames.globalgames;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
@@ -24,7 +23,6 @@ import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Global games: a chat game or race where everyone who makes it in time is rewarded,
@@ -87,13 +85,14 @@ public final class GlobalGameManager {
      */
     public void afterRegularGame() {
         GlobalGameConfig config = this.config;
-        if (config.getChanceAfterGame() <= 0 || plugin.getRandom().nextDouble() * 100 >= config.getChanceAfterGame()) return;
+        if (plugin.getEventManager().isRunning()
+                || config.getChanceAfterGame() <= 0 || plugin.getRandom().nextDouble() * 100 >= config.getChanceAfterGame()) return;
         plugin.getScheduler().globalLater(this::startRandom, config.getDelaySeconds() * 20L);
     }
 
     private void startRandom() {
         GlobalGameConfig config = this.config;
-        if (plugin.isInGame() || plugin.getGameManager().getGamePlayerManager().getOnlinePlayers() < config.getMinimumPlayers()) return;
+        if (plugin.isInGame() || plugin.getEventManager().isRunning() || plugin.getGameManager().getGamePlayerManager().getOnlinePlayers() < config.getMinimumPlayers()) return;
         boolean races = ConfigValue.getBoolean(ConfigPaths.RACES_ENABLED);
         GameType type = config.pick(plugin.getRandom(), game -> races || !game.isRace());
         if (type != null) start(type);
@@ -107,8 +106,7 @@ public final class GlobalGameManager {
      */
     public void award(@Nonnull Player player, @Nonnull GameType type, double seconds, int place) {
         GlobalGameConfig config = this.config;
-        GlobalGameConfig.Entry entry = config.get(type);
-        int points = entry == null ? 0 : entry.getPoints();
+        int points = config.find(type).getPoints();
         boolean placed = place <= config.getRewardedPlaces();
 
         ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());
@@ -190,17 +188,4 @@ public final class GlobalGameManager {
         return sections;
     }
 
-    /** @return a copy of a games.yml section with a global game's time limit and points */
-    @Nonnull
-    public static ConfigurationSection settingsFor(@Nullable ConfigurationSection game, @Nonnull GlobalGameConfig.Entry entry) {
-        MemoryConfiguration copy = new MemoryConfiguration();
-        if (game != null) {
-            for (Map.Entry<String, Object> value : game.getValues(true).entrySet()) {
-                if (!(value.getValue() instanceof ConfigurationSection)) copy.set(value.getKey(), value.getValue());
-            }
-        }
-        copy.set("timeToGuess_seconds", entry.getDurationSeconds());
-        copy.set("points", entry.getPoints());
-        return copy;
-    }
 }

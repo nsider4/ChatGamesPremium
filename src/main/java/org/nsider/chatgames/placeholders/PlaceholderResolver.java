@@ -35,6 +35,13 @@ public final class PlaceholderResolver {
         final int raceAmount;
         /** The viewer's count in the running race. */
         final int raceProgress;
+        /** The running game event's name, or null if none runs. */
+        @Nullable final String eventName;
+        final int eventStep;
+        final int eventSteps;
+        /** The viewer's event points and place (0 if they haven't scored). */
+        final int eventPoints;
+        final int eventPlace;
 
         public Status(@Nullable GameType currentGame, long nextGameSeconds) {
             this(currentGame, nextGameSeconds, null, 0, 0);
@@ -42,11 +49,34 @@ public final class PlaceholderResolver {
 
         public Status(@Nullable GameType currentGame, long nextGameSeconds, @Nullable String raceTarget,
                       int raceAmount, int raceProgress) {
+            this(currentGame, nextGameSeconds, raceTarget, raceAmount, raceProgress, null, 0, 0, 0, 0);
+        }
+
+        private Status(@Nullable GameType currentGame, long nextGameSeconds, @Nullable String raceTarget,
+                       int raceAmount, int raceProgress, @Nullable String eventName, int eventStep, int eventSteps,
+                       int eventPoints, int eventPlace) {
             this.currentGame = currentGame;
             this.nextGameSeconds = nextGameSeconds;
             this.raceTarget = raceTarget;
             this.raceAmount = raceAmount;
             this.raceProgress = raceProgress;
+            this.eventName = eventName;
+            this.eventStep = eventStep;
+            this.eventSteps = eventSteps;
+            this.eventPoints = eventPoints;
+            this.eventPlace = eventPlace;
+        }
+
+        /**
+         * @param name   the running event's name
+         * @param step   the game playing or next, from 1
+         * @param points the viewer's event points
+         * @param place  the viewer's place, 0 if they haven't scored
+         * @return this status with a game event running
+         */
+        @Nonnull
+        public Status withEvent(@Nonnull String name, int step, int steps, int points, int place) {
+            return new Status(currentGame, nextGameSeconds, raceTarget, raceAmount, raceProgress, name, step, steps, points, place);
         }
     }
 
@@ -104,6 +134,12 @@ public final class PlaceholderResolver {
             case "race_target": return status.raceTarget == null ? empty : status.raceTarget;
             case "race_amount": return status.raceTarget == null ? empty : String.valueOf(status.raceAmount);
             case "race_progress": return status.raceTarget == null ? empty : String.valueOf(status.raceProgress);
+            case "event_running": return String.valueOf(status.eventName != null);
+            case "event_name": return status.eventName == null ? empty : status.eventName;
+            case "event_step": return status.eventName == null ? empty : String.valueOf(status.eventStep);
+            case "event_steps": return status.eventName == null ? empty : String.valueOf(status.eventSteps);
+            case "event_points": return status.eventName == null ? empty : String.valueOf(status.eventPoints);
+            case "event_place": return status.eventName == null ? empty : rank(status.eventPlace);
             case "challenges_completed": return stat(Stat.CHALLENGES_COMPLETED);
             case "daily_completed": return completed(Period.DAILY);
             case "daily_total": return String.valueOf(challenges.active(Period.DAILY, today).size());

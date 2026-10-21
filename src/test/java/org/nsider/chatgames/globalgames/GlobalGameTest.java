@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Test;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.games.Game;
+import org.nsider.chatgames.games.StartOptions;
 import org.nsider.chatgames.games.round.GameSettings;
 import org.nsider.chatgames.games.round.Round;
 import org.nsider.chatgames.races.RaceProgress;
@@ -89,7 +90,7 @@ class GlobalGameTest {
         games.loadFromString("math:\n  enable: false\n  winners: 3\n  points: 5\n  timeToGuess_seconds: 60\n"
                 + "  hints:\n    enable: true\n    max: 2\n");
         GlobalGameConfig config = config("games:\n  math:\n    duration_seconds: 15\n    points: 2\n", new ArrayList<>());
-        ConfigurationSection merged = GlobalGameManager.settingsFor(games.getConfigurationSection("math"), config.get(GameType.MATH));
+        ConfigurationSection merged = StartOptions.global(config.get(GameType.MATH)).apply(games.getConfigurationSection("math"));
         GameSettings settings = new GameSettings(GameType.MATH, merged);
         assertEquals(15, settings.getTimeSeconds());
         assertEquals(2, settings.getPoints());

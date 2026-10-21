@@ -26,6 +26,7 @@ public class ConfigManager {
     @Getter private static Presets presets;
     @Getter private static Challenges challenges;
     @Getter private static Streaks streaks;
+    @Getter private static Events events;
 
     private ConfigManager() {}
 
@@ -51,6 +52,7 @@ public class ConfigManager {
         presets = new Presets();
         challenges = new Challenges();
         streaks = new Streaks();
+        events = new Events();
 
         // Messages read messages.yml, so they are built last
         messages = new Messages();
@@ -77,7 +79,8 @@ public class ConfigManager {
                 & globalGames.reload()
                 & presets.reload()
                 & challenges.reload()
-                & streaks.reload();
+                & streaks.reload()
+                & events.reload();
 
         messages = new Messages();
         return success;
@@ -184,6 +187,15 @@ public class ConfigManager {
     public static class Streaks extends YamlConfig {
         public Streaks() {
             super(plugin, "streaks");
+        }
+    }
+
+    /**
+     * Game events: series of games with their own scoring
+     */
+    public static class Events extends YamlConfig {
+        public Events() {
+            super(plugin, "events");
         }
     }
 }

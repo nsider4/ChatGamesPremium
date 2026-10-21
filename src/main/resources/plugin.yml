@@ -113,6 +113,12 @@ permissions:
   chatgames.streaks.set:
     description: 'Allows setting a player''s streak.'
     default: op
+  chatgames.event:
+    description: 'Allows listing game events and viewing their leaderboards.'
+    default: true
+  chatgames.event.manage:
+    description: 'Allows starting and stopping game events.'
+    default: op
   chatgames.start.unscramble:
     description: 'Allows starting unscramble by command.'
     default: op

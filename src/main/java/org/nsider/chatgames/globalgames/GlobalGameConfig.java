@@ -110,6 +110,16 @@ public final class GlobalGameConfig {
         return entry != null && entry.enabled ? entry : null;
     }
 
+    /**
+     * @return the game's settings whether or not it is enabled (an event can still play it
+     *         globally), or defaults of 30 seconds and 1 point if it isn't listed
+     */
+    @Nonnull
+    public Entry find(@Nonnull GameType type) {
+        Entry entry = games.get(type);
+        return entry != null ? entry : new Entry(type, false, 30, 1);
+    }
+
     /** @return every enabled global game */
     @Nonnull
     public List<GameType> getEnabled() {
@@ -150,6 +160,12 @@ public final class GlobalGameConfig {
         @Nonnull
         public GameType getType() {
             return type;
+        }
+
+        /** @return these settings with another time limit (at least 5 seconds) */
+        @Nonnull
+        public Entry withDuration(int seconds) {
+            return new Entry(type, enabled, Math.max(5, seconds), points);
         }
 
         /** @return how long everyone has to answer */

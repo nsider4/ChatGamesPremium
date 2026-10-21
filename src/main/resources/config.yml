@@ -88,6 +88,8 @@ fastest-typers-top: true
 #  Challenges:   %chatgames_daily_completed%, %chatgames_daily_total%, %chatgames_weekly_completed%,
 #                %chatgames_weekly_total%, %chatgames_challenges_completed% (all time)
 #  Streaks:      %chatgames_streak_<type>%, %chatgames_streak_<type>_longest% (<type> is challenge, daily or global)
+#  Game event:   %chatgames_event_running%, %chatgames_event_name%, %chatgames_event_step%, %chatgames_event_steps%,
+#                %chatgames_event_points% and %chatgames_event_place% (yours in the running event)
 #  <game> is a game's name as in games.yml (e.g. unscramble, guess_the_number); <n> is a place (1, 2, 3...).
 placeholders:
   #How often the leaderboard placeholders (top_<n>, fastest_<n>, positions...) are rebuilt, in seconds.

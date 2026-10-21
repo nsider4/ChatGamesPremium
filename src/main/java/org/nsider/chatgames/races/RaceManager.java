@@ -15,6 +15,7 @@ import org.nsider.chatgames.events.ChatGamesStartEvent;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.games.StartOptions;
 import org.nsider.chatgames.globalgames.GlobalGameConfig;
 import org.nsider.chatgames.managers.TopManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
@@ -98,7 +99,7 @@ public final class RaceManager {
      *         exists on this version, or a plugin cancelled it (a console warning says which)
      */
     public boolean start(@Nonnull GameType type, @Nonnull String... args) {
-        return start(prepare(type, null, args));
+        return start(type, StartOptions.NORMAL, args);
     }
 
     /**
@@ -108,7 +109,14 @@ public final class RaceManager {
      * @return false for the same reasons as {@link #start(GameType, String...)}
      */
     public boolean startGlobal(@Nonnull GameType type, @Nonnull GlobalGameConfig.Entry global, @Nonnull String... args) {
-        return start(prepare(type, global, args));
+        return start(type, StartOptions.global(global), args);
+    }
+
+    /**
+     * Starts a race with its time limit replaced, and/or as a global race. Main/global thread.
+     */
+    public boolean start(@Nonnull GameType type, @Nonnull StartOptions options, @Nonnull String... args) {
+        return start(prepare(type, options, args));
     }
 
     private boolean start(@Nullable Race race) {
@@ -133,7 +141,7 @@ public final class RaceManager {
     }
 
     @Nullable
-    private Race prepare(GameType type, @Nullable GlobalGameConfig.Entry global, String[] args) {
+    private Race prepare(GameType type, StartOptions options, String[] args) {
         RaceData races = getData(type);
         String target;
         int amount;
@@ -165,9 +173,10 @@ public final class RaceManager {
                     + " is not a valid " + (type == GameType.HUNT ? "mob" : "material") + " on this server version.");
             return null;
         }
-        int time = global != null ? global.getDurationSeconds() : section(type).getInt("timeToComplete_seconds", DEFAULT_TIME_LIMIT);
+        int time = options.raceTimeSeconds() > 0 ? options.raceTimeSeconds()
+                : section(type).getInt(StartOptions.RACE_TIME, DEFAULT_TIME_LIMIT);
         return new Race(type, resolved, resolved.displayName(plugin.getLanguageManager()), amount,
-                races.getRewards(resolved.getName(), amount), time > 0 ? time : DEFAULT_TIME_LIMIT, global != null);
+                races.getRewards(resolved.getName(), amount), time > 0 ? time : DEFAULT_TIME_LIMIT, options.isGlobal());
     }
 
     /**

@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -214,6 +215,24 @@ public final class PlayerRepository {
                         return rows;
                     });
             return LeaderboardSnapshot.build(points, times, names);
+        }
+    }
+
+    /**
+     * @return the players with the highest value of a stat, highest first
+     */
+    @Nonnull
+    public List<Map.Entry<UUID, Long>> topStat(@Nonnull String stat, int limit) throws SQLException {
+        try (Connection connection = connections.get()) {
+            return QueryUtils.query(connection, "SELECT UUID, stat_value FROM " + statsTable
+                    + " WHERE stat = ? AND stat_value > 0 ORDER BY stat_value DESC LIMIT " + Math.max(1, limit), rs -> {
+                List<Map.Entry<UUID, Long>> rows = new ArrayList<>();
+                while (rs.next()) {
+                    UUID uuid = parseUuid(rs.getString("UUID"));
+                    if (uuid != null) rows.add(new AbstractMap.SimpleImmutableEntry<>(uuid, rs.getLong("stat_value")));
+                }
+                return rows;
+            }, stat);
         }
     }
 
