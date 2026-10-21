@@ -2,6 +2,7 @@
 //
 // usage: node bot.js <port> <username> <version|auto> <action> [action ...]
 // actions: wait:<ms>  chat:<text>  quit  join
+//          at:<ms>  waits until that long after the bot started (lines bots up however long actions take)
 //          tab:<text>  prints the server's tab completions for <text>, as "[tab] <text> -> a, b";
 //                      a trailing "_" stands for a space (the test harness trims actions)
 //          play:on / play:off  autoplay in the background while later actions run
@@ -22,6 +23,8 @@
 // Needs mineflayer (npm install mineflayer@4); point NODE_PATH at its node_modules.
 
 const mineflayer = require('mineflayer');
+
+const STARTED = Date.now();
 
 const [port, username, version, ...actions] = process.argv.slice(2);
 let bot = null;
@@ -44,6 +47,8 @@ function connect() {
       resolve();
     });
     bot.once('kicked', (reason) => console.log(`[BOT ${username}] kicked: ${JSON.stringify(reason)}`));
+    bot.once('end', (reason) => console.log(`[BOT ${username}] disconnected: ${reason}`));
+    bot.on('error', (error) => console.log(`[BOT ${username}] error: ${error && error.stack ? error.stack.split('\n').slice(0, 4).join(' / ') : error}`));
     bot.once('error', reject);
     bot.on('messagestr', (text, position) => {
       if (text.trim()) console.log(`[BOT ${username}] ${position === 'game_info' ? '[bar] ' : ''}${text}`);
@@ -342,6 +347,7 @@ function play(message) {
     const [kind, ...rest] = action.split(':');
     const arg = rest.join(':');
     if (kind === 'wait') await sleep(Number(arg));
+    else if (kind === 'at') await sleep(Math.max(0, STARTED + Number(arg) - Date.now()));
     else if (kind === 'chat') bot.chat(arg);
     else if (kind === 'play') autoplay = arg === 'on';
     else if (kind === 'tab') {

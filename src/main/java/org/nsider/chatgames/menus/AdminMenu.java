@@ -5,6 +5,9 @@ import org.nsider.chatgames.commands.CommandSupport;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.gameevents.EventDefinition;
 import org.nsider.chatgames.gameevents.EventManager;
+import org.nsider.chatgames.globalgames.GlobalGameConfig;
+import org.nsider.chatgames.globalgames.GlobalGameManager;
+import org.nsider.chatgames.globalgames.GlobalSession;
 import org.nsider.chatgames.managers.PresetManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
@@ -55,15 +58,33 @@ final class AdminMenu {
                 .set("%preset%", preset != null ? preset : none);
     }
 
-    /** Every game and race. */
+    /** Every game and race (Count is started from the global page). */
     private void buildStart(Menu menu) {
-        for (GameType game : GameType.values()) menu.addEntry(game.isRace() ? "race" : "game", Menus.gameValues(game));
+        for (GameType game : GameType.values()) {
+            if (!game.isGlobalOnly()) menu.addEntry(game.isRace() ? "race" : "game", Menus.gameValues(game));
+        }
     }
 
-    /** The games global_games.yml enables. */
+    /** The games global_games.yml enables, and the one in play. */
     private void buildGlobal(Menu menu) {
-        for (GameType game : plugin.getGlobalGameManager().getConfig().getEnabled()) {
-            menu.addEntry(game.isRace() ? "race" : "game", Menus.gameValues(game));
+        GlobalGameManager globals = plugin.getGlobalGameManager();
+        GlobalSession running = globals.getCurrent();
+        String none = Menus.none(menu);
+        menu.set("%global_running%", running != null)
+                .set("%global_game%", running != null ? Menus.gameName(running.getType()) : none)
+                .set("%global_goal%", running != null ? running.getGoalText() : none)
+                .set("%global_progress%", running != null ? running.getProgress().getProgress() : 0)
+                .set("%global_goal_amount%", running != null ? running.getProgress().getGoal() : 0)
+                .set("%global_percent%", running != null ? running.getProgress().getPercent() : 0)
+                .set("%global_contributors%", running != null ? running.getProgress().contributors() : 0)
+                .set("%global_time_left%", running != null ? running.getSecondsLeft() : 0);
+        for (GameType game : globals.getConfig().getEnabled()) {
+            GlobalGameConfig.Entry entry = globals.getConfig().find(game);
+            Map<String, Object> values = Menus.gameValues(game);
+            values.put("%goal%", entry.getGoal());
+            values.put("%duration%", entry.getDurationSeconds());
+            values.put("%points%", entry.getPoints());
+            menu.addEntry(game.isGlobalOnly() ? "count" : game.isRace() ? "race" : "game", values);
         }
     }
 

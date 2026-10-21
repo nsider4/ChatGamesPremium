@@ -42,6 +42,8 @@ public final class PlaceholderResolver {
         /** The viewer's event points and place (0 if they haven't scored). */
         final int eventPoints;
         final int eventPlace;
+        /** The global game in play (progress, goal, the viewer's contribution, seconds left), or null. */
+        @Nullable final int[] global;
 
         public Status(@Nullable GameType currentGame, long nextGameSeconds) {
             this(currentGame, nextGameSeconds, null, 0, 0);
@@ -49,12 +51,12 @@ public final class PlaceholderResolver {
 
         public Status(@Nullable GameType currentGame, long nextGameSeconds, @Nullable String raceTarget,
                       int raceAmount, int raceProgress) {
-            this(currentGame, nextGameSeconds, raceTarget, raceAmount, raceProgress, null, 0, 0, 0, 0);
+            this(currentGame, nextGameSeconds, raceTarget, raceAmount, raceProgress, null, 0, 0, 0, 0, null);
         }
 
         private Status(@Nullable GameType currentGame, long nextGameSeconds, @Nullable String raceTarget,
                        int raceAmount, int raceProgress, @Nullable String eventName, int eventStep, int eventSteps,
-                       int eventPoints, int eventPlace) {
+                       int eventPoints, int eventPlace, @Nullable int[] global) {
             this.currentGame = currentGame;
             this.nextGameSeconds = nextGameSeconds;
             this.raceTarget = raceTarget;
@@ -65,6 +67,7 @@ public final class PlaceholderResolver {
             this.eventSteps = eventSteps;
             this.eventPoints = eventPoints;
             this.eventPlace = eventPlace;
+            this.global = global;
         }
 
         /**
@@ -76,7 +79,18 @@ public final class PlaceholderResolver {
          */
         @Nonnull
         public Status withEvent(@Nonnull String name, int step, int steps, int points, int place) {
-            return new Status(currentGame, nextGameSeconds, raceTarget, raceAmount, raceProgress, name, step, steps, points, place);
+            return new Status(currentGame, nextGameSeconds, raceTarget, raceAmount, raceProgress, name, step, steps, points,
+                    place, global);
+        }
+
+        /**
+         * @param contribution the viewer's contribution so far
+         * @return this status with a global game in play
+         */
+        @Nonnull
+        public Status withGlobal(int progress, int goal, int contribution, int secondsLeft) {
+            return new Status(currentGame, nextGameSeconds, raceTarget, raceAmount, raceProgress, eventName, eventStep,
+                    eventSteps, eventPoints, eventPlace, new int[]{progress, goal, contribution, secondsLeft});
         }
     }
 
@@ -123,6 +137,13 @@ public final class PlaceholderResolver {
             case "race_wins": return stat(Stat.RACE_WINS);
             case "global_played": return stat(Stat.GLOBAL_PLAYED);
             case "global_won": return stat(Stat.GLOBAL_WON);
+            case "contributions": return stat(Stat.CONTRIBUTIONS);
+            case "global_running": return String.valueOf(status.global != null);
+            case "global_progress": return status.global == null ? empty : String.valueOf(status.global[0]);
+            case "global_goal": return status.global == null ? empty : String.valueOf(status.global[1]);
+            case "global_percent": return status.global == null ? empty : String.valueOf(status.global[0] * 100L / Math.max(1, status.global[1]));
+            case "global_contribution": return status.global == null ? empty : String.valueOf(status.global[2]);
+            case "global_time_left": return status.global == null ? empty : String.valueOf(status.global[3]);
             case "events_played": return stat(Stat.EVENTS_PLAYED);
             case "event_wins": return stat(Stat.EVENT_WINS);
             case "event_best_place": return stat(Stat.EVENT_BEST_PLACE);

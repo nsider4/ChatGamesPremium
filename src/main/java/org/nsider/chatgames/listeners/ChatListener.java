@@ -7,7 +7,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
-import org.nsider.chatgames.games.Game;
+import org.nsider.chatgames.globalgames.GlobalGameManager;
 
 public class ChatListener implements Listener {
 
@@ -19,10 +19,14 @@ public class ChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onChat(AsyncPlayerChatEvent event) {
-        Game game = plugin.getGameManager().getGame();
-        // In a global game a visible answer could be copied by everyone, so it is always hidden
-        boolean hide = (game != null && game.isGlobal()) || ConfigValue.getBoolean(ConfigPaths.CANCEL_MESSAGE_ON_WIN);
-        if (plugin.getGameManager().getAnswerHandler().onChat(event.getPlayer(), event.getMessage()) && hide) {
+        GlobalGameManager globals = plugin.getGlobalGameManager();
+        if (globals.isRunning()) {
+            // A visible answer could be copied by everyone, and counted numbers are shown again formatted
+            if (globals.onChat(event.getPlayer(), event.getMessage())) event.setCancelled(true);
+            return;
+        }
+        if (plugin.getGameManager().getAnswerHandler().onChat(event.getPlayer(), event.getMessage())
+                && ConfigValue.getBoolean(ConfigPaths.CANCEL_MESSAGE_ON_WIN)) {
             event.setCancelled(true);
         }
     }

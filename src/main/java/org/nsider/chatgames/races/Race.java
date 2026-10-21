@@ -22,7 +22,7 @@ public final class Race {
     private final List<String> rewards;
     private final int timeLimitSeconds;
     private final RaceProgress progress;
-    /** Everyone who reaches the amount in time finishes; see {@link RaceProgress}. */
+    /** Played by the whole server towards one goal; see {@link org.nsider.chatgames.globalgames.GlobalRace}. */
     private final boolean global;
     private final long startNanos = System.nanoTime();
 
@@ -40,7 +40,7 @@ public final class Race {
         this.rewards = rewards;
         this.timeLimitSeconds = timeLimitSeconds;
         this.global = global;
-        this.progress = new RaceProgress(amount, global);
+        this.progress = new RaceProgress(amount);
     }
 
     public double getElapsedSeconds() {

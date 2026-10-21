@@ -489,7 +489,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - `MenuBuilder`, `MenuHolder` and `MenuListener` are gone; the admin logs page is pure YAML.
     - `MenusFileTest` also checks that every action exists and every `[open]`/`[switch]`/`[back]` target is a real menu.
   - **Always `mvn clean package`** after changing the library: a non-clean build reused the previous shaded classes.
-- [ ] **Step 9d: Co-op global games + Count** (requested 2026-10-21). Replaces 9's "everyone who answers in time, ranked by place" model.
+- [x] **Step 9d: Co-op global games + Count** (requested and done 2026-10-21; 147 tests, live-tested on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2 with two bots; boot-test.py gained `@bg`/`@join`, bot.js `at:<ms>`). Replaces 9's "everyone who answers in time, ranked by place" model.
   - **Shared goal:** each global game has a `goal` and `duration-seconds`. Contributions (correct answers, race units, counted numbers) add to one server score; a boss bar (1.9+, by reflection) or action bar (1.8) shows `progress/goal` and time left, with chat updates at 25/50/75%.
   - **Chat games as a question stream:** the current question accepts one answer per player; it changes after `answers-per-question` correct answers or `question-seconds`. Each correct answer is +1.
   - **Races:** every unit of progress from any player is +1 toward e.g. 500 stone. Reuses the race listeners.

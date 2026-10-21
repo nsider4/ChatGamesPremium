@@ -156,6 +156,24 @@ class PlaceholderResolverTest {
     }
 
     @Test
+    void globalGamePlaceholders() {
+        assertEquals("false", resolve("global_running"));
+        assertEquals("-", resolve("global_progress"));
+        assertEquals("-", resolve("global_contribution"));
+        PlaceholderResolver.Status global = new PlaceholderResolver.Status(GameType.COUNT, -1).withGlobal(3, 12, 2, 40);
+        assertEquals("true", resolve("global_running", alex(), global));
+        assertEquals("3", resolve("global_progress", alex(), global));
+        assertEquals("12", resolve("global_goal", alex(), global));
+        assertEquals("25", resolve("global_percent", alex(), global));
+        assertEquals("2", resolve("global_contribution", alex(), global));
+        assertEquals("40", resolve("global_time_left", alex(), global));
+
+        ChatGamesPlayer data = alex();
+        data.setStat(Stat.CONTRIBUTIONS, 17);
+        assertEquals("17", resolve("contributions", data, global));
+    }
+
+    @Test
     void raceTimesOnlyCountInTheirOwnList() {
         List<LeaderboardSnapshot.TimeRow> times = Arrays.asList(
                 new LeaderboardSnapshot.TimeRow(ALEX, GameType.CRAFT, 0.5),

@@ -76,10 +76,12 @@ class MenusFileTest {
                 for (int slot : slots) {
                     assertTrue(slot >= 0 && slot < size, key + "." + item + " slot " + slot);
                     // "none" only shows when the list is empty, so it may sit on a list slot
-                    if (!item.equals("none")) {
-                        String other = used.put(slot, item);
-                        assertEquals(null, other, key + ": " + item + " and " + other + " share slot " + slot);
-                    }
+                    if (item.equals("none")) continue;
+                    String other = used.put(slot, item);
+                    // Two items that each show only on a condition (e.g. running / idle) may take turns
+                    boolean takeTurns = other != null && items.contains(item + ".view-requirements")
+                            && items.contains(other + ".view-requirements");
+                    if (!takeTurns) assertEquals(null, other, key + ": " + item + " and " + other + " share slot " + slot);
                 }
             }
             List<String> lists = new ArrayList<>();

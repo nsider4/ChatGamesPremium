@@ -14,11 +14,14 @@
 #  minimum-players: players needed online for the schedule to start it (the command ignores this)
 #  pause-seconds: seconds between one game ending and the next starting
 #  points: event points for 1st, 2nd, 3rd... in each game
-#  participation-points: event points for anyone else who makes it (in global games, where
-#                        everyone who answers in time makes it)
+#  participation-points: event points for anyone else who makes it. In a global game, if the
+#                        server reaches the goal, everyone who contributed enough scores:
+#                        'points' for the biggest contributors, these for the rest.
+#                        If the goal isn't reached, nobody scores that game.
 #  steps: the games, in order. Each one:
 #    game: the game or race, as in games.yml / races.yml
-#    global: true to play it as a global game (everyone who makes it in time scores)
+#    global: true to play it as a global game (the server plays together; see global_games.yml).
+#            Count is always global.
 #    time: seconds to answer (or to finish a race), instead of the game's own
 #    winners: how many can win a normal chat game, instead of the game's own
 #    args: the values, as after /chatgames <game>, e.g. 'stone 16' for a mine race
@@ -50,7 +53,7 @@ events:
       - game: mine
         global: true
         time: 120
-        args: 'stone 16'
+        args: 'stone 100'
     rewards:
       1:
         - '[consolecmd] give %player% diamond 5'

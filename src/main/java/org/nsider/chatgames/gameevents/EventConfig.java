@@ -97,7 +97,8 @@ public final class EventConfig {
             warn.accept("step game '" + game + "' isn't a game or race; skipped");
             return null;
         }
-        boolean global = Boolean.TRUE.equals(map.get("global")) || "true".equalsIgnoreCase(String.valueOf(map.get("global")));
+        boolean global = type.isGlobalOnly() || Boolean.TRUE.equals(map.get("global"))
+                || "true".equalsIgnoreCase(String.valueOf(map.get("global")));
         if (global && !GlobalGameConfig.supports(type)) {
             warn.accept(type.getConfigKey() + " can't be played globally; it plays as a normal game");
             global = false;

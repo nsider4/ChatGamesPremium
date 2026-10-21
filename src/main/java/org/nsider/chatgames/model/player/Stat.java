@@ -15,10 +15,12 @@ public final class Stat {
     public static final String WINS = "wins";
     /** Races won. */
     public static final String RACE_WINS = "race_wins";
-    /** Global games taken part in. */
+    /** Global games taken part in (contributed at least once). */
     public static final String GLOBAL_PLAYED = "global_played";
-    /** Global games finished in a rewarded place. */
+    /** Global games completed: the server reached the goal and the player contributed enough. */
     public static final String GLOBAL_WON = "global_won";
+    /** Everything put into global games: correct answers, race units and counted numbers. */
+    public static final String CONTRIBUTIONS = "contributions";
 
     /** Daily and weekly challenges completed (claimed or not). */
     public static final String CHALLENGES_COMPLETED = "challenges_completed";

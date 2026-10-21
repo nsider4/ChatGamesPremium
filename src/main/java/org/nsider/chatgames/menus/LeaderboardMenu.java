@@ -46,6 +46,7 @@ final class LeaderboardMenu {
     private void buildGames(Menu menu) {
         LeaderboardSnapshot snapshot = plugin.getLeaderboardCache().getSnapshot();
         for (GameType game : GameType.values()) {
+            if (game.isGlobalOnly()) continue; // no times to rank
             String key = "%top_" + game.getConfigKey() + "%";
             menu.list(key, lines(menu, position -> snapshot.fastest(game, position), true));
             Map<String, Object> values = Menus.gameValues(game);

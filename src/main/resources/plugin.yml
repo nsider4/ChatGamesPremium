@@ -24,6 +24,7 @@ permissions:
       chatgames.start.math: true
       chatgames.start.trivia: true
       chatgames.start.word_association: true
+      chatgames.start.count: true
       chatgames.start.reaction: true
       chatgames.start.clickable: true
       chatgames.start.random: true
@@ -43,6 +44,9 @@ permissions:
       chatgames.start.furnace: true
   chatgames.start.word_association:
     description: 'Allows starting word_association by command.'
+    default: op
+  chatgames.start.count:
+    description: 'Allows starting count (always a global game) by command.'
     default: op
   chatgames.global:
     description: 'Allows starting a global game or race by command.'

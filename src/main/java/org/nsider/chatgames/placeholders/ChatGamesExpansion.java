@@ -6,6 +6,7 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.gameevents.EventManager;
+import org.nsider.chatgames.globalgames.GlobalSession;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.progression.ProgressionManager;
@@ -73,6 +74,11 @@ public class ChatGamesExpansion extends PlaceholderExpansion {
             status = status.withEvent(event.getDefinition().getName(), event.getStepNumber(),
                     event.getDefinition().getSteps().size(),
                     uuid == null ? 0 : event.getScores().points(uuid), uuid == null ? 0 : event.getScores().place(uuid));
+        }
+        GlobalSession global = plugin.getGlobalGameManager().getCurrent();
+        if (global != null) {
+            status = status.withGlobal(global.getProgress().getProgress(), global.getProgress().getGoal(),
+                    player == null ? 0 : global.contribution(player.getUniqueId()), global.getSecondsLeft());
         }
         ProgressionManager progression = plugin.getProgressionManager();
         return new PlaceholderResolver(plugin.getLeaderboardCache().getSnapshot(), data, status,

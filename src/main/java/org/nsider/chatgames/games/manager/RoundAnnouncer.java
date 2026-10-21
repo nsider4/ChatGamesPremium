@@ -19,6 +19,7 @@ import org.nsider.chatgames.utils.messages.MessageUtils;
 import org.nsider.chatgames.utils.messages.Msg;
 
 import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,14 +44,16 @@ public final class RoundAnnouncer {
         this.plugin = plugin;
     }
 
+    /** The question. For Memorize this shows the list to remember. */
+    public void announceStart(@Nonnull Round round, @Nonnull GameSettings settings) {
+        announceQuestion(round, settings, null);
+    }
+
     /**
-     * The question. For Memorize this shows the list to remember.
-     *
-     * @param global a global game: its announcement from global_games.yml goes first
+     * The question, with a line above it: a global game's question number and progress.
      */
-    public void announceStart(@Nonnull Round round, @Nonnull GameSettings settings, boolean global) {
+    public void announceQuestion(@Nonnull Round round, @Nonnull GameSettings settings, @Nullable Msg header) {
         Msg message = base(round, settings, "gameStartAnnouncement").component(round.getComponent());
-        Msg header = global ? plugin.getGlobalGameManager().startMessage(round.getType(), settings.getTimeSeconds()) : null;
         for (Player player : players()) {
             if (!canPlay(player)) continue;
             GameSoundManager.playGameSound(player, "game-start");

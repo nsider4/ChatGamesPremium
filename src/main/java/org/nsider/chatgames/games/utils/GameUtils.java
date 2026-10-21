@@ -8,6 +8,7 @@ import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,10 +47,19 @@ public class GameUtils {
     }
 
     /**
-     * Gives a player who made it in a global game their rewards from global_games.yml.
+     * Gives a player who took part in a global game their rewards from global_games.yml.
+     *
+     * @param sections the reward sections, e.g. {@code completed} and {@code top-contributors.1}
+     * @param contribution fills {@code %contribution%} in the rewards
      */
-    public void giveGlobalRewards(GameType type, Player player, int place) {
-        plugin.getScheduler().global(() -> processRewards(plugin.getRewardManager().globalRewards(type, player, place), player));
+    public void giveGlobalRewards(GameType type, Player player, List<String> sections, int contribution) {
+        plugin.getScheduler().global(() -> {
+            List<String> rewards = new ArrayList<>();
+            for (String reward : plugin.getRewardManager().globalRewards(type, player, sections)) {
+                rewards.add(reward.replace("%contribution%", String.valueOf(contribution)));
+            }
+            processRewards(rewards, player);
+        });
     }
 
     /**

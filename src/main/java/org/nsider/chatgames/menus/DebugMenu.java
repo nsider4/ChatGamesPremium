@@ -73,7 +73,7 @@ public final class DebugMenu implements Listener {
      * @return false if it couldn't (a race, or the generator failed); the player is told why
      */
     public boolean start(@Nonnull Player player, @Nonnull GameType type, @Nonnull String... args) {
-        if (type.isRace()) {
+        if (type.isRace() || type.isGlobalOnly()) {
             Menus.message(player, "debug-race");
             return false;
         }
@@ -105,7 +105,7 @@ public final class DebugMenu implements Listener {
     /** Every chat game (races are played in the world). */
     private void buildPicker(Menu menu) {
         for (GameType type : GameType.values()) {
-            if (!type.isRace()) menu.addEntry("game", Menus.gameValues(type));
+            if (!type.isRace() && !type.isGlobalOnly()) menu.addEntry("game", Menus.gameValues(type));
         }
     }
 

@@ -89,6 +89,7 @@ public final class ProfileMenu implements MenuProvider {
                 .set("%race_wins%", data.getStat(Stat.RACE_WINS))
                 .set("%global_played%", data.getStat(Stat.GLOBAL_PLAYED))
                 .set("%global_won%", data.getStat(Stat.GLOBAL_WON))
+                .set("%contributions%", data.getStat(Stat.CONTRIBUTIONS))
                 .set("%events_played%", data.getStat(Stat.EVENTS_PLAYED))
                 .set("%event_wins%", data.getStat(Stat.EVENT_WINS))
                 .set("%event_best_place%", bestPlace > 0 ? "#" + bestPlace : none)

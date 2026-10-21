@@ -37,13 +37,16 @@ public final class Activity {
     }
 
     /**
-     * A global game solved in time.
+     * Taking part in a global game.
      *
-     * @param placed true if it was in one of the rewarded places, which counts as winning it
+     * @param points    the points it paid
+     * @param completed true if the server reached the goal and this player contributed
+     *                  enough to be rewarded, which counts as winning it
      */
     @Nonnull
-    public static Activity global(@Nonnull GameType game, double seconds, int points, boolean placed) {
-        return new Activity(Kind.GLOBAL, game, seconds, points, placed);
+    public static Activity global(@Nonnull GameType game, int points, boolean completed) {
+        // Nobody answers "in N seconds" in a global game, so it never counts for FAST_WIN
+        return new Activity(Kind.GLOBAL, game, Double.MAX_VALUE, points, completed);
     }
 
     /** Taking part in a game event. */
@@ -69,7 +72,7 @@ public final class Activity {
         return points;
     }
 
-    /** @return true for a win, or a global game finished in a rewarded place */
+    /** @return true for a win, or a completed global game */
     boolean isWin() {
         return kind == Kind.WIN || (kind == Kind.GLOBAL && placed);
     }

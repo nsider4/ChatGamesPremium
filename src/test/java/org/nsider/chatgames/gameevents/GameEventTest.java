@@ -56,7 +56,7 @@ class GameEventTest {
         assertEquals(1, cup.getSchedule().size());
         assertArrayEquals(new int[]{5, 3, 1}, cup.getPlacePoints());
         assertTrue(cup.getSteps().get(4).isGlobal());
-        assertArrayEquals(new String[]{"stone", "16"}, cup.getSteps().get(4).getArgs());
+        assertArrayEquals(new String[]{"stone", "100"}, cup.getSteps().get(4).getArgs());
         assertEquals("hard", cup.getSteps().get(2).getSettings().get("difficulty"));
         assertNotNull(config.get("QUICK_QUIZ"), "ids ignore case");
         for (String key : new String[]{"start", "step", "end", "nobody", "stopped"}) {

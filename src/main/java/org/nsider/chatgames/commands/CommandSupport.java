@@ -114,7 +114,7 @@ public final class CommandSupport {
     public static List<String> chatGameNames(@Nonnull String typed) {
         List<String> names = new ArrayList<>();
         for (GameType type : GameType.values()) {
-            if (!type.isRace()) names.add(type.getConfigKey());
+            if (!type.isRace() && !type.isGlobalOnly()) names.add(type.getConfigKey());
         }
         return MessageUtils.filterSuggestions(names, typed);
     }

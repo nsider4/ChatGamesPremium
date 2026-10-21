@@ -9,6 +9,8 @@ import org.bukkit.event.Listener;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.events.ChatGamesEndEvent;
+import org.nsider.chatgames.events.ChatGamesGlobalEndEvent;
+import org.nsider.chatgames.globalgames.CoopProgress;
 import org.nsider.chatgames.events.ChatGamesEventEndEvent;
 import org.nsider.chatgames.events.ChatGamesEventStartEvent;
 import org.nsider.chatgames.games.utils.PlayerResult;
@@ -198,12 +200,39 @@ public final class EventManager implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onGameEnd(ChatGamesEndEvent event) {
         Run current = run;
-        if (current == null || !current.awaiting
-                || event.getType() != current.definition.getSteps().get(current.step).getType()) return;
+        if (current == null || !current.awaiting) return;
+        EventStep step = current.definition.getSteps().get(current.step);
+        // A global step ends with ChatGamesGlobalEndEvent, which says whether the goal was reached
+        if (event.getType() != step.getType() || step.isGlobal()) return;
         current.awaiting = false;
 
         List<UUID> byPlace = new ArrayList<>();
         for (PlayerResult result : event.getWinners()) byPlace.add(result.getUuid());
+        score(current, byPlace);
+    }
+
+    /**
+     * A global step scores only if the server reached the goal: event points by contribution,
+     * for everyone who contributed enough to be rewarded.
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onGlobalEnd(ChatGamesGlobalEndEvent event) {
+        Run current = run;
+        if (current == null || !current.awaiting) return;
+        EventStep step = current.definition.getSteps().get(current.step);
+        if (event.getType() != step.getType() || !step.isGlobal()) return;
+        current.awaiting = false;
+
+        List<UUID> byContribution = new ArrayList<>();
+        if (event.isCompleted()) {
+            for (CoopProgress.Contributor contributor : event.getContributors()) {
+                if (contributor.getAmount() >= event.getMinContribution()) byContribution.add(contributor.getUuid());
+            }
+        }
+        score(current, byContribution);
+    }
+
+    private void score(Run current, List<UUID> byPlace) {
         Map<UUID, Integer> earned = current.scores.addStep(byPlace, current.definition.getPlacePoints(),
                 current.definition.getParticipationPoints());
         for (Map.Entry<UUID, Integer> entry : earned.entrySet()) {

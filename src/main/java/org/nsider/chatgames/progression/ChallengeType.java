@@ -10,9 +10,9 @@ public enum ChallengeType {
     WIN_GAME,
     /** Races won. */
     WIN_RACES,
-    /** Global games solved in time. */
+    /** Global games taken part in (contributed at least once). */
     PLAY_GLOBAL,
-    /** Global games finished in a rewarded place. */
+    /** Global games completed: the server reached the goal and the player contributed enough. */
     WIN_GLOBAL,
     /** Chat games won in {@code seconds} or less (races don't count). */
     FAST_WIN,

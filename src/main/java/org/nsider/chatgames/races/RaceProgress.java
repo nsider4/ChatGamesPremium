@@ -4,10 +4,8 @@ import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -17,9 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * added atomically and the race ends exactly once: either the first player to reach
  * the goal wins, or it is closed (time up, stopped) with no winner. Whatever comes
  * second is ignored.</p>
- *
- * <p>In a global race nobody wins outright: everyone who reaches the goal before it is
- * closed finishes, in order.</p>
  */
 public final class RaceProgress {
 
@@ -29,46 +24,21 @@ public final class RaceProgress {
     private final int goal;
     private final Map<UUID, Integer> counts = new ConcurrentHashMap<>();
     private final AtomicReference<UUID> outcome = new AtomicReference<>();
-    private final boolean global;
-    private final Set<UUID> finished = ConcurrentHashMap.newKeySet();
-    private final AtomicInteger finishers = new AtomicInteger();
 
     public RaceProgress(int goal) {
-        this(goal, false);
-    }
-
-    public RaceProgress(int goal, boolean global) {
         this.goal = goal;
-        this.global = global;
     }
 
     /**
      * Adds to a player's count.
      *
-     * @return true if this made the player the winner (in a global race: made them
-     *         finish); false otherwise, including once the race has ended
+     * @return true if this made the player the winner; false otherwise, including once
+     *         the race has ended
      */
     public boolean add(@Nonnull UUID player, int amount) {
-        return addAndPlace(player, amount) > 0;
-    }
-
-    /**
-     * Adds to a player's count.
-     *
-     * @return the place this made the player finish in (always 1 outside global races),
-     *         or 0 if it didn't
-     */
-    public int addAndPlace(@Nonnull UUID player, int amount) {
-        if (amount <= 0 || outcome.get() != null) return 0;
+        if (amount <= 0 || outcome.get() != null) return false;
         int count = counts.merge(player, amount, Integer::sum);
-        if (count < goal) return 0;
-        if (!global) return outcome.compareAndSet(null, player) ? 1 : 0;
-        return finished.add(player) ? finishers.incrementAndGet() : 0;
-    }
-
-    /** @return how many finished a global race */
-    public int getFinishers() {
-        return finishers.get();
+        return count >= goal && outcome.compareAndSet(null, player);
     }
 
     /**

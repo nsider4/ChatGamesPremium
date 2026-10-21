@@ -24,6 +24,8 @@ public enum GameType {
     FILLOUT("fillout", false),
     HOVERABLE("hoverable", false),
     WORD_ASSOCIATION("word_association", false),
+    /** Counting together in chat; only played as a global game. */
+    COUNT("count", false, true),
     HUNT("hunt", true),
     PLACE("place", true),
     MINE("mine", true),
@@ -35,10 +37,17 @@ public enum GameType {
     /** Section name used for this game in games.yml / races.yml, messages.yml and rewards.yml. */
     private final String configKey;
     private final boolean race;
+    /** Only played as a global game: never in the rotation, never a regular start. */
+    private final boolean globalOnly;
 
     GameType(String configKey, boolean race) {
+        this(configKey, race, false);
+    }
+
+    GameType(String configKey, boolean race, boolean globalOnly) {
         this.configKey = configKey;
         this.race = race;
+        this.globalOnly = globalOnly;
     }
 
     /**

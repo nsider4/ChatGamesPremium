@@ -39,8 +39,9 @@ public final class EventStep {
         return type;
     }
 
+    /** @return true if it is played as a global game (Count always is) */
     public boolean isGlobal() {
-        return global;
+        return global || type.isGlobalOnly();
     }
 
     public int getTimeSeconds() {
@@ -72,7 +73,7 @@ public final class EventStep {
         Map<String, Object> overrides = new LinkedHashMap<>(settings);
         if (winners > 0 && !type.isRace()) overrides.put("winners", winners);
         if (timeSeconds > 0) overrides.put(type.isRace() ? StartOptions.RACE_TIME : StartOptions.GAME_TIME, timeSeconds);
-        if (!global) return StartOptions.of(null, overrides);
+        if (!global && !type.isGlobalOnly()) return StartOptions.of(null, overrides);
 
         GlobalGameConfig.Entry entry = globals.find(type);
         if (timeSeconds > 0) entry = entry.withDuration(timeSeconds);

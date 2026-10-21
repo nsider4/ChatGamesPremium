@@ -107,6 +107,7 @@ public class MainTask {
         if (preset != null) {
             for (GameType type : PresetManager.getGames(preset, plugin.getLogger())) {
                 // Races stay off when races are turned off globally, preset or not
+                if (type.isGlobalOnly()) continue;
                 if (!type.isRace() || ConfigValue.getBoolean(ConfigPaths.RACES_ENABLED)) games.add(type);
             }
         } else {
@@ -190,6 +191,7 @@ public class MainTask {
      * @return True if the game type is enabled, false otherwise.
      */
     private boolean isEnabledInConfig(@Nonnull GameType type) {
+        if (type.isGlobalOnly()) return false;
         if (type.isRace()) {
             return ConfigValue.getBoolean(ConfigPaths.RACES_ENABLED)
                     && ConfigManager.getRaces().getBoolean(type.getConfigKey() + ".enable");

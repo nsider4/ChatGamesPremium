@@ -6,6 +6,8 @@ The server dir gets eula.txt, a flat-world server.properties (port 25599) and th
 plugin copied into plugins/. Each command is typed into the console 3 seconds apart.
 A command starting with "@bot " runs scripts/bot.js instead and waits for it to finish, e.g.
   "@bot Tester auto | wait:2000 | chat:/chatgames reload | quit | join | wait:1000"
+"@bg " starts a bot the same way without waiting, so several can play at once; "@join" (and
+stopping the server) waits for them. Their output follows, one bot after another.
 (the name, version and each action are separated by " | ", so chat text may contain spaces;
  the parts are trimmed, so bot.js reads a trailing "_" in tab:<text> as a space)
 (needs node and mineflayer; set NODE_PATH to the node_modules folder that has mineflayer).
@@ -60,19 +62,44 @@ else:
         if line.startswith('server-port='):
             port = line.strip().split('=', 1)[1]
     bot_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot.js')
+    background = []
+
+    def start_bot(cmd):
+        username, version, *actions = [part.strip() for part in cmd.split(' ', 1)[1].split('|')]
+        bot = subprocess.Popen(['node', bot_script, port, username, version, *actions], stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace')
+        # Read its output as it comes: a full pipe would block the bot (node writes to pipes synchronously)
+        output = {}
+        reader = threading.Thread(target=lambda: output.update(zip(('out', 'err'), bot.communicate(timeout=300))))
+        reader.start()
+        return reader, output
+
+    def collect(bot):
+        reader, output = bot
+        reader.join()
+        out, err = output.get('out', ''), output.get('err', '')
+        lines.extend(out.splitlines())
+        # mineflayer prints PartialReadError stacks for registry packets it skips; they are harmless
+        lines.extend(l for l in err.splitlines()
+                      if l.strip() and 'PartialReadError' not in l and not l.strip().startswith('at '))
+
+    def join():
+        while background:
+            collect(background.pop(0))
+
     for cmd in commands:
         lines.append('>>> ' + cmd)
         if cmd.startswith('@bot '):
-            username, version, *actions = [part.strip() for part in cmd[5:].split('|')]
-            result = subprocess.run(['node', bot_script, port, username, version, *actions],
-                                    capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=300)
-            lines.extend(result.stdout.splitlines())
-            # mineflayer prints PartialReadError stacks for registry packets it skips; they are harmless
-            lines.extend(l for l in result.stderr.splitlines()
-                          if l.strip() and 'PartialReadError' not in l and not l.strip().startswith('at '))
+            collect(start_bot(cmd))
+        elif cmd.startswith('@bg '):
+            background.append(start_bot(cmd))
+            continue
+        elif cmd == '@join':
+            join()
         else:
             send(cmd)
         time.sleep(3)
+    join()
     send('stop')
     try:
         proc.wait(120)

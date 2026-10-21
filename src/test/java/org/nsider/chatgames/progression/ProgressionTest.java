@@ -170,8 +170,8 @@ class ProgressionTest {
                 + "    games:\n      type: WIN_GAMES\n      amount: 5\n"
                 + "    event:\n      type: PLAY_EVENT\n      amount: 5\n");
         ChatGamesPlayer player = new ChatGamesPlayer(UUID.randomUUID());
-        ChallengeTracker.record(player, config, Activity.global(GameType.REACTION, 2, 1, false), DAY);
-        ChallengeTracker.record(player, config, Activity.global(GameType.REACTION, 1, 1, true), DAY);
+        ChallengeTracker.record(player, config, Activity.global(GameType.REACTION, 0, false), DAY);
+        ChallengeTracker.record(player, config, Activity.global(GameType.REACTION, 1, true), DAY);
         ChallengeTracker.record(player, config, Activity.event(), DAY);
         List<Challenge> active = config.active(Period.DAILY, DAY);
         assertEquals(2, ChallengeTracker.progress(player, config, active.get(0), DAY));

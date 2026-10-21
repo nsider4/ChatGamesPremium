@@ -55,13 +55,13 @@ public class RewardManager {
     }
 
     /**
-     * @param place the player's place among those who made it, 1 for first
-     * @return the participation rewards plus the place's, from global_games.yml
+     * @param keys the reward sections under {@code rewards}, e.g. {@code completed}
+     * @return their rewards, from global_games.yml
      */
     @Nonnull
-    public List<String> globalRewards(@Nonnull GameType type, @Nonnull Player player, int place) {
+    public List<String> globalRewards(@Nonnull GameType type, @Nonnull Player player, @Nonnull List<String> keys) {
         List<String> commands = new ArrayList<>();
-        for (ConfigurationSection section : GlobalGameManager.rewardSections(type, place)) {
+        for (ConfigurationSection section : GlobalGameManager.rewardSections(type, keys)) {
             commands.addAll(select("global " + type.getConfigKey(), section, null, player));
         }
         return commands;

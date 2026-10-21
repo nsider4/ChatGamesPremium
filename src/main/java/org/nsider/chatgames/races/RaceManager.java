@@ -16,7 +16,6 @@ import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 import org.nsider.chatgames.games.utils.PlayerResult;
 import org.nsider.chatgames.games.StartOptions;
-import org.nsider.chatgames.globalgames.GlobalGameConfig;
 import org.nsider.chatgames.managers.TopManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
@@ -52,8 +51,6 @@ public final class RaceManager {
     private volatile Map<GameType, RaceData> data = Collections.emptyMap();
     @Nullable private volatile Race current;
     @Nullable private ChatGamesScheduler.Task expiry;
-    /** Who finished the running global race, by place. */
-    private final List<PlayerResult> finishers = Collections.synchronizedList(new ArrayList<PlayerResult>());
 
     public RaceManager(@Nonnull ChatGames plugin) {
         this.plugin = plugin;
@@ -103,17 +100,7 @@ public final class RaceManager {
     }
 
     /**
-     * Starts a global race: everyone who gets there within the global time limit finishes.
-     * Main/global thread.
-     *
-     * @return false for the same reasons as {@link #start(GameType, String...)}
-     */
-    public boolean startGlobal(@Nonnull GameType type, @Nonnull GlobalGameConfig.Entry global, @Nonnull String... args) {
-        return start(type, StartOptions.global(global), args);
-    }
-
-    /**
-     * Starts a race with its time limit replaced, and/or as a global race. Main/global thread.
+     * Starts a race with its time limit replaced. Main/global thread.
      */
     public boolean start(@Nonnull GameType type, @Nonnull StartOptions options, @Nonnull String... args) {
         return start(prepare(type, options, args));
@@ -126,7 +113,6 @@ public final class RaceManager {
         GameManager manager = plugin.getGameManager();
         if (!manager.tryBegin()) return false;
         current = race;
-        finishers.clear();
         ChatGamesStartEvent event = new ChatGamesStartEvent(type, null);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
@@ -138,6 +124,28 @@ public final class RaceManager {
         announceStart(race);
         expiry = plugin.getScheduler().globalLater(() -> expire(race), race.getTimeLimitSeconds() * 20L);
         return true;
+    }
+
+    /**
+     * Picks a global race's target (from the values, or races.yml) without starting it.
+     * {@link org.nsider.chatgames.globalgames.GlobalGameManager} runs it.
+     *
+     * @return the race, or null if the values are invalid (a console warning says why)
+     */
+    @Nullable
+    public Race prepareGlobal(@Nonnull GameType type, @Nonnull StartOptions options, @Nonnull String... args) {
+        return prepare(type, options, args);
+    }
+
+    /** Lets the race listeners count towards a global race. Main/global thread. */
+    public void attachGlobal(@Nonnull Race race) {
+        current = race;
+    }
+
+    /** Stops counting towards a global race. Main/global thread. */
+    public void detachGlobal(@Nonnull Race race) {
+        race.getProgress().close();
+        if (current == race) current = null;
     }
 
     @Nullable
@@ -185,21 +193,13 @@ public final class RaceManager {
      * @param race the race the action was checked against (a newer one may have started since)
      */
     public void progress(@Nonnull Race race, @Nonnull Player player, int amount) {
-        int place = race.getProgress().addAndPlace(player.getUniqueId(), amount);
-        if (place == 0) return;
-        double seconds = race.getElapsedSeconds();
         if (race.isGlobal()) {
-            plugin.getScheduler().global(() -> finish(race, player, seconds, place));
-        } else {
-            plugin.getScheduler().global(() -> win(race, player, seconds));
+            plugin.getGlobalGameManager().raceProgress(race, player, amount);
+            return;
         }
-    }
-
-    /** A player made it in a global race, which goes on until time is up. */
-    private void finish(Race race, Player player, double seconds, int place) {
-        if (current != race) return;
-        finishers.add(new PlayerResult(player.getUniqueId(), seconds, place));
-        plugin.getGlobalGameManager().award(player, race.getType(), seconds, place);
+        if (!race.getProgress().add(player.getUniqueId(), amount)) return;
+        double seconds = race.getElapsedSeconds();
+        plugin.getScheduler().global(() -> win(race, player, seconds));
     }
 
     private void win(Race race, Player player, double seconds) {
@@ -242,17 +242,6 @@ public final class RaceManager {
 
     private void expire(Race race) {
         if (current != race || !race.getProgress().close()) return;
-        if (race.isGlobal()) {
-            List<PlayerResult> results;
-            synchronized (finishers) {
-                results = new ArrayList<>(finishers);
-            }
-            results.sort((a, b) -> Integer.compare(a.getPlace(), b.getPlace()));
-            Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(race.getType(), null, results));
-            plugin.getGlobalGameManager().announceEnd(race.getType(), race.getAmount() + " " + race.getDisplayName(), results);
-            end(race);
-            return;
-        }
         Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(race.getType(), null, Collections.<PlayerResult>emptyList()));
         Msg message = message(race, "time_expired_message");
         for (Player player : players()) {
@@ -272,7 +261,7 @@ public final class RaceManager {
      */
     public boolean stop(boolean notify) {
         Race race = current;
-        if (race == null || !race.getProgress().close()) return false;
+        if (race == null || race.isGlobal() || !race.getProgress().close()) return false;
         if (notify) {
             Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(race.getType(), null, Collections.<PlayerResult>emptyList()));
         }
@@ -289,10 +278,7 @@ public final class RaceManager {
     }
 
     private void announceStart(Race race) {
-        Msg message = race.isGlobal()
-                ? plugin.getGlobalGameManager().startMessage(race.getType(), race.getTimeLimitSeconds())
-                        .with("%value%", race.getDisplayName()).with("%amount%", race.getAmount())
-                : message(race, "gameStartAnnouncement");
+        Msg message = message(race, "gameStartAnnouncement");
         ConfigurationSection settings = section(race.getType());
         String title = fill(race, settings.getString("titleMessage", ""));
         String subtitle = fill(race, settings.getString("subtitleMessage", ""));

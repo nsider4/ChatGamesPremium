@@ -1,12 +1,19 @@
 #GLOBAL GAMES
 #
-#In a global game everyone who answers (or, in a global race, gets there) within the time
-#limit is rewarded, not just the first few. Every player who makes it gets the participation
-#rewards and the points below; the first places also get their place's rewards.
-#Answers to a global game are always hidden from chat, so they can't be copied.
+#In a global game the whole server plays as one team. Every correct answer (or, in a global
+#race, every block mined, mob killed...; in Count, every number counted) adds to one shared
+#score. Nobody has to be the fastest: when the score reaches the goal in time, everyone who
+#contributed gets the reward. If time runs out first, the game fails.
 #
-#Global games start by chance after a regular game, on a timer, or with
-#/chatgames global <game> [values] (the same values as starting the game normally).
+#  Chat games run as a stream of questions. Each player can answer each question once, and
+#  the next question comes after 'answers-per-question' correct answers or 'question-seconds'.
+#  Answers are always hidden, so they can't be copied.
+#  Races count everyone's progress together, e.g. 500 Stone mined by the whole server.
+#  Count (only played globally): count together in chat, one number per message.
+#
+#Global games start by chance after a regular game, on a timer, with
+#/chatgames global <game> [values], or as a step in an event (events.yml).
+#The progress shows in a boss bar (1.9+) or the action bar (1.8).
 
 triggers:
   #Percent chance that a global game starts after a regular game or race ends (0 = never).
@@ -18,129 +25,223 @@ triggers:
   #Players needed online for a global game to start by itself (the command ignores this).
   minimum-players: 2
 
-#How many of the first places count as winning a global game: they get their place's rewards
-#and count for WIN_GLOBAL challenges, the daily win streak and %chatgames_global_won%.
-rewarded-places: 3
+progress-bar:
+  enabled: true
+  #A boss bar colour: BLUE, GREEN, PINK, PURPLE, RED, WHITE or YELLOW.
+  color: YELLOW
+  #SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12 or SEGMENTED_20.
+  style: SEGMENTED_10
+  #Percentages of the goal announced in chat as the server gets there.
+  announce-at: [25, 50, 75]
 
-#Used by every game below that has no 'rewards' of its own. The same format as rewards.yml
-#(chance, minimum-players, '<chance>%~ ' and 'has:<permission>' all work).
+#Used by every game below for any value it doesn't set itself.
+#  goal: correct answers (or, for races, items/mobs) the server needs
+#  duration-seconds: how long the server has
+#  min-contribution: the least a player must contribute to be rewarded
+#  points: what every rewarded player gets when the goal is reached
+#  points-per-contribution: extra points for each of a player's contributions
+#  answers-per-question: chat games only, how many players can answer one question
+#  question-seconds: chat games only, the longest one question stays up
+defaults:
+  goal: 10
+  duration-seconds: 120
+  min-contribution: 1
+  points: 1
+  points-per-contribution: 0
+  answers-per-question: 3
+  question-seconds: 15
+
+#Rewards in the rewards.yml format (chance, minimum-players, '<chance>%~ ' and 'has:<permission>'
+#all work). %player% is the player and %contribution% what they put in.
+#A game's own 'rewards' section replaces these for that game.
 rewards:
-  participation:
+  #Everyone who contributed at least min-contribution, when the goal is reached.
+  completed:
     reward_1:
       data:
-        - '[consolecmd] give %player% iron_ingot 2'
-  1:
-    reward_1:
-      data:
-        - '[consolecmd] give %player% diamond 1'
-  2:
-    reward_1:
-      data:
-        - '[consolecmd] give %player% gold_ingot 3'
-  3:
-    reward_1:
-      data:
-        - '[consolecmd] give %player% iron_ingot 5'
+        - '[consolecmd] give %player% iron_ingot 3'
+  #The same players when time runs out. Empty: no consolation prize.
+  failed: {}
+  #Extra for the biggest contributors when the goal is reached, by place.
+  top-contributors:
+    1:
+      reward_1:
+        data:
+          - '[consolecmd] give %player% diamond 1'
+    2:
+      reward_1:
+        data:
+          - '[consolecmd] give %player% gold_ingot 3'
+    3:
+      reward_1:
+        data:
+          - '[consolecmd] give %player% gold_ingot 1'
 
+#Placeholders in every message: %game% %goal% (a number) %goal_text% (e.g. "500 Stone")
+#%progress% %percent% %time% (seconds left) %duration%
 messages:
-  #Shown above the game's own question. %time% is the time limit in seconds, %game% the game.
   start:
-    - '&6&l» GLOBAL GAME! &fEveryone who answers within &e%time%s &fwins!'
-  #Shown instead of the race's own start message. %amount% and %value% are the goal.
+    - ''
+    - '&6&l» GLOBAL %game%! &fThe whole server plays together.'
+    - '&f  Get &e%goal% correct answers &fwithin &e%time%s&f. Everyone who helps is rewarded!'
+    - '&7  Each question takes %answers% answers, so don''t wait for others.'
+    - ''
   race_start:
     - ''
-    - '&6&l» GLOBAL RACE! &fEveryone who gets &e%amount% %value% &fwithin &e%time%s &fwins!'
+    - '&6&l» GLOBAL RACE! &fThe whole server plays together.'
+    - '&f  Get &e%goal% %value% &ftogether within &e%time%s&f. Everyone who helps is rewarded!'
     - ''
-  #To each player who makes it. %place% is their place, %points% what they earned.
-  solved: '&8[%prefix%&8] &aYou made it in &f%time%s &aas &f#%place%&a! &7(+%points% points)'
-  #%count% is how many made it; %winner_<n>% and %time_<n>% the first three.
-  #%correct_answer% is the answer, or for a race its goal (e.g. 16 Stone).
-  end:
-    - '&6&l» GLOBAL GAME OVER! &e%count% &fplayer(s) made it. &7(%correct_answer%)'
-    - '&f  1. &e%winner_1% &7%time_1%s  &f2. &e%winner_2% &7%time_2%s  &f3. &e%winner_3% &7%time_3%s'
-  nobody:
-    - '&6&l» GLOBAL GAME OVER! &cNobody made it in time. &7(%correct_answer%)'
+  count_start:
+    - ''
+    - '&6&l» GLOBAL COUNT! &fCount from &e%start% &fto &e%target% &fin steps of &e%step% &ftogether!'
+    - '&7  One number per message, in order. Nobody counts twice in a row. %time%s to finish.'
+    - ''
+  #Above each question. %question% is its number.
+  question:
+    - '&6&l» GLOBAL &7Question #%question% &8| &e%progress%&7/&e%goal%'
+  #When a question's time runs out. %answer% is its answer. Empty to stay quiet.
+  question_over: '&8» &7The answer was &f%answer%&7.'
+  #To a player whose answer counted. %contribution% is their total so far.
+  answered: '&8[%prefix%&8] &aCorrect! &7You''ve given &f%contribution% &7of the server''s &f%progress%/%goal%&7.'
+  #%reached% is the percentage just reached.
+  milestone: '&6&l» &e%reached%% &fdone! &7(%progress%/%goal%, %time%s left)'
+  #A number that counted, shown instead of the player's message. %player% %number%
+  counted: '&e%player% &8» &f%number%'
+  #A mistake. %player% %number% %next% (what was expected) %start% %reason% %mistakes% %max_mistakes%
+  count_broken:
+    - '&c%player% said %number%: %reason%'
+    - '&fThe count starts over from &e%start%&f.'
+  #The mistake that ends the game (on-mistake: fail, or max-mistakes reached).
+  count_broken_final:
+    - '&c%player% said %number%: %reason%'
+  count_reasons:
+    ahead: 'too far ahead (the next number was %next%)'
+    behind: 'that was already counted (the next number was %next%)'
+    repeated: 'that number was just said'
+    twice: 'nobody may count two numbers in a row'
+  #%count% players were rewarded, %contributors% took part, %seconds% it took.
+  #%top_<n>% and %top_<n>_amount%: the three biggest contributors.
+  completed:
+    - ''
+    - '&6&l» GOAL REACHED! &fThe server got &e%goal_text% &fin &e%seconds%s&f.'
+    - '&f  Top: &e%top_1% &7(%top_1_amount%)  &e%top_2% &7(%top_2_amount%)  &e%top_3% &7(%top_3_amount%)'
+    - '&f  &e%count% &fplayer(s) get the reward.'
+    - ''
+  failed:
+    - ''
+    - '&6&l» GLOBAL GAME OVER! &fThe server got to &e%progress%/%goal% &7(%percent%%)&f. Better luck next time!'
+    - ''
+  #To each rewarded player when the goal is reached. %points% is what they earned.
+  rewarded: '&8[%prefix%&8] &aYou contributed &f%contribution% &aand earned &f%points% &apoint(s)!'
+  #To a player who contributed less than min-contribution. %min% is that minimum.
+  too_little: '&8[%prefix%&8] &7You contributed %contribution%; at least %min% were needed for the reward.'
+  #The boss bar (or action bar on 1.8).
+  bar: '&6Global %game% &8| &f%progress%/%goal% &8| &e%time%s'
+
+#Words used to build %goal_text%.
+words:
+  answers: 'correct answers'
+  to: 'to'
 
 #The games that can be played globally. Memorize and Guess the Number can't.
-#  enabled: whether it can start (by chance, timer or command)
-#  duration_seconds: how long everyone has
-#  points: what every player who makes it earns
-#  rewards: optional, replaces the shared rewards above for this game
+#Each can set enabled and anything from 'defaults', plus its own 'rewards'.
 games:
   reaction:
     enabled: true
-    duration_seconds: 20
-    points: 1
+    goal: 10
+    duration-seconds: 90
+    question-seconds: 10
   unscramble:
     enabled: true
-    duration_seconds: 30
-    points: 1
+    goal: 10
+    duration-seconds: 150
   math:
     enabled: true
-    duration_seconds: 25
-    points: 1
+    goal: 15
+    duration-seconds: 150
   sequence:
     enabled: true
-    duration_seconds: 30
-    points: 1
+    goal: 8
+    duration-seconds: 150
   trivia:
     enabled: true
-    duration_seconds: 30
-    points: 1
+    goal: 8
+    duration-seconds: 180
+    question-seconds: 20
   word_association:
     enabled: true
-    duration_seconds: 30
-    points: 1
+    goal: 8
+    duration-seconds: 150
   fillout:
     enabled: true
-    duration_seconds: 30
-    points: 1
+    goal: 10
+    duration-seconds: 150
   unreverse:
     enabled: false
-    duration_seconds: 30
-    points: 1
   random:
     enabled: false
-    duration_seconds: 25
-    points: 1
   variable:
     enabled: false
-    duration_seconds: 30
-    points: 1
   hoverable:
     enabled: false
-    duration_seconds: 25
-    points: 1
   clickable:
     enabled: false
-    duration_seconds: 20
-    points: 1
-  #Global races: everyone who gets the amount in time. Targets and amounts come from races.yml.
+  #Count together. Its goal is how many numbers the chosen mode has.
+  count:
+    enabled: true
+    duration-seconds: 120
+    #Nobody may say two numbers in a row.
+    no-double-count: true
+    #reset: a mistake starts the count over; fail: a mistake ends the game.
+    on-mistake: reset
+    #With reset: the mistakes that end the game anyway (0 = no limit).
+    max-mistakes: 5
+    #One is picked at random; /chatgames global count <mode> picks one.
+    #'step' is how much each number goes up (the direction follows start and target).
+    modes:
+      up:
+        start: 1
+        target: 20
+        step: 1
+      down:
+        start: 15
+        target: 1
+        step: 1
+      evens:
+        start: 2
+        target: 30
+        step: 2
+      fives:
+        start: 5
+        target: 75
+        step: 5
+  #Global races: the whole server collects towards the goal. Targets come from races.yml;
+  #/chatgames global mine STONE 500 sets both.
   mine:
     enabled: true
-    duration_seconds: 90
-    points: 1
+    goal: 200
+    duration-seconds: 240
   hunt:
     enabled: true
-    duration_seconds: 90
-    points: 1
+    goal: 40
+    duration-seconds: 240
   place:
     enabled: false
-    duration_seconds: 90
-    points: 1
+    goal: 200
+    duration-seconds: 240
   fish:
     enabled: false
-    duration_seconds: 120
-    points: 1
+    goal: 20
+    duration-seconds: 300
   eat:
     enabled: false
-    duration_seconds: 90
-    points: 1
+    goal: 30
+    duration-seconds: 240
   craft:
     enabled: false
-    duration_seconds: 90
-    points: 1
+    goal: 100
+    duration-seconds: 240
   furnace:
     enabled: false
-    duration_seconds: 120
-    points: 1
+    goal: 64
+    duration-seconds: 300

@@ -66,7 +66,7 @@ class RoundGeneratorsTest {
     @Test
     void everyChatGameHasDefaultsAndGeneratesPlayableRounds() {
         for (GameType type : GameType.values()) {
-            if (type.isRace()) continue;
+            if (type.isRace() || type.isGlobalOnly()) continue;
             assertNotNull(games.getConfigurationSection(type.getConfigKey()), type + " missing from games.yml");
             ConfigurationSection section = messages.getConfigurationSection(type.getConfigKey());
             assertNotNull(section, type + " missing from messages.yml");
