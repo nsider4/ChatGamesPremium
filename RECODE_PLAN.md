@@ -107,7 +107,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - Challenge types:
     - win N games, or win N games of a specific type
     - win N races
-    - take part in N global games, or win N global games
+    - take part in N global games, or complete N global games (the server reached the goal)
     - answer in under N seconds
     - earn N points
     - take part in an event
@@ -135,7 +135,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 - **Profile**, `/chatgames profile [player]`:
   - games won, by type and in total; races won
   - fastest time overall and your best per game
-  - global games played and won
+  - global games played and completed, and total contributions
   - events played, event wins and best event place
   - current and longest daily, challenge and global streaks
   - points, milestones reached, and challenges completed
@@ -203,7 +203,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - `fastest_<game>` (your best time), `fastest_<game>_<n>` and `fastest_<game>_time_<n>`
   - `daily_completed`, `daily_total`, `weekly_completed`, `weekly_total`
   - `streak_<daily|challenge|global>` and `streak_<…>_longest`
-  - `global_played`, `global_won`
+  - `global_played`, `global_won` (completed), `contributions`, and `global_running|progress|goal|percent|contribution|time_left`
   - `event_running`, `event_name`, `event_points`, `event_place`
   - `current_game`, `time_left`
 - All of them are served from memory, so a scoreboard never waits on the database.
@@ -430,13 +430,13 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - New permissions `chatgames.challenges|streaks|claim|challenges.reset|streaks.set|global`.
   - **Placeholders:** `daily_completed`, `daily_total`, `weekly_completed`, `weekly_total`, `challenges_completed`, `streak_<type>`, `streak_<type>_longest`.
   - **Removed:** the v1 daily fields, the `<table>_daily` table (recode-only, never in 1.9.9) and `ChallengeManager`.
-  - **Global games (`globalgames/`, `global_games.yml`):**
+  - **Global games (`globalgames/`, `global_games.yml`):** *(superseded by step 9d: global games are now co-op, with a shared goal)*
     - Any chat game except Memorize and Guess the Number, or any race, runs as a normal `Game`/`Race` with `global` set. Places never run out and the game ends when time is up.
     - Everyone who makes it gets points, `global_played`, participation rewards, and their place's rewards. The first `rewarded-places` (3) count as wins for `global_won`, `WIN_GLOBAL` and the daily streak.
     - Answers are always hidden, including a repeated answer. The first live run showed a second "creeper" in chat; now fixed.
     - Start: by chance after a regular game (`chance-after-game`, `delay-seconds`), on a timer (`interval-minutes`), or with `/chatgames global <game> [values]`.
     - Shared `rewards` with per-game overrides, and the global messages in the same file.
-    - Global race: `RaceProgress` in global mode gives each finisher a place, atomically. Tested with 8 threads.
+    - Global race: `RaceProgress` in global mode gives each finisher a place, atomically. Tested with 8 threads. (9d removed the finisher places)
   - **Bug found by the tests:** `%challenge%` inside a reward line left the name's own `%amount%` unfilled.
 
 - [x] **Step 9a: Word Association + game events** (2026-10-21). 128 tests. Events tested live with a bot and PlaceholderAPI on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2.
