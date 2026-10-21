@@ -54,15 +54,16 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 - Options: count or ignore spawner mobs, and allow or deny creative mode.
 - Legacy and modern material and mob names are both accepted.
 
-**Global games** *(new)*
-- In a global game *everyone* who solves the round within N seconds is rewarded, instead of just the first N players.
-  - Everyone who succeeds gets the participation reward.
-  - The first three also get place rewards.
-- Global games reuse the normal games' generators, so supporting another one is just a config entry. The list in `global_games.yml`:
-  - **Global Reaction** (already in the recode), **Global Unscramble**, **Global Math**, **Global Sequence**, **Global Trivia**, **Global Fill-out**, **Global Word Association**
-  - **Global Race**: everyone who mines, kills, catches etc. N of something in the time window. This reuses the race listeners.
-- A global game starts by chance after a regular game (`chance_trigger_percent`), on its own interval, by command, or as a step in an event.
-- Each global game has its own messages and rewards.
+**Global games** *(new; reworked to co-op in step 9d)*
+- The whole server plays as one team. Every correct answer (or, in a race, every block mined, mob killed...) pushes one server-wide progress bar toward a target, e.g. "answer 25 math questions together in 3 minutes" or "mine 500 stone together in 5 minutes".
+- Nobody has to be the fastest: each player's contribution is tracked and added to the shared score.
+- When the goal is reached in time, **every participant** gets the reward, not just a winner. If time runs out first, the game fails (optional consolation rewards).
+- Chat games run as a stream of questions. Each player can answer each question once (answers are hidden), and the question moves on after a few correct answers or a few seconds, so slower players still contribute.
+- **Count** *(new, global only)*: count together in chat, in order, e.g. 1 to 10 (or down, or in steps of 2/5...). A number that is ahead, behind or repeated, or the same player counting twice in a row, breaks the count: it restarts (or the game fails, per config).
+- The progress bar is a boss bar on 1.9+, and action bar + chat updates (25/50/75%) on 1.8.
+- Playable globally: Reaction, Unscramble, Math, Sequence, Trivia, Fill-out, Word Association, Count, and every race.
+- A global game starts by chance after a regular game, on its own interval, by command, or as a step in an event.
+- Each global game has its own goal, time, messages and rewards.
 
 **Game events** *(new)*
 - Defined in `events.yml`. An event is a named, ordered list of steps. A step is any chat game, race or global game, with optional overrides (time limit, difficulty, winners), plus a pause between steps.
@@ -239,6 +240,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 | Word Association | new | step 9a |
 | Game events | new | step 9a |
 | More global games | new | step 9 |
+| Co-op global games (shared progress bar, everyone rewarded) + Count game | new (2026-10-21) | step 9d |
 | Suggestions | | configurable hints, action-bar countdown, weighted no-repeat rotation, anti-macro (steps 5, 9) |
 
 **Other suggestions, not in scope unless you want them:**
@@ -474,7 +476,20 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - Claiming one challenge (`ChallengeTracker.claim`, matched by id so a menu opened before a reload can't claim a stale challenge) or one streak (`ProgressionManager.claimStreak`).
     - Event totals across all events: `events_played`, `event_wins` and `event_best_place`, also as placeholders.
 
+- [ ] **Step 9b+: Menus on InventoryManager 2.0.0** (in progress). The menu code moves out of ChatGames into the library, and buttons are driven by `actions:` in `menus.yml` so server owners can change behaviour and add their own menus.
+- [ ] **Step 9d: Co-op global games + Count** (requested 2026-10-21). Replaces 9's "everyone who answers in time, ranked by place" model.
+  - **Shared goal:** each global game has a `goal` and `duration-seconds`. Contributions (correct answers, race units, counted numbers) add to one server score; a boss bar (1.9+, by reflection) or action bar (1.8) shows `progress/goal` and time left, with chat updates at 25/50/75%.
+  - **Chat games as a question stream:** the current question accepts one answer per player; it changes after `answers-per-question` correct answers or `question-seconds`. Each correct answer is +1.
+  - **Races:** every unit of progress from any player is +1 toward e.g. 500 stone. Reuses the race listeners.
+  - **Count (global only):** `start`, `target`, `step` (negative counts down), random `modes`. Only messages that are numbers count; they are shown as a formatted line. Ahead, behind, repeated, or the same player twice in a row (`no-double-count`) is a mistake: `on-mistake: reset|fail`, optional `max-mistakes`. The counter is atomic (Folia chat is async).
+  - **Ending:** goal reached → every participant with at least `min-contribution` gets `points` (+ optional `points-per-contribution`) and the `rewards.completed` lines; optional `rewards.top-contributors` for the top 1-3. Time up → `rewards.failed` (empty by default) and a message showing how far the server got.
+  - **Stats & progression:** `global_played` = took part; `global_won` becomes "completed" (took part in a game that reached its goal). `WIN_GLOBAL` challenges and the daily streak use completed. New `contributions` stat and placeholders `global_progress`, `global_goal`, `global_contribution`. `rewarded-places` is removed.
+  - **Events:** a global step gives `participation-points` to every contributor and `points` by contribution rank, only if the goal is reached.
+  - **Menus:** admin "global" page and profile show the new stats; the progress bar also shows in the admin status item.
+  - **Tests:** unit tests for the counter rules and contribution maths; live runs with two bots on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2.
+
 ---
+
 
 ## 1. Where you left off
 
@@ -816,6 +831,8 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
    - Presets, including `preset save`.
    - 9a. **Word Association** game, and **game events**: `events.yml`, the runner that pauses the rotation, event scoring and stats tables, the end leaderboard, schedules.
    - 9b. **Menus**: main, profile, challenges, streaks, admin, debug (mock answers + timing report).
+   - 9b+. **Menus on InventoryManager 2.0.0**: move the menu framework into the library (YAML actions, requirements, custom menus, any 1.8–26.x material), push + tag it, and rebuild ChatGames' menus on it.
+   - 9d. **Co-op global games + Count**: shared progress bar, everyone rewarded, and the Count game (details under Progress).
    - 9c. **Translations**: a script that rebuilds `mine-translator` from Mojang's latest language assets; a version check so outdated files re-download. Pushing to the GitHub repo is your call.
 10. **1.9.9 → 2.0.0 migration.**
     - DB: `fastest` column → fastest-times table.
