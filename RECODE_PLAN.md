@@ -477,7 +477,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - Event totals across all events: `events_played`, `event_wins` and `event_best_place`, also as placeholders.
 
 - [x] **Step 9b+: Menus on InventoryManager 2.0.0** (2026-10-21). 133+ tests (16 in the library). A bot clicked through every menu, plus a custom one, on Paper 1.21.1, Spigot 1.8.8 and Folia 26.1.2.
-  - **InventoryManager 2.0.0** (github.com/nsider4/InventoryManager), built against the 1.8.8 API on XSeries:
+  - **InventoryManager 2.0.1** (github.com/nsider4/InventoryManager, tag 2.0.1 on JitPack; 2.0.0 never built there because spigot-api 1.8.8 drags in an unhosted bungeecord-chat snapshot, now excluded, and PlaceholderAPI is now called by reflection), built against the 1.8.8 API on XSeries:
     - `MenuManager`: loads menus from a config section and/or a folder (one file per menu), opens them on the player's thread (Folia-aware by reflection), keeps a per-player history for `[back]`, and debounces clicks (150 ms).
     - YAML per item: slots with ranges, any 1.8–26.x material (names, `NAME:data`, numeric ids from a bundled 1.8 table, `head:<name|texture|url>`), glow (glint override on 1.20.5+), enchantments, flags, custom model data, item model, leather colour, hex colours on 1.16+.
     - Behaviour per item: `actions` (and left/right/shift/middle/drop variants), `view-requirements`, `click-requirements` + `deny-actions`, `state` + `when-off`. Menu level: `open-requirements`, `open-actions`, `update-interval`, `list-slots` and named `lists`, `templates`.
