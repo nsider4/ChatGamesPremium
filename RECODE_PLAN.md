@@ -514,11 +514,12 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 - [x] **Step 11: Folia hardening** (2026-10-21; 159 tests, live-tested with two bots in different regions on Folia 26.1.2, and as a regression on Paper 1.21.1 and Spigot 1.8.8).
   - **Routing:** `ChatGamesScheduler.onPlayer` runs a task on the thread that owns the player (straight away when that is the current thread, which is the main thread outside Folia); `onGlobal` now also runs straight away on Folia's global tick thread. `[playercmd]` and `[player_as_op]` go to the player's thread, `[consolecmd]` to the global one, game sounds (they read the player's location) and item rewards to the player's thread. Chat, titles, action bars and boss bars are packet sends and stay where they are.
   - **Live (Folia, `winners: 2`, the second player teleported to 3000/3000):** three math games answered by both at once from two regions got two distinct places each (answers 0.2–14 ms apart, never a double 1st, never a third winner); every reward type reached the right player; the race was won from the far region; a menu, `reload` and `stop` mid-game, a full inventory (the item dropped at the player's feet) and stopping the server mid-game all worked. No errors or thread warnings on any of the three servers.
-- [ ] **Step 12: test matrix and release** (in progress 2026-10-21). Release notes in `RELEASE_NOTES.md`.
+- [x] **Step 12: test matrix and release** (2026-10-21; merged to `main` and tagged `2.0.0`). Release notes in `RELEASE_NOTES.md`.
   - **SQLite matrix, all passed with no plugin errors:** Spigot 1.8.8, 1.13 and 1.20.1; Paper 1.12.2, 1.16.5, 1.20.4, 1.21.11, 26.1.2 and 26.3; Folia 26.1.2. On each, a bot started all 14 games: it won the 7 it can play (Clickable, Math, Memorize, Random, Reaction, Sequence and a Mine race) and the other 8 ran out of time. Then it ran `top`, `fastest`, `points`, PlaceholderAPI (`P=7`, `B=0.90x`, `W=1`, `M=1`), `reload`, and one more game after the reload. Paper 26.3 was console-only (mineflayer stops at 26.1), and every game ran out of time there.
   - Spigot was tested at 1.8.8, 1.13 and 1.20.1; Paper covered 1.12.2, 1.16.5 and 1.20.4, because Spigot jars for those need BuildTools.
   - Test-world note: 1.21.9+ ignores `spawn-monsters` in server.properties (it is a game rule now), so the test sets `difficulty peaceful`.
-  - **Still to do:** MySQL (a local MariaDB 11.4 run was cut off when the machine ran low on memory); publishing (merge to main, tag, Spigot upload) is the owner's call.
+  - **MySQL:** the same run on Paper 1.21.11 against MariaDB 11.4 passed. It created the `chatgames`, `chatgames_fastest_times` and `chatgames_stats` tables and stored 8 points plus a fastest time for each of the 7 games won.
+  - **Release:** merged into `main` (the old 2025-10-05 commit `fd07dab` on `origin/main` is superseded by the recode, which keeps its own tree), pushed, and tagged `2.0.0`. The Spigot upload is done by the owner.
 
 ---
 
@@ -875,6 +876,6 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
     - Per-player routing for broadcasts and rewards (5.3, 5.5).
     - `folia-supported: true`.
     - The Folia test pass (5, "Folia testing").
-12. **Test matrix** (section 4.10, including Folia), then release.
+12. **Test matrix** (section 4.10, including Folia), then release. *(Done.)*
 
 Steps 1–5 give you a working 1.9.9-equivalent core. Steps 6–8 bring it to feature parity. Steps 9–11 are what makes 2.0.0 worth releasing.
