@@ -24,7 +24,11 @@ public final class QueryInitializer {
         DatabaseUtils.initialize(plugin);
 
         try {
-            repository.createTables();
+            int upgraded = repository.createTables();
+            if (upgraded >= 0) {
+                plugin.getLogger().log(Level.INFO, "Upgraded the 1.9.9 player table ({0} players); the old one is kept with _1_9_9 added to its name.",
+                        upgraded);
+            }
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Could not create the database tables.", e);
             return false;

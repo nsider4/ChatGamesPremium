@@ -31,6 +31,8 @@ public final class ChatGamesPlayer {
 
     private final EnumMap<GameType, Double> fastest = new EnumMap<>(GameType.class);
     private final Set<GameType> dirtyFastest = new HashSet<>();
+    // The one overall best a 1.9.9 database kept; read-only, so never saved
+    private double legacyBest;
 
     public ChatGamesPlayer(UUID uuid) {
         this.uuid = uuid;
@@ -141,10 +143,11 @@ public final class ChatGamesPlayer {
     }
 
     /**
-     * @return the best time across every chat game (races aren't typing) in seconds, or 0 if never won
+     * @return the best time across every chat game (races aren't typing) and the 1.9.9 record,
+     *         in seconds, or 0 if never won
      */
     public synchronized double getBestOverall() {
-        double best = 0;
+        double best = legacyBest;
         for (Map.Entry<GameType, Double> entry : fastest.entrySet()) {
             double time = entry.getValue();
             if (!entry.getKey().isRace() && (best == 0 || time < best)) best = time;
@@ -167,6 +170,10 @@ public final class ChatGamesPlayer {
 
     synchronized void loadFastest(GameType game, double seconds) {
         fastest.put(game, seconds);
+    }
+
+    synchronized void loadLegacyBest(double seconds) {
+        legacyBest = seconds;
     }
 
     /**

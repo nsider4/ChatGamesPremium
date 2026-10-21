@@ -75,8 +75,8 @@ public final class LeaderboardSnapshot {
         Map<GameType, List<Row>> byGame = new EnumMap<>(GameType.class);
         for (TimeRow row : fastestRows) {
             if (row.seconds <= 0) continue;
-            if (!row.game.isRace()) best.merge(row.uuid, row.seconds, Math::min);
-            byGame.computeIfAbsent(row.game, g -> new ArrayList<>()).add(new Row(row.uuid, row.seconds));
+            if (row.game == null || !row.game.isRace()) best.merge(row.uuid, row.seconds, Math::min);
+            if (row.game != null) byGame.computeIfAbsent(row.game, g -> new ArrayList<>()).add(new Row(row.uuid, row.seconds));
         }
         List<Row> byTime = new ArrayList<>();
         for (Map.Entry<UUID, Double> entry : best.entrySet()) byTime.add(new Row(entry.getKey(), entry.getValue()));
@@ -170,13 +170,13 @@ public final class LeaderboardSnapshot {
         }
     }
 
-    /** One fastest-time record. */
+    /** One fastest-time record; a null game is a 1.9.9 overall best, which only counts overall. */
     public static final class TimeRow {
         final UUID uuid;
         final GameType game;
         final double seconds;
 
-        public TimeRow(@Nonnull UUID uuid, @Nonnull GameType game, double seconds) {
+        public TimeRow(@Nonnull UUID uuid, @Nullable GameType game, double seconds) {
             this.uuid = uuid;
             this.game = game;
             this.seconds = seconds;

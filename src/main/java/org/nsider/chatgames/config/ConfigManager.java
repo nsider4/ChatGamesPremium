@@ -4,6 +4,10 @@ import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.nsider.chatgames.ChatGames;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.logging.Level;
+
 /**
  * Manages all configuration files and messages for the ChatGames plugin.
  * This class is responsible for initializing and reloading configuration files,
@@ -39,6 +43,7 @@ public class ConfigManager {
      */
     public static void initialize(ChatGames plugin) {
         ConfigManager.plugin = plugin;
+        migrateFrom199(plugin);
         plugin.saveDefaultConfig();
 
         config = plugin.getConfig();
@@ -58,6 +63,22 @@ public class ConfigManager {
 
         // Messages read messages.yml, so they are built last
         messages = new Messages();
+    }
+
+    private static void migrateFrom199(ChatGames plugin) {
+        if (!LegacyMigration.isNeeded(plugin.getDataFolder())) return;
+        try {
+            LegacyMigration.Result result = LegacyMigration.migrate(plugin.getDataFolder(), plugin::getResource);
+            StringBuilder carried = new StringBuilder();
+            for (Map.Entry<String, Integer> entry : result.carried.entrySet()) {
+                if (entry.getValue() > 0) carried.append(carried.length() == 0 ? "" : ", ").append(entry.getKey()).append(" (").append(entry.getValue()).append(')');
+            }
+            if (result.rewardsKept) carried.append(carried.length() == 0 ? "" : ", ").append("rewards.yml (kept)");
+            plugin.getLogger().log(Level.INFO, "Upgraded the 1.9.9 configuration. Your changes went to: {0}. The old files are in {1}.",
+                    new Object[]{carried.length() == 0 ? "nothing (all defaults)" : carried, result.backup.getPath()});
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Could not upgrade the 1.9.9 configuration; the old files are in backups/.", e);
+        }
     }
 
     /**
