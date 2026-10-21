@@ -505,7 +505,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - **Version check:** `LanguageManager` loads the cached file at once, then in the background reads the repository's `version.json`. A file with an older or no `mine-translator.version` is downloaded again; offline or without a `version.json` the cached file stays. Downloads have 10 s timeouts, and a download for a language replaced by a reload is ignored. `-Dchatgames.translations-url=` points it at a mirror.
   - **Live runs:** old file -> updated (old -> 26.3); current file -> one `version.json` request, no download; no file -> downloaded (1.8.8). A bot saw `Mena de diamante` and `Hierba corta` (only in the new files) in race starts; 1.8's `LONG_GRASS` maps to the same key.
   - **Tooling:** `boot-test.py` takes extra server JVM options from `JVM_ARGS`.
-  - **Still yours to do:** build into a clone of `nsider4/mine-translator` and push it. Until then servers keep their cached files (no `version.json` yet, so no update is attempted).
+  - **Published** to `nsider4/mine-translator` (9212ece, 2026-10-21). The build merges into the existing files and never removes a key or a language, because 1.9.9 downloads the same `Languages/<code>.json` and throws on a missing mob key. Checked: all 118 old files keep every key; 1.9.9 on Paper 1.21.1 shows `Piedra`, `Salmón`, `Antorcha` from the new file. (1.9.9 can't enable on Spigot 1.8.8 at all: its HikariCP needs a newer SQLite driver.) `language_names.txt` keeps its Common/All layout. Downloads run 8 at a time with retries.
 
 ---
 
