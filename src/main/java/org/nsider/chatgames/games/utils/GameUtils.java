@@ -126,7 +126,7 @@ public class GameUtils {
         }
         item.setAmount(amount);
         // Inventories belong to the player's region on Folia
-        plugin.getScheduler().atPlayer(player, () -> {
+        plugin.getScheduler().onPlayer(player, () -> {
             if (player.getInventory().firstEmpty() == -1) {
                 player.getWorld().dropItemNaturally(player.getLocation(), item);
                 MessageUtils.sendMessage(player, ConfigManager.getMessagesConfig().getString("inventory_full"));

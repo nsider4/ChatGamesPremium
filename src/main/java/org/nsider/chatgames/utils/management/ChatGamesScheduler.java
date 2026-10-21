@@ -61,7 +61,7 @@ public final class ChatGamesScheduler {
      * Folia runs a player's commands on that player's region thread.
      */
     public void onGlobal(@Nonnull Runnable task) {
-        if (!isFolia() && Bukkit.isPrimaryThread()) {
+        if (isFolia() ? scheduler.isGlobalTickThread() : Bukkit.isPrimaryThread()) {
             task.run();
         } else {
             global(task);
@@ -92,6 +92,19 @@ public final class ChatGamesScheduler {
      */
     public void atPlayer(@Nonnull Player player, @Nonnull Runnable task) {
         scheduler.runAtEntity(player, ignored -> task.run());
+    }
+
+    /**
+     * Runs a task on the thread that owns this player: straight away if that is this thread
+     * (the main thread outside Folia), otherwise scheduled there. For player commands, sounds
+     * and inventories, which Folia only allows on the player's region thread.
+     */
+    public void onPlayer(@Nonnull Player player, @Nonnull Runnable task) {
+        if (scheduler.isOwnedByCurrentRegion(player)) {
+            task.run();
+        } else {
+            atPlayer(player, task);
+        }
     }
 
     /**

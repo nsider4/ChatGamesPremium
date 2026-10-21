@@ -340,7 +340,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - Titles now go through XSeries, which handles every version.
     - The empty Discord webhook no longer logs a warning on every win.
   - **Until step 8:** races have no data loaded yet, so the default `enable-races: true` makes the rotation log an error whenever it picks one (it then carries on). The gameplay tests ran with races off. Races still use the old `GameMessageManager`.
-  - **For step 11:** reward commands (`[playercmd]`) and broadcasts run on the global thread; Folia wants player commands on the player's thread. The Folia run had no errors with the default rewards, but this is still to do.
+  - **For step 11:** reward commands (`[playercmd]`) and broadcasts run on the global thread; Folia wants player commands on the player's thread. The Folia run had no errors with the default rewards, but this is still to do. *(Done in step 11.)*
 - [x] **Step 6: commands** (2026-10-20). 71 tests (step 5's "79" was a miscount; it was 68). Tested on real servers with two scripted players (an op and a non-op) plus the console, on Paper 1.21.1, Spigot 1.8.8 and Folia 26.1.2: every command below, its error cases, and tab completion.
   - **Structure:** one class per sub-command under `commands/sub`, routed by `ChatGamesCommand` (names and aliases ignore case; plain `/chatgames` shows the help). `CommandSupport` holds the shared bits: messages, number parsing, and an offline-safe player lookup that asks Mojang off the main thread. Commands that touch the running game hop to the global thread, because Folia runs a player's commands on that player's region thread.
   - **Ported from 1.9.9:** `help`, `top`, `fastest`, `points`, `toggle`, `togglesound`, `toggleAll`, `reload`, `logs [amount]`, `remove <player>`, `+points`/`-points`/`setpoints <player> <amount>`, `<game> [values]` and `any`. `shoppinglist` still works as an alias for `memorize`.
@@ -511,6 +511,9 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - **Config (`LegacyMigration`, before any file loads):** runs when `games.yml` is missing and the folder has `chatRaces.yml` or game sections in config.yml. Copies the five old files to `backups/1.9.9-<date>/`. Only values that differ from 1.9.9's own defaults (bundled as `legacy/1.9.9/*.yml`) are carried over: game sections -> `games.yml`, `discord`/`log-*` -> `add-ons.yml`, `chatRaces.yml` -> `races.yml` (then deleted), `shoppinglist` -> `memorize`, `shoppinglist.items` -> `memorize.pools.shopping_list`. Everything else is the 2.0.0 default, so an untouched 1.9.9 install gets the shipped files byte for byte. Edited `rewards.yml` is kept whole (`shoppinglist` renamed), with default sections added for games it lacks.
   - **Comments kept on every version:** changed values are written into the shipped text line by line (scalars and `- item` lists, either way round); the result is used only if it reads back as exactly defaults + changes, otherwise Bukkit's save is used (which drops comments before 1.18). Live: both servers kept all 48/82/4/5 comments, diffs were only the owner's changes.
   - **Live check after upgrade:** `P=7 best=2.250 top=Tester`, `/chatgames fastest` lists the 1.9.9 record, the custom prefix shows, Memorize runs.
+- [x] **Step 11: Folia hardening** (2026-10-21; 159 tests, live-tested with two bots in different regions on Folia 26.1.2, and as a regression on Paper 1.21.1 and Spigot 1.8.8).
+  - **Routing:** `ChatGamesScheduler.onPlayer` runs a task on the thread that owns the player (straight away when that is the current thread, which is the main thread outside Folia); `onGlobal` now also runs straight away on Folia's global tick thread. `[playercmd]` and `[player_as_op]` go to the player's thread, `[consolecmd]` to the global one, game sounds (they read the player's location) and item rewards to the player's thread. Chat, titles, action bars and boss bars are packet sends and stay where they are.
+  - **Live (Folia, `winners: 2`, the second player teleported to 3000/3000):** three math games answered by both at once from two regions got two distinct places each (answers 0.2–14 ms apart, never a double 1st, never a third winner); every reward type reached the right player; the race was won from the far region; a menu, `reload` and `stop` mid-game, a full inventory (the item dropped at the player's feet) and stopping the server mid-game all worked. No errors or thread warnings on any of the three servers.
 
 ---
 
@@ -862,7 +865,7 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
     - DB: `fastest` column → fastest-times table.
     - Config: split the old `config.yml` into `games.yml`/`add-ons.yml`, rename `chatRaces.yml` → `races.yml`, and `shoppinglist` → `memorize`.
     - Back up the old files first.
-11. **Folia hardening.**
+11. **Folia hardening.** *(Done.)*
     - ~~InventoryManager scheduler support (5.8).~~ Done in InventoryManager 2.0.0.
     - Per-player routing for broadcasts and rewards (5.3, 5.5).
     - `folia-supported: true`.

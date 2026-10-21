@@ -42,15 +42,18 @@ public final class GameSoundManager {
 
         Optional<XSound> sound = XSound.of(toEnumName(name));
         Sound bukkitSound = sound.isPresent() ? sound.get().parseSound() : null;
-        try {
-            if (bukkitSound != null) {
-                player.playSound(player.getLocation(), bukkitSound, volume, pitch);
-            } else {
-                player.playSound(player.getLocation(), name, volume, pitch);
+        // Played at the player's location, which only their own thread may read on Folia
+        plugin.getScheduler().onPlayer(player, () -> {
+            try {
+                if (bukkitSound != null) {
+                    player.playSound(player.getLocation(), bukkitSound, volume, pitch);
+                } else {
+                    player.playSound(player.getLocation(), name, volume, pitch);
+                }
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Invalid sound in config.yml GameSounds." + type + ": " + name);
             }
-        } catch (IllegalArgumentException e) {
-            plugin.getLogger().warning("Invalid sound in config.yml GameSounds." + type + ": " + name);
-        }
+        });
     }
 
     /** "minecraft:entity.player.levelup" → "ENTITY_PLAYER_LEVELUP". */

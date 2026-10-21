@@ -83,14 +83,18 @@ public class RewardManager {
                 line -> plugin.getLogger().severe("Invalid chance in a " + game + " reward: " + line));
     }
 
-    /** Runs one reward command for the winner. Main/global thread. */
+    /**
+     * Runs one reward command for the winner. Folia runs console commands only on the global
+     * thread and a player's commands only on that player's thread, so each goes to its own;
+     * outside Folia both are the main thread and run straight away.
+     */
     public void executeCommand(@Nonnull String command, @Nonnull Player player) {
         String cmd = command.replace("%player%", player.getName());
 
         if (cmd.startsWith("[playercmd]")) {
-            Bukkit.dispatchCommand(player, strip(cmd, "[playercmd]"));
+            plugin.getScheduler().onPlayer(player, () -> Bukkit.dispatchCommand(player, strip(cmd, "[playercmd]")));
         } else if (cmd.startsWith("[consolecmd]")) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), strip(cmd, "[consolecmd]"));
+            plugin.getScheduler().onGlobal(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), strip(cmd, "[consolecmd]")));
         } else if (cmd.startsWith("[playermsg]")) {
             player.sendMessage(MessageUtils.color(strip(cmd, "[playermsg]")));
         } else if (cmd.startsWith("[broadcast]")) {
@@ -99,7 +103,7 @@ public class RewardManager {
                     .filter(plugin.getGameManager()::worldEnabled)
                     .forEach(p -> p.sendMessage(message));
         } else if (cmd.startsWith("[player_as_op]")) {
-            CommandUtils.executeAsOp(player, strip(cmd, "[player_as_op]"));
+            plugin.getScheduler().onPlayer(player, () -> CommandUtils.executeAsOp(player, strip(cmd, "[player_as_op]")));
         } else {
             plugin.getLogger().warning("Unknown reward action (expected [consolecmd], [playercmd], ...): " + command);
         }
