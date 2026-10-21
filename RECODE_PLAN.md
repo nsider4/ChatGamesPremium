@@ -172,7 +172,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 - Titles/subtitles per game.
 - Sounds for start, win, time-expired, wrong-case and hint, with volume and pitch. The correct sound is picked for every version.
 - Block, item and mob names are translated into the server language (`lang`):
-  - **Translation files are updated to the latest version (26.x)** *(new)*. A script regenerates `nsider4/mine-translator` from Mojang's official language assets and keeps only the block/item/entity/enchantment/effect keys, so the files are about 10x smaller.
+  - **Translation files are updated to the latest version (26.x)** *(new)*. A script regenerates `nsider4/mine-translator` from Mojang's official language assets and keeps only the block/item/entity/enchantment/effect keys, so the files are about half the size.
   - The plugin re-downloads a translation file when it is from an older version (1.9.9 only downloaded missing files).
 
 **Commands** (`/chatgames`, alias `/chatgame`)
@@ -499,6 +499,13 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - **Events:** a global step gives `participation-points` to every contributor and `points` by contribution rank, only if the goal is reached.
   - **Menus:** admin "global" page and profile show the new stats; the progress bar also shows in the admin status item.
   - **Tests:** unit tests for the counter rules and contribution maths; live runs with two bots on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2.
+- [x] **Step 9c: Translations** (2026-10-21; 149 tests, live-tested on Spigot 1.8.8, Paper 1.21.1 and Folia 26.1.2 against a local mirror).
+  - **`scripts/build-translations.py <out dir> [version]`:** reads Mojang's version manifest (default: latest release), downloads every `minecraft/lang/*.json` asset plus `en_us` from the client jar, and keeps only `block/item/entity/enchantment/effect.minecraft.*`. Writes `Languages/<code>.json` (one key per line, sorted, with `mine-translator.version`), `Languages/version.json` and `language_names.txt`.
+  - **First build (26.3):** 143 languages (was 118), about 190 KB per file (was about 380 KB), 756 new names per language. No key from the 2023 files was lost: Mojang keeps renamed keys (`grass` next to `short_grass`).
+  - **Version check:** `LanguageManager` loads the cached file at once, then in the background reads the repository's `version.json`. A file with an older or no `mine-translator.version` is downloaded again; offline or without a `version.json` the cached file stays. Downloads have 10 s timeouts, and a download for a language replaced by a reload is ignored. `-Dchatgames.translations-url=` points it at a mirror.
+  - **Live runs:** old file -> updated (old -> 26.3); current file -> one `version.json` request, no download; no file -> downloaded (1.8.8). A bot saw `Mena de diamante` and `Hierba corta` (only in the new files) in race starts; 1.8's `LONG_GRASS` maps to the same key.
+  - **Tooling:** `boot-test.py` takes extra server JVM options from `JVM_ARGS`.
+  - **Still yours to do:** build into a clone of `nsider4/mine-translator` and push it. Until then servers keep their cached files (no `version.json` yet, so no update is attempted).
 
 ---
 

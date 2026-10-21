@@ -3,12 +3,13 @@
 #############################
 check-update: true
 
-#These translations are for plugin sided things such as material and entity names that are used for races. 118 Language Types Supported!
+#These translations are for plugin sided things such as material and entity names that are used for races. Over 140 languages supported!
 #IT WILL ONLY TRANSLATE THOSE THINGS, CUSTOMIZABLE MESSAGES(messages.yml) HAVE TO BE CHANGED MANUALLY.
 #
 #See the ID for your language here: https://github.com/nsider4/mine-translator/blob/main/language_names.txt
 #
-#CHANGES ARE REGISTERED ONLY ON RESTART
+#The file is downloaded into translations/ and replaced automatically when names for a newer
+#Minecraft version are published. A change here applies on /chatgames reload.
 lang: 'en_us'
 
 #Storage type, available: SQLite or MySQL

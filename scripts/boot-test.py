@@ -11,6 +11,7 @@ stopping the server) waits for them. Their output follows, one bot after another
 (the name, version and each action are separated by " | ", so chat text may contain spaces;
  the parts are trimmed, so bot.js reads a trailing "_" in tab:<text> as a space)
 (needs node and mineflayer; set NODE_PATH to the node_modules folder that has mineflayer).
+Extra JVM options for the server go in the JVM_ARGS environment variable, space-separated.
 
 Server jars used for the 2.0.0 test matrix:
   Spigot 1.8.8 / 1.13 (Java 8), Spigot 1.20.1 (Java 17), Paper 1.21.1 (Java 21)
@@ -34,7 +35,8 @@ if not os.path.exists(props):
         f.write('online-mode=false\nserver-port=25599\nlevel-type=flat\nspawn-monsters=false\n'
                 'generate-structures=false\nview-distance=3\nsimulation-distance=3\n')
 
-proc = subprocess.Popen([java, '-Xmx1G', '-Dcom.mojang.eula.agree=true', '-jar', server_jar, 'nogui'],
+jvm_args = os.environ.get('JVM_ARGS', '').split()
+proc = subprocess.Popen([java, '-Xmx1G', '-Dcom.mojang.eula.agree=true', *jvm_args, '-jar', server_jar, 'nogui'],
                         cwd=server_dir, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
 lines = []
