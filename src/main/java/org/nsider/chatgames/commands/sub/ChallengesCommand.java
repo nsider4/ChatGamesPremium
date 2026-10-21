@@ -98,7 +98,7 @@ public class ChallengesCommand extends SubCommand {
 
     /** @return the time until the period ends, e.g. "2d 5h", "5h 12m" or "40m" */
     @Nonnull
-    static String timeLeft(@Nonnull ChallengeConfig config, @Nonnull Period period, @Nonnull LocalDate today) {
+    public static String timeLeft(@Nonnull ChallengeConfig config, @Nonnull Period period, @Nonnull LocalDate today) {
         ZonedDateTime end = config.lastDay(period, today).plusDays(1).atStartOfDay(config.getZone());
         long minutes = Math.max(1, Duration.between(ZonedDateTime.now(config.getZone()), end).toMinutes());
         long days = minutes / (24 * 60);

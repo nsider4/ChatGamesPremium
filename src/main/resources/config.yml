@@ -78,6 +78,7 @@ fastest-typers-top: true
 #PlaceholderAPI placeholders (needs PlaceholderAPI installed):
 #  You:          %chatgames_points%, %chatgames_wins%, %chatgames_wins_<game>%, %chatgames_race_wins%,
 #                %chatgames_global_played%, %chatgames_global_won%, %chatgames_toggle%, %chatgames_sound_toggle%
+#                %chatgames_events_played%, %chatgames_event_wins%, %chatgames_event_best_place% (0 = none yet)
 #  Your times:   %chatgames_personal_best% (any chat game), %chatgames_fastest_<game>% (races too)
 #  Your place:   %chatgames_show_current_pos_top% (points), %chatgames_show_current_pos_fastest% (best time)
 #  Points top:   %chatgames_top_<n>% (name), %chatgames_points_top_<n>%, %chatgames_total_points%

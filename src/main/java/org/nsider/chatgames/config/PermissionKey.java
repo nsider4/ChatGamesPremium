@@ -34,7 +34,12 @@ public enum PermissionKey {
     CHALLENGES_RESET("chatgames.challenges.reset", "Allows clearing a player's challenge progress.", "op"),
     STREAKS_SET("chatgames.streaks.set", "Allows setting a player's streak.", "op"),
     EVENT("chatgames.event", "Allows listing game events and viewing their leaderboards.", "true"),
-    EVENT_MANAGE("chatgames.event.manage", "Allows starting and stopping game events.", "op");
+    EVENT_MANAGE("chatgames.event.manage", "Allows starting and stopping game events.", "op"),
+    MENU("chatgames.menu", "Allows opening the main menu.", "true"),
+    PROFILE("chatgames.profile", "Allows viewing your profile.", "true"),
+    PROFILE_OTHERS("chatgames.profile.others", "Allows viewing another player's profile.", "true"),
+    ADMIN("chatgames.admin", "Allows opening the admin menu (each button still needs its command's permission).", "op"),
+    DEBUG("chatgames.debug", "Allows opening the debug menu to test games privately.", "op");
 
     private final String permission;
     private final String description;

@@ -127,7 +127,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 - **Per-event leaderboards** *(new)*.
 - Your own position and best time are shown under each list.
 
-**Menus** *(new)*, built with your InventoryManager. Every item, title and slot is configurable in `menus.yml`.
+**Menus** *(new)*. *(Built in the plugin rather than with InventoryManager; see step 9b.)* Every item, title and slot is configurable in `menus.yml`.
 - **Main menu**, `/chatgames menu`:
   - Profile, Challenges, Streaks and Leaderboards
   - your game and sound toggles
@@ -453,6 +453,27 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - **Global games** now go through the same `StartOptions` path; `GlobalGameManager.settingsFor` is gone.
   - **The admin menu's "start event" button** comes with the menus in 9b.
 
+- [x] **Step 9b: Menus** (2026-10-21). 133 tests. A bot opened and clicked through every menu on Paper 1.21.1, Spigot 1.8.8 and Folia 26.1.2, as an op and as a normal player (`scripts/bot.js` now prints each menu's items and can `click:<slot>`).
+  - **Built in the plugin, not with InventoryManager.** The library keeps one shared `Inventory` per menu name, has no click handling, and its bundled XMaterial and version parser predate 26.x. So menus use a small `menus/` package instead:
+    - `MenuHolder` (an `InventoryHolder`), so clicks are matched by holder, not by title.
+    - `MenuListener` cancels every click and drag and runs the clicked slot's action. It avoids `getView()`, which breaks on 1.21+.
+    - `MenuBuilder` builds each player's own copy from `menus.yml`: XSeries items, glow, player heads, `when-off` looks, list placeholders that expand to several lore lines, templates and paging.
+    - Menus open through `atPlayer` (next tick, and the player's region on Folia).
+    - The dead `inventory/` stub is removed. InventoryManager is still a dependency, for its `@Nonnull`/`@Nullable` annotations only.
+  - **`menus.yml`:** every title, size, slot, item, template, game name and icon, the progress bar, and the debug messages. A key named `off:` would be read by YAML as `false`, so two-look items use `when-off:`. Found live; a test now guards it.
+  - **Menus:**
+    - **Main** (`/chatgames menu`, alias `gui`): profile, challenges, streaks, leaderboards, your game and sound toggles, and admin (if allowed).
+    - **Profile** (`/chatgames profile [player]`, alias `stats`): works for offline players too. Shows points and rank, wins per game, race wins, fastest times per game, global played/won, events played/won and best place, the three streaks (current and best), milestones reached, and challenges completed.
+    - **Challenges:** daily and weekly tabs, a progress bar, and a status per challenge (in progress, ready, claimed). Click a ready one to claim it, or use Claim All.
+    - **Streaks:** each streak with its 7-day ladder for the current week, with today highlighted. Clicking a ready day claims that streak's days.
+    - **Leaderboards:** top points, fastest overall, your ranks, fastest per game, and the event list (click one for `event top`). Everything comes from the placeholder cache, so opening it never queries the database.
+    - **Admin** (`/chatgames admin`): a status item (running game, next game, rotation, event, preset), plus start a game or race, start a global game, start/stop events, load presets, logs (10/25/50/100), your toggle, the rotation toggle, stop, reload and debug. Each button runs the matching command as the admin, so it keeps that command's permission check and reply.
+    - **Debug** (`/chatgames debug [game] [values]`): generates a private round of any chat game and shows its question, accepted answers and settings, with the generation time. The mock-answer buttons run the real answer check and report in chat, with the real elapsed time: answer correctly now (shows the anti-macro check), after 100/500/1000/5000 ms, wrongly, with the wrong case, or let it time out. Nothing reaches the running game, rewards or stats. Races are explained instead, since they're played in the world.
+  - **New permissions:** `chatgames.menu`, `chatgames.profile`, `chatgames.profile.others` (all true), `chatgames.admin` and `chatgames.debug` (op).
+  - **Backend additions:**
+    - Claiming one challenge (`ChallengeTracker.claim`, matched by id so a menu opened before a reload can't claim a stale challenge) or one streak (`ProgressionManager.claimStreak`).
+    - Event totals across all events: `events_played`, `event_wins` and `event_best_place`, also as placeholders.
+
 ---
 
 ## 1. Where you left off
@@ -731,7 +752,7 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
 5. **Don't read other regions' data from the global region.** Reading `player.getWorld()` or `getLocation()` for every online player from the global thread crosses regions. On Folia, do the disabled-world, toggle and permission check *inside* the per-player `atPlayer` task. Toggle and permission data come from the cache, which is thread-safe.
 6. **Hunt race spawner flag:** `setMetadata` on spawn and `hasMetadata` on death both run on the region that owns that entity, so they stay valid. Optionally switch to PersistentDataContainer on 1.14+, which is more robust than metadata, and keep metadata as the 1.8–1.13 fallback.
 7. **PlaceholderAPI:** other plugins (scoreboards, tab) request placeholders from their own threads. Serve every placeholder from the in-memory cache, with **no DB call and no `.join()`**. 1.9.9 blocked on DB futures inside placeholders.
-8. **InventoryManager (your library):** it must also stop using the Bukkit scheduler, and its inventory handling has to run on the player's region. Update it to accept the `ChatGamesScheduler` abstraction, or give it its own FoliaLib usage, and release it as 1.2.0 before ChatGames ships Folia support.
+8. ~~**InventoryManager (your library):**~~ *No longer needed: step 9b built the menus without it, and only its `@Nonnull`/`@Nullable` annotations are still used.* It must also stop using the Bukkit scheduler, and its inventory handling has to run on the player's region. Update it to accept the `ChatGamesScheduler` abstraction, or give it its own FoliaLib usage, and release it as 1.2.0 before ChatGames ships Folia support.
 9. **`plugin.yml`:** add `folia-supported: true`. Spigot, Paper and old versions ignore unknown keys. Confirm that once on 1.8.8 during testing.
 10. **`onDisable`:** `scheduler.cancelAll()`, then save players synchronously, then close Hikari. On Folia there's no main thread to "run later" on during shutdown.
 
@@ -801,7 +822,7 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
     - Config: split the old `config.yml` into `games.yml`/`add-ons.yml`, rename `chatRaces.yml` → `races.yml`, and `shoppinglist` → `memorize`.
     - Back up the old files first.
 11. **Folia hardening.**
-    - InventoryManager 1.2.0 with scheduler support (5.8).
+    - ~~InventoryManager 1.2.0 with scheduler support (5.8).~~ Not needed since 9b.
     - Per-player routing for broadcasts and rewards (5.3, 5.5).
     - `folia-supported: true`.
     - The Folia test pass (5, "Folia testing").

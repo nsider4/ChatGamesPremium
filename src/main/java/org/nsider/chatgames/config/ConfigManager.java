@@ -27,6 +27,7 @@ public class ConfigManager {
     @Getter private static Challenges challenges;
     @Getter private static Streaks streaks;
     @Getter private static Events events;
+    @Getter private static Menus menus;
 
     private ConfigManager() {}
 
@@ -53,6 +54,7 @@ public class ConfigManager {
         challenges = new Challenges();
         streaks = new Streaks();
         events = new Events();
+        menus = new Menus();
 
         // Messages read messages.yml, so they are built last
         messages = new Messages();
@@ -80,7 +82,8 @@ public class ConfigManager {
                 & presets.reload()
                 & challenges.reload()
                 & streaks.reload()
-                & events.reload();
+                & events.reload()
+                & menus.reload();
 
         messages = new Messages();
         return success;
@@ -196,6 +199,15 @@ public class ConfigManager {
     public static class Events extends YamlConfig {
         public Events() {
             super(plugin, "events");
+        }
+    }
+
+    /**
+     * Menu layouts: titles, slots and items
+     */
+    public static class Menus extends YamlConfig {
+        public Menus() {
+            super(plugin, "menus");
         }
     }
 }

@@ -14,6 +14,7 @@ import org.nsider.chatgames.events.ChatGamesEventStartEvent;
 import org.nsider.chatgames.games.utils.PlayerResult;
 import org.nsider.chatgames.listeners.DiscordListener;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
+import org.nsider.chatgames.model.player.Stat;
 import org.nsider.chatgames.progression.Activity;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.chatgames.utils.messages.Msg;
@@ -256,6 +257,10 @@ public final class EventManager implements Listener {
                 data.incrementStat(stat(definition, "points"), points);
                 if (place == 1) data.incrementStat(stat(definition, "wins"), 1);
                 if (points > data.getStat(stat(definition, "best"))) data.setStat(stat(definition, "best"), points);
+                data.incrementStat(Stat.EVENTS_PLAYED, 1);
+                if (place == 1) data.incrementStat(Stat.EVENT_WINS, 1);
+                long best = data.getStat(Stat.EVENT_BEST_PLACE);
+                if (best == 0 || place < best) data.setStat(Stat.EVENT_BEST_PLACE, place);
             });
             Player player = Bukkit.getPlayer(standing.getUuid());
             if (player == null) continue;

@@ -26,7 +26,8 @@ public enum ConfigFile {
     PRESETS(ConfigManager::getPresets),
     CHALLENGES(ConfigManager::getChallenges),
     STREAKS(ConfigManager::getStreaks),
-    EVENTS(ConfigManager::getEvents);
+    EVENTS(ConfigManager::getEvents),
+    MENUS(ConfigManager::getMenus);
 
     private final Supplier<FileConfiguration> supplier;
 

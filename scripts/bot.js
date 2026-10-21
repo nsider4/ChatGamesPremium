@@ -5,6 +5,10 @@
 //          tab:<text>  prints the server's tab completions for <text>, as "[tab] <text> -> a, b";
 //                      a trailing "_" stands for a space (the test harness trims actions)
 //          play:on / play:off  autoplay in the background while later actions run
+//          click:<slot>  clicks a slot of the open menu (opened by a chat command), then waits 1.5 s
+//          close         closes the open menu
+//          Every menu that opens is printed as "[menu] <title>" and one "[slot N] name | lore | lore" line per item
+//          (the gray glass-pane filler is left out).
 //          autoplay:<seconds>  plays the chat games for that long (see autoplay below)
 //          race actions (for the races; <names> lists alternatives for different versions, e.g. grass_block,grass):
 //          dig:<names>:<count>     breaks the nearest blocks of that kind
@@ -46,6 +50,8 @@ function connect() {
     bot.on('message', (message, position) => {
       if (autoplay && position !== 'game_info') play(message);
     });
+    // Items arrive just after the window opens
+    bot.on('windowOpen', (window) => setTimeout(() => printMenu(window), 500));
   });
 }
 
@@ -60,6 +66,39 @@ function quit() {
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Item names and lore come as JSON text, NBT or plain strings depending on the version
+function plain(value) {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.startsWith('"')) {
+      try { return plain(JSON.parse(trimmed)); } catch (e) { /* not JSON */ }
+    }
+    return value.replace(/§./g, '');
+  }
+  if (Array.isArray(value)) return value.map(plain).join('');
+  if (typeof value === 'object') {
+    if ('value' in value && 'type' in value) return plain(value.value);
+    let text = plain(value.text !== undefined ? value.text : (value[''] !== undefined ? value[''] : ''));
+    if (value.extra) text += plain(value.extra);
+    return text;
+  }
+  return String(value);
+}
+
+function printMenu(window) {
+  if (!window || bot.currentWindow !== window) return;
+  console.log(`[BOT ${username}] [menu] ${plain(window.title)}`);
+  const end = window.inventoryStart !== undefined ? window.inventoryStart : window.slots.length;
+  for (let slot = 0; slot < end; slot++) {
+    const item = window.slots[slot];
+    if (!item || item.name === 'gray_stained_glass_pane' || item.name === 'stained_glass_pane') continue;
+    const name = plain(item.customName) || item.displayName;
+    const lore = (item.customLore || []).map(plain).filter((line) => line.trim());
+    console.log(`[BOT ${username}] [slot ${slot}] ${item.name} "${name}"${lore.length ? ' | ' + lore.join(' | ') : ''}`);
+  }
+}
 
 // ---------------------------------------------------------------------------------------------
 // Race actions. Block and item names differ between versions, so each takes a comma-separated
@@ -309,6 +348,14 @@ function play(message) {
       const matches = await bot.tabComplete(text, true, false, 3000).catch((e) => [`error: ${e.message}`]);
       const names = matches.map((m) => (typeof m === 'string' ? m : m.match));
       console.log(`[BOT ${username}] [tab] ${text} -> ${names.join(', ')}`);
+    }
+    else if (kind === 'click') {
+      if (!bot.currentWindow) console.log(`[BOT ${username}] no menu open to click`);
+      else await bot.clickWindow(Number(arg), 0, 0).catch((e) => console.log(`[BOT ${username}] click failed: ${e.message}`));
+      await sleep(1500);
+    }
+    else if (kind === 'close') {
+      if (bot.currentWindow) bot.closeWindow(bot.currentWindow);
     }
     else if (['dig', 'place', 'eat', 'craft', 'attack', 'smelt'].includes(kind)) await race(kind, arg);
     else if (kind === 'quit') await quit();

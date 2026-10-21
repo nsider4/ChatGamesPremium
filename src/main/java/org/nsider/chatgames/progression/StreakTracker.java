@@ -66,6 +66,15 @@ public final class StreakTracker {
     }
 
     /**
+     * @return the last streak day whose reward was claimed, 0 if none (or the streak died)
+     */
+    public static int claimed(@Nonnull ChatGamesPlayer player, @Nonnull StreakType type, @Nonnull LocalDate today) {
+        synchronized (player) {
+            return alive(player, type, today) ? (int) player.getStat(key(type, "claimed")) : 0;
+        }
+    }
+
+    /**
      * Marks every unclaimed day of a living streak as claimed.
      *
      * @return the first and last streak day claimed now, or null if there was nothing

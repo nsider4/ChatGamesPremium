@@ -123,6 +123,9 @@ public final class PlaceholderResolver {
             case "race_wins": return stat(Stat.RACE_WINS);
             case "global_played": return stat(Stat.GLOBAL_PLAYED);
             case "global_won": return stat(Stat.GLOBAL_WON);
+            case "events_played": return stat(Stat.EVENTS_PLAYED);
+            case "event_wins": return stat(Stat.EVENT_WINS);
+            case "event_best_place": return stat(Stat.EVENT_BEST_PLACE);
             case "personal_best": return data == null ? empty : time(data.getBestOverall());
             case "show_current_pos_top": return rank(data == null ? 0 : board.pointsRank(data.getUuid()));
             case "show_current_pos_fastest": return rank(data == null ? 0 : board.fastestRank(data.getUuid()));

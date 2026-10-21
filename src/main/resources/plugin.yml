@@ -119,6 +119,21 @@ permissions:
   chatgames.event.manage:
     description: 'Allows starting and stopping game events.'
     default: op
+  chatgames.menu:
+    description: 'Allows opening the main menu.'
+    default: true
+  chatgames.profile:
+    description: 'Allows viewing your profile.'
+    default: true
+  chatgames.profile.others:
+    description: 'Allows viewing another player''s profile.'
+    default: true
+  chatgames.admin:
+    description: 'Allows opening the admin menu (each button still needs its command''s permission).'
+    default: op
+  chatgames.debug:
+    description: 'Allows opening the debug menu to test games privately.'
+    default: op
   chatgames.start.unscramble:
     description: 'Allows starting unscramble by command.'
     default: op

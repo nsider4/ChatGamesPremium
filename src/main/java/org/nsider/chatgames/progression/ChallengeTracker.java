@@ -118,6 +118,28 @@ public final class ChallengeTracker {
     }
 
     /**
+     * Marks one challenge as claimed if it is complete and not yet claimed.
+     *
+     * @return true if it was claimed now, so its reward is to be given
+     */
+    public static boolean claim(@Nonnull ChatGamesPlayer player, @Nonnull ChallengeConfig config,
+                                @Nonnull Challenge challenge, @Nonnull LocalDate today) {
+        synchronized (player) {
+            // By id: a menu opened before a reload holds the old Challenge objects
+            boolean active = false;
+            for (Challenge current : config.active(challenge.getPeriod(), today)) {
+                if (current.getId().equals(challenge.getId())) active = true;
+            }
+            if (!active) return false;
+            rollover(player, config, challenge.getPeriod(), today);
+            if (player.getStat(progressKey(challenge)) < challenge.getAmount()
+                    || player.getStat(claimedKey(challenge)) != 0) return false;
+            player.setStat(claimedKey(challenge), 1);
+            return true;
+        }
+    }
+
+    /**
      * Clears the player's progress and claims for the current daily and weekly challenges.
      */
     public static void reset(@Nonnull ChatGamesPlayer player) {

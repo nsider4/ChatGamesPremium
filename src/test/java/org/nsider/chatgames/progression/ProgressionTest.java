@@ -327,4 +327,28 @@ class ProgressionTest {
         assertEquals("0", nobody.resolve("daily_completed"));
         assertEquals("0", nobody.resolve("streak_challenge_longest"));
     }
+
+    @Test
+    void oneChallengeOrOneStreakCanBeClaimedAlone() throws Exception {
+        ChallengeConfig config = config(FIXED);
+        ChatGamesPlayer player = new ChatGamesPlayer(UUID.randomUUID());
+        Challenge win2 = config.active(Period.DAILY, DAY).get(0);
+        assertFalse(ChallengeTracker.claim(player, config, win2, DAY), "not finished yet");
+        ChallengeTracker.record(player, config, Activity.win(GameType.MATH, 9, 1), DAY);
+        ChallengeTracker.record(player, config, Activity.win(GameType.MATH, 9, 1), DAY);
+        assertTrue(ChallengeTracker.claim(player, config, win2, DAY));
+        assertFalse(ChallengeTracker.claim(player, config, win2, DAY), "only once");
+        assertEquals(Collections.singletonList("math"), ids(ChallengeTracker.claimAll(player, config, DAY)),
+                "claim all skips the one already claimed");
+        // A menu opened before a reload holds the old object; it is matched by id
+        Challenge reloaded = config(FIXED).active(Period.DAILY, DAY).get(0);
+        assertFalse(ChallengeTracker.claim(player, config, reloaded, DAY));
+
+        StreakTracker.advance(player, StreakType.DAILY, DAY);
+        StreakTracker.advance(player, StreakType.DAILY, DAY.plusDays(1));
+        assertEquals(0, StreakTracker.claimed(player, StreakType.DAILY, DAY.plusDays(1)));
+        StreakTracker.claim(player, StreakType.DAILY, DAY.plusDays(1));
+        assertEquals(2, StreakTracker.claimed(player, StreakType.DAILY, DAY.plusDays(1)));
+        assertEquals(0, StreakTracker.claimed(player, StreakType.DAILY, DAY.plusDays(5)), "a dead streak has nothing claimed");
+    }
 }

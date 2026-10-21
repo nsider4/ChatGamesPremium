@@ -99,30 +99,60 @@ public final class ProgressionManager {
         int claimed = 0;
 
         for (Challenge challenge : ChallengeTracker.claimAll(data, challenges, today)) {
-            List<String> rewards = new ArrayList<>();
-            for (String line : challenge.getRewards()) rewards.add(challenge.fill(line));
-            plugin.getGameUtils().giveLineRewards(challenge.getPeriod().getKey() + " challenge " + challenge.getId(), player, rewards);
-            send(player, MessageKey.CHALLENGE_CLAIMED, "%challenge%", challenge.getName());
+            payChallenge(player, challenge);
             claimed++;
         }
-
         for (StreakType type : StreakType.values()) {
-            if (!streaks.isEnabled(type)) continue;
-            int[] days = StreakTracker.claim(data, type, today);
-            if (days == null) continue;
-            String name = streaks.getName(type);
-            for (int day = days[0]; day <= days[1]; day++) {
-                List<String> rewards = new ArrayList<>();
-                for (String line : streaks.getRewards(type, day)) {
-                    rewards.add(line.replace("%streak%", name).replace("%day%", String.valueOf(day)));
-                }
-                plugin.getGameUtils().giveLineRewards(type.getKey() + " streak day " + day, player, rewards);
-                claimed++;
-            }
-            send(player, MessageKey.STREAK_CLAIMED, "%streak%", name,
-                    "%days%", days[0] == days[1] ? String.valueOf(days[0]) : days[0] + "-" + days[1]);
+            if (streaks.isEnabled(type)) claimed += payStreak(player, streaks, type, StreakTracker.claim(data, type, today));
         }
         return claimed;
+    }
+
+    /**
+     * Claims one finished challenge, e.g. clicked in the menu.
+     *
+     * @return false if it isn't finished, was already claimed, or is no longer active
+     */
+    public boolean claimChallenge(@Nonnull Player player, @Nonnull Challenge challenge) {
+        ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());
+        if (data == null || !ChallengeTracker.claim(data, challenges, challenge, today())) return false;
+        payChallenge(player, challenge);
+        return true;
+    }
+
+    /**
+     * Claims every unclaimed day of one streak.
+     *
+     * @return how many days were claimed
+     */
+    public int claimStreak(@Nonnull Player player, @Nonnull StreakType type) {
+        ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());
+        StreakConfig streaks = this.streaks;
+        if (data == null || !streaks.isEnabled(type)) return 0;
+        return payStreak(player, streaks, type, StreakTracker.claim(data, type, today()));
+    }
+
+    private void payChallenge(Player player, Challenge challenge) {
+        List<String> rewards = new ArrayList<>();
+        for (String line : challenge.getRewards()) rewards.add(challenge.fill(line));
+        plugin.getGameUtils().giveLineRewards(challenge.getPeriod().getKey() + " challenge " + challenge.getId(), player, rewards);
+        send(player, MessageKey.CHALLENGE_CLAIMED, "%challenge%", challenge.getName());
+    }
+
+    /** @param days the first and last streak day just claimed, or null for none */
+    private int payStreak(Player player, StreakConfig streaks, StreakType type, int[] days) {
+        if (days == null) return 0;
+        String name = streaks.getName(type);
+        for (int day = days[0]; day <= days[1]; day++) {
+            List<String> rewards = new ArrayList<>();
+            for (String line : streaks.getRewards(type, day)) {
+                rewards.add(line.replace("%streak%", name).replace("%day%", String.valueOf(day)));
+            }
+            plugin.getGameUtils().giveLineRewards(type.getKey() + " streak day " + day, player, rewards);
+        }
+        send(player, MessageKey.STREAK_CLAIMED, "%streak%", name,
+                "%days%", days[0] == days[1] ? String.valueOf(days[0]) : days[0] + "-" + days[1]);
+        return days[1] - days[0] + 1;
     }
 
     /** @return "Daily" or "Weekly" from messages.yml */

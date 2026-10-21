@@ -9,6 +9,9 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.commands.sub.AnyGameCommand;
 import org.nsider.chatgames.commands.sub.ChallengesCommand;
 import org.nsider.chatgames.commands.sub.ClaimCommand;
+import org.nsider.chatgames.commands.sub.DebugCommand;
+import org.nsider.chatgames.commands.sub.MenuCommand;
+import org.nsider.chatgames.commands.sub.ProfileCommand;
 import org.nsider.chatgames.commands.sub.EventCommand;
 import org.nsider.chatgames.commands.sub.GlobalCommand;
 import org.nsider.chatgames.commands.sub.HelpCommand;
@@ -53,6 +56,8 @@ public class ChatGamesCommand implements TabExecutor {
     public ChatGamesCommand(@Nonnull ChatGames plugin) {
         this.plugin = plugin;
         register(new HelpCommand());
+        register(MenuCommand.main(plugin));
+        register(new ProfileCommand(plugin));
         register(TopCommand.points());
         register(TopCommand.fastest());
         register(new PointsCommand(plugin));
@@ -72,6 +77,8 @@ public class ChatGamesCommand implements TabExecutor {
         for (ManagePointsCommand command : ManagePointsCommand.all(plugin)) {
             register(command);
         }
+        register(MenuCommand.admin(plugin));
+        register(new DebugCommand(plugin));
         register(new ReloadCommand(plugin));
         for (GameType type : GameType.values()) {
             register(new StartGameCommand(plugin, type));

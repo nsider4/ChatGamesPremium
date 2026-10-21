@@ -23,6 +23,13 @@ public final class Stat {
     /** Daily and weekly challenges completed (claimed or not). */
     public static final String CHALLENGES_COMPLETED = "challenges_completed";
 
+    /** Game events taken part in (scored in at least one game), all events together. */
+    public static final String EVENTS_PLAYED = "events_played";
+    /** Game events finished in first place. */
+    public static final String EVENT_WINS = "event_wins";
+    /** The best final place in any game event; 0 if none yet. */
+    public static final String EVENT_BEST_PLACE = "event_best_place";
+
     /** Milestones reached but not yet paid out, as "milestone_pending.<points>" = 1. */
     public static final String MILESTONE_PENDING_PREFIX = "milestone_pending.";
 
