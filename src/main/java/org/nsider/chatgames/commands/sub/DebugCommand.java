@@ -31,7 +31,7 @@ public class DebugCommand extends SubCommand {
     public void execute(@Nonnull CommandSender sender, @Nonnull String[] args) {
         Player player = (Player) sender;
         if (args.length == 0) {
-            plugin.getMenus().getDebug().open(player);
+            plugin.getMenus().open(player, "debug");
             return;
         }
         GameType type = GameType.fromName(args[0]);
@@ -40,7 +40,9 @@ public class DebugCommand extends SubCommand {
             return;
         }
         // A race is explained by start()
-        plugin.getMenus().getDebug().start(player, type, Arrays.copyOfRange(args, 1, args.length));
+        if (plugin.getMenus().getDebug().start(player, type, Arrays.copyOfRange(args, 1, args.length))) {
+            plugin.getMenus().open(player, "debug-session");
+        }
     }
 
     @Nonnull

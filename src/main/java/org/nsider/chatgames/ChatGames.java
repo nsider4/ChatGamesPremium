@@ -15,7 +15,6 @@ import org.nsider.chatgames.database.HikariDatabase;
 import org.nsider.chatgames.database.QueryInitializer;
 import org.nsider.chatgames.database.enums.StorageType;
 import org.nsider.chatgames.gameevents.EventManager;
-import org.nsider.chatgames.menus.MenuListener;
 import org.nsider.chatgames.menus.Menus;
 import org.nsider.chatgames.games.builder.GameBuilder;
 import org.nsider.chatgames.games.manager.GameConfigManager;
@@ -130,7 +129,6 @@ public final class ChatGames extends JavaPlugin {
         pluginManager.registerEvents(new RaceListener(this), this);
         pluginManager.registerEvents(new DiscordListener(this), this);
         pluginManager.registerEvents(eventManager, this);
-        pluginManager.registerEvents(new MenuListener(this), this);
 
         // 7. Command
         PluginCommand command = getCommand("chatgames");
@@ -158,6 +156,9 @@ public final class ChatGames extends JavaPlugin {
      */
     @Override
     public void onDisable() {
+        if (menus != null) {
+            menus.closeAll();
+        }
         if (mainTask != null) {
             mainTask.cancel();
         }
@@ -212,6 +213,7 @@ public final class ChatGames extends JavaPlugin {
         progressionManager.load();
         globalGameManager.load();
         eventManager.load();
+        menus.reload();
         mainTask.reloadEnabledGames();
         startGameRotation();
         leaderboardCache.start();

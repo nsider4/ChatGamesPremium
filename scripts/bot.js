@@ -6,6 +6,7 @@
 //                      a trailing "_" stands for a space (the test harness trims actions)
 //          play:on / play:off  autoplay in the background while later actions run
 //          click:<slot>  clicks a slot of the open menu (opened by a chat command), then waits 1.5 s
+//          rclick:<slot> the same with a right click
 //          close         closes the open menu
 //          Every menu that opens is printed as "[menu] <title>" and one "[slot N] name | lore | lore" line per item
 //          (the gray glass-pane filler is left out).
@@ -349,9 +350,9 @@ function play(message) {
       const names = matches.map((m) => (typeof m === 'string' ? m : m.match));
       console.log(`[BOT ${username}] [tab] ${text} -> ${names.join(', ')}`);
     }
-    else if (kind === 'click') {
+    else if (kind === 'click' || kind === 'rclick') {
       if (!bot.currentWindow) console.log(`[BOT ${username}] no menu open to click`);
-      else await bot.clickWindow(Number(arg), 0, 0).catch((e) => console.log(`[BOT ${username}] click failed: ${e.message}`));
+      else await bot.clickWindow(Number(arg), kind === 'rclick' ? 1 : 0, 0).catch((e) => console.log(`[BOT ${username}] click failed: ${e.message}`));
       await sleep(1500);
     }
     else if (kind === 'close') {

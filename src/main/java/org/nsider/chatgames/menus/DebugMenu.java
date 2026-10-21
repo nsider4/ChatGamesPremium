@@ -1,11 +1,12 @@
 package org.nsider.chatgames.menus;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.commands.CommandSupport;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.config.MessageKey;
-import org.nsider.chatgames.config.PermissionKey;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.chatgames.games.round.AnswerChecker;
 import org.nsider.chatgames.games.round.GameSettings;
@@ -13,6 +14,8 @@ import org.nsider.chatgames.games.round.Round;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
+import org.nsider.inventorymanager.menu.Menu;
+import org.nsider.inventorymanager.menu.MenuManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,16 +26,19 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@code /chatgames debug}: generates a round of any chat game for one admin only and
- * shows its question and answers. The buttons feed mock answers through the real answer
- * check (capitalisation, anti-macro minimum, time limit) and report the result and timing
- * in chat. Nothing reaches the running game, rewards or stats.
+ * {@code /chatgames debug}: generates a round of any chat game for one admin only and shows
+ * its question and answers. The {@code debug-session} buttons feed mock answers through the
+ * real answer check (capitalisation, anti-macro minimum, time limit) and report the result
+ * and timing in chat. Nothing reaches the running game, rewards or stats.
  *
- * <p>A mock answer's time counts from the click, as a real answer's counts from the
- * round opening. Delays are rounded to server ticks (50 ms); the report shows the real
- * time taken.</p>
+ * <p>Actions: {@code [chatgames:debug] <game>}, {@code [chatgames:debug-answer]
+ * <correct|wrong|wrong-case> [ms]}, {@code [chatgames:debug-timeout]},
+ * {@code [chatgames:debug-reroll]} and {@code [chatgames:debug-end]}.</p>
+ *
+ * <p>A mock answer's time counts from the click, as a real answer's counts from the round
+ * opening. Delays are rounded to server ticks (50 ms); the report shows the real time taken.</p>
  */
-public final class DebugMenu {
+public final class DebugMenu implements Listener {
 
     private final ChatGames plugin;
     private final Menus menus;
@@ -43,38 +49,33 @@ public final class DebugMenu {
         this.menus = menus;
     }
 
-    /** The game picker. */
-    public void open(@Nonnull Player player) {
-        open(player, 0);
-    }
-
-    private void open(Player player, int page) {
-        if (!player.hasPermission(PermissionKey.DEBUG.getPermission())) {
-            CommandSupport.send(player, MessageKey.NOT_ENOUGH_PERMISSIONS);
-            return;
-        }
-        MenuBuilder menu = MenuBuilder.of(plugin, "debug", player);
-        List<GameType> games = new ArrayList<>();
-        for (GameType type : GameType.values()) {
-            if (!type.isRace()) games.add(type);
-        }
-        menu.paged(games, page, (slot, game) ->
-                menu.place(slot, menu.template("game"), AdminMenu.gameValues(game), () -> start(player, game)),
-                other -> open(player, other));
-        if (player.hasPermission(PermissionKey.ADMIN.getPermission())) menu.item("back", () -> menus.getAdmin().open(player));
-        menu.item("close", player::closeInventory);
-        menu.open();
+    void register(@Nonnull MenuManager manager) {
+        manager.registerMenu("debug", this::buildPicker);
+        manager.registerMenu("debug-session", this::buildSession);
+        manager.registerAction("chatgames:debug", (menu, argument) -> {
+            GameType type = GameType.fromName(argument.trim());
+            if (type != null && start(menu.getPlayer(), type)) menu.open("debug-session");
+        });
+        manager.registerAction("chatgames:debug-answer", this::answer);
+        manager.registerAction("chatgames:debug-timeout", (menu, argument) -> timeout(menu.getPlayer()));
+        manager.registerAction("chatgames:debug-reroll", (menu, argument) -> {
+            Session session = sessions.get(menu.getPlayer().getUniqueId());
+            if (session != null && start(menu.getPlayer(), session.round.getType())) menu.refresh();
+        });
+        manager.registerAction("chatgames:debug-end", (menu, argument) -> end(menu.getPlayer().getUniqueId()));
     }
 
     /**
-     * Generates a fresh private round and opens its test menu.
+     * Generates a fresh private round for the player (opening {@code debug-session} is up to
+     * the caller).
      *
      * @param args optional values, as after {@code /chatgames <game>}
+     * @return false if it couldn't (a race, or the generator failed); the player is told why
      */
-    public void start(@Nonnull Player player, @Nonnull GameType type, @Nonnull String... args) {
+    public boolean start(@Nonnull Player player, @Nonnull GameType type, @Nonnull String... args) {
         if (type.isRace()) {
             Menus.message(player, "debug-race");
-            return;
+            return false;
         }
         end(player.getUniqueId());
         long before = System.nanoTime();
@@ -82,13 +83,12 @@ public final class DebugMenu {
         double generateMillis = (System.nanoTime() - before) / 1_000_000.0;
         if (round == null) {
             Menus.message(player, "debug-failed", "%game%", Menus.gameName(type));
-            return;
+            return false;
         }
-        Session session = new Session(round, plugin.getGameConfigManager().settings(type), generateMillis);
-        sessions.put(player.getUniqueId(), session);
+        sessions.put(player.getUniqueId(), new Session(round, plugin.getGameConfigManager().settings(type), generateMillis));
         Menus.message(player, "debug-round", "%game%", Menus.gameName(type),
                 "%answer%", round.getMainAnswer(), "%generated%", String.format(Locale.ROOT, "%.2f", generateMillis));
-        openSession(player);
+        return true;
     }
 
     /** Cancels a player's pending mock answers, e.g. when they leave. */
@@ -97,71 +97,99 @@ public final class DebugMenu {
         if (session != null) session.cancelTasks();
     }
 
-    private void openSession(Player player) {
-        Session session = sessions.get(player.getUniqueId());
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        end(event.getPlayer().getUniqueId());
+    }
+
+    /** Every chat game (races are played in the world). */
+    private void buildPicker(Menu menu) {
+        for (GameType type : GameType.values()) {
+            if (!type.isRace()) menu.addEntry("game", Menus.gameValues(type));
+        }
+    }
+
+    private void buildSession(Menu menu) {
+        Session session = sessions.get(menu.getPlayer().getUniqueId());
         if (session == null) {
-            open(player);
+            menu.cancel();
+            menus.open(menu.getPlayer(), "debug");
             return;
         }
         Round round = session.round;
         GameSettings settings = session.settings;
-        MenuBuilder menu = MenuBuilder.of(plugin, "debug-session", player)
-                .with("%game%", Menus.gameName(round.getType()))
-                .with("%icon%", Menus.gameIcon(round.getType()))
-                .with("%question%", round.getDisplay())
-                .with("%answer%", round.getMainAnswer())
-                .with("%time%", settings.getTimeSeconds())
-                .with("%min_ms%", settings.getMinAnswerMillis())
-                .with("%case_sensitive%", CommandSupport.state(settings.isCaseSensitive()))
-                .with("%winners%", settings.getWinners())
-                .with("%points%", settings.getPoints())
-                .with("%hints%", round.getHints().size())
-                .with("%generated%", String.format(Locale.ROOT, "%.2f", session.generateMillis));
+        menu.set("%game%", Menus.gameName(round.getType()))
+                .set("%key%", round.getType().getConfigKey())
+                .set("%icon%", Menus.gameIcon(round.getType()))
+                .set("%question%", round.getDisplay())
+                .set("%answer%", round.getMainAnswer())
+                .set("%time%", settings.getTimeSeconds())
+                .set("%min_ms%", settings.getMinAnswerMillis())
+                .set("%case_sensitive%", CommandSupport.state(settings.isCaseSensitive()))
+                .set("%winners%", settings.getWinners())
+                .set("%points%", settings.getPoints())
+                .set("%hints%", round.getHints().size())
+                .set("%generated%", String.format(Locale.ROOT, "%.2f", session.generateMillis));
         List<String> placeholders = new ArrayList<>();
         for (Map.Entry<String, String> entry : round.getPlaceholders().entrySet()) {
             placeholders.add("&7" + entry.getKey() + " &8= &f" + entry.getValue());
         }
-        menu.withList("%placeholders%", placeholders);
+        menu.list("%placeholders%", placeholders);
         List<String> answers = new ArrayList<>();
         for (String answer : round.getAnswers()) answers.add("&f" + answer);
-        menu.withList("%answers%", answers);
+        menu.list("%answers%", answers);
 
-        menu.item("question", null);
-        menu.item("answer", null);
-        menu.item("settings", null);
-        menu.item("correct-now", () -> mock(player, session, round.getMainAnswer(), 0));
-        List<Integer> delays = menu.getSection().getIntegerList("delays");
-        List<Integer> slots = menu.listSlots("delay-slots");
-        for (int i = 0; i < Math.min(delays.size(), slots.size()); i++) {
-            int delay = delays.get(i);
-            Map<String, String> values = new HashMap<>();
-            values.put("%ms%", String.valueOf(delay));
-            menu.place(slots.get(i), menu.template("correct-after"), values, () -> mock(player, session, round.getMainAnswer(), delay));
+        // The "answer correctly after X ms" buttons: one entry per configured delay
+        for (int delay : menu.getSection().getIntegerList("delays")) {
+            Map<String, Object> values = new HashMap<>();
+            values.put("%ms%", delay);
+            menu.addEntry("delays", "correct-after", values, null);
         }
-        menu.item("wrong", () -> mock(player, session, "zz" + round.getMainAnswer() + "zz", 0));
-        menu.item("wrong-case", () -> {
-            String swapped = swapCase(round.getMainAnswer());
-            if (swapped.equals(round.getMainAnswer())) {
-                Menus.message(player, "debug-no-letters");
-            } else {
-                mock(player, session, swapped, 0);
+    }
+
+    /** {@code [chatgames:debug-answer] <correct|wrong|wrong-case> [ms]} */
+    private void answer(Menu menu, String argument) {
+        Player player = menu.getPlayer();
+        Session session = sessions.get(player.getUniqueId());
+        if (session == null) return;
+        String[] parts = argument.trim().split("\\s+");
+        String main = session.round.getMainAnswer();
+        int delay = 0;
+        if (parts.length > 1) {
+            try {
+                delay = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException ignored) {
+                // No delay
             }
-        });
-        menu.item("timeout", () -> {
-            Menus.message(player, "debug-timeout-started", "%time%", String.valueOf(settings.getTimeSeconds()));
-            session.add(plugin.getScheduler().asyncLater(() -> {
-                if (sessions.get(player.getUniqueId()) == session) {
-                    Menus.message(player, "debug-timeout", "%game%", Menus.gameName(round.getType()), "%answer%", round.getMainAnswer());
+        }
+        switch (parts[0].toLowerCase(Locale.ROOT)) {
+            case "wrong":
+                mock(player, session, "zz" + main + "zz", delay);
+                break;
+            case "wrong-case":
+                String swapped = swapCase(main);
+                if (swapped.equals(main)) {
+                    Menus.message(player, "debug-no-letters");
+                } else {
+                    mock(player, session, swapped, delay);
                 }
-            }, settings.getTimeSeconds() * 20L));
-        });
-        menu.item("reroll", () -> start(player, round.getType()));
-        menu.item("back", () -> {
-            end(player.getUniqueId());
-            open(player);
-        });
-        menu.item("close", player::closeInventory);
-        menu.open();
+                break;
+            default:
+                mock(player, session, main, delay);
+        }
+    }
+
+    private void timeout(Player player) {
+        Session session = sessions.get(player.getUniqueId());
+        if (session == null) return;
+        Round round = session.round;
+        int seconds = session.settings.getTimeSeconds();
+        Menus.message(player, "debug-timeout-started", "%time%", String.valueOf(seconds));
+        session.add(plugin.getScheduler().asyncLater(() -> {
+            if (sessions.get(player.getUniqueId()) == session) {
+                Menus.message(player, "debug-timeout", "%game%", Menus.gameName(round.getType()), "%answer%", round.getMainAnswer());
+            }
+        }, seconds * 20L));
     }
 
     private void mock(Player player, Session session, String input, int delayMillis) {

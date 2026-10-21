@@ -128,7 +128,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
 - **Per-event leaderboards** *(new)*.
 - Your own position and best time are shown under each list.
 
-**Menus** *(new)*. *(Built in the plugin rather than with InventoryManager; see step 9b.)* Every item, title and slot is configurable in `menus.yml`.
+**Menus** *(new)*. *(Built on InventoryManager 2.0.0; see step 9b+.)* Every item, title, slot **and what each button does** is configurable in `menus.yml`, and server owners can add their own menus.
 - **Main menu**, `/chatgames menu`:
   - Profile, Challenges, Streaks and Leaderboards
   - your game and sound toggles
@@ -456,7 +456,7 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
   - **The admin menu's "start event" button** comes with the menus in 9b.
 
 - [x] **Step 9b: Menus** (2026-10-21). 133 tests. A bot opened and clicked through every menu on Paper 1.21.1, Spigot 1.8.8 and Folia 26.1.2, as an op and as a normal player (`scripts/bot.js` now prints each menu's items and can `click:<slot>`).
-  - **Built in the plugin, not with InventoryManager.** The library keeps one shared `Inventory` per menu name, has no click handling, and its bundled XMaterial and version parser predate 26.x. So menus use a small `menus/` package instead:
+  - **First built in the plugin** (moved into InventoryManager 2.0.0 in step 9b+). The library kept one shared `Inventory` per menu name, has no click handling, and its bundled XMaterial and version parser predate 26.x. So menus use a small `menus/` package instead:
     - `MenuHolder` (an `InventoryHolder`), so clicks are matched by holder, not by title.
     - `MenuListener` cancels every click and drag and runs the clicked slot's action. It avoids `getView()`, which breaks on 1.21+.
     - `MenuBuilder` builds each player's own copy from `menus.yml`: XSeries items, glow, player heads, `when-off` looks, list placeholders that expand to several lore lines, templates and paging.
@@ -476,7 +476,19 @@ This is the finished feature set the plan builds toward. Items marked *(new)* we
     - Claiming one challenge (`ChallengeTracker.claim`, matched by id so a menu opened before a reload can't claim a stale challenge) or one streak (`ProgressionManager.claimStreak`).
     - Event totals across all events: `events_played`, `event_wins` and `event_best_place`, also as placeholders.
 
-- [ ] **Step 9b+: Menus on InventoryManager 2.0.0** (in progress). The menu code moves out of ChatGames into the library, and buttons are driven by `actions:` in `menus.yml` so server owners can change behaviour and add their own menus.
+- [x] **Step 9b+: Menus on InventoryManager 2.0.0** (2026-10-21). 133+ tests (16 in the library). A bot clicked through every menu, plus a custom one, on Paper 1.21.1, Spigot 1.8.8 and Folia 26.1.2.
+  - **InventoryManager 2.0.0** (github.com/nsider4/InventoryManager), built against the 1.8.8 API on XSeries:
+    - `MenuManager`: loads menus from a config section and/or a folder (one file per menu), opens them on the player's thread (Folia-aware by reflection), keeps a per-player history for `[back]`, and debounces clicks (150 ms).
+    - YAML per item: slots with ranges, any 1.8–26.x material (names, `NAME:data`, numeric ids from a bundled 1.8 table, `head:<name|texture|url>`), glow (glint override on 1.20.5+), enchantments, flags, custom model data, item model, leather colour, hex colours on 1.16+.
+    - Behaviour per item: `actions` (and left/right/shift/middle/drop variants), `view-requirements`, `click-requirements` + `deny-actions`, `state` + `when-off`. Menu level: `open-requirements`, `open-actions`, `update-interval`, `list-slots` and named `lists`, `templates`.
+    - Actions: `[command]`, `[console]`, `[message]`, `[broadcast]`, `[sound]`, `[open]`, `[switch]`, `[back]`, `[refresh]`, `[close]`, `[next-page]`, `[previous-page]`, `[page]`, `[wait]`, and plugin-registered ones. Requirements: permissions and placeholder comparisons.
+    - A refresh of the same window swaps the contents in place (no flicker). Page buttons hide when there's no page to turn to.
+    - The 1.x API (`InventoryBuilder`, `ItemBuilder`...) still works but is deprecated. `GeneralUtils.getMCVersion()` no longer breaks on 26.x.
+  - **ChatGames:** the `menus/` classes are now providers that only fill in data (placeholders and list entries). Every button's behaviour is in `menus.yml` as actions; ChatGames adds `[chatgames:claim-challenge]`, `[chatgames:claim-streak]`, `[chatgames:debug...]` and `[chatgames:no-permission]`.
+    - `/chatgames menu <id>` opens any menu, including server owners' own (menus.yml `menus:` or `plugins/ChatGames-Premium/menus/<id>.yml`), with tab completion.
+    - `MenuBuilder`, `MenuHolder` and `MenuListener` are gone; the admin logs page is pure YAML.
+    - `MenusFileTest` also checks that every action exists and every `[open]`/`[switch]`/`[back]` target is a real menu.
+  - **Always `mvn clean package`** after changing the library: a non-clean build reused the previous shaded classes.
 - [ ] **Step 9d: Co-op global games + Count** (requested 2026-10-21). Replaces 9's "everyone who answers in time, ranked by place" model.
   - **Shared goal:** each global game has a `goal` and `duration-seconds`. Contributions (correct answers, race units, counted numbers) add to one server score; a boss bar (1.9+, by reflection) or action bar (1.8) shows `progress/goal` and time left, with chat updates at 25/50/75%.
   - **Chat games as a question stream:** the current question accepts one answer per player; it changes after `answers-per-question` correct answers or `question-seconds`. Each correct answer is +1.
@@ -767,7 +779,7 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
 5. **Don't read other regions' data from the global region.** Reading `player.getWorld()` or `getLocation()` for every online player from the global thread crosses regions. On Folia, do the disabled-world, toggle and permission check *inside* the per-player `atPlayer` task. Toggle and permission data come from the cache, which is thread-safe.
 6. **Hunt race spawner flag:** `setMetadata` on spawn and `hasMetadata` on death both run on the region that owns that entity, so they stay valid. Optionally switch to PersistentDataContainer on 1.14+, which is more robust than metadata, and keep metadata as the 1.8–1.13 fallback.
 7. **PlaceholderAPI:** other plugins (scoreboards, tab) request placeholders from their own threads. Serve every placeholder from the in-memory cache, with **no DB call and no `.join()`**. 1.9.9 blocked on DB futures inside placeholders.
-8. ~~**InventoryManager (your library):**~~ *No longer needed: step 9b built the menus without it, and only its `@Nonnull`/`@Nullable` annotations are still used.* It must also stop using the Bukkit scheduler, and its inventory handling has to run on the player's region. Update it to accept the `ChatGamesScheduler` abstraction, or give it its own FoliaLib usage, and release it as 1.2.0 before ChatGames ships Folia support.
+8. ~~**InventoryManager (your library):**~~ *Done in 2.0.0 (step 9b+): it schedules through a Folia-aware `TaskRunner`.* It must also stop using the Bukkit scheduler, and its inventory handling has to run on the player's region. Update it to accept the `ChatGamesScheduler` abstraction, or give it its own FoliaLib usage, and release it as 1.2.0 before ChatGames ships Folia support.
 9. **`plugin.yml`:** add `folia-supported: true`. Spigot, Paper and old versions ignore unknown keys. Confirm that once on 1.8.8 during testing.
 10. **`onDisable`:** `scheduler.cancelAll()`, then save players synchronously, then close Hikari. On Folia there's no main thread to "run later" on during shutdown.
 
@@ -839,7 +851,7 @@ Mojang dropped `1.x` numbering after **1.21.11**. Releases are now `26.1`, `26.2
     - Config: split the old `config.yml` into `games.yml`/`add-ons.yml`, rename `chatRaces.yml` → `races.yml`, and `shoppinglist` → `memorize`.
     - Back up the old files first.
 11. **Folia hardening.**
-    - ~~InventoryManager 1.2.0 with scheduler support (5.8).~~ Not needed since 9b.
+    - ~~InventoryManager scheduler support (5.8).~~ Done in InventoryManager 2.0.0.
     - Per-player routing for broadcasts and rewards (5.3, 5.5).
     - `folia-supported: true`.
     - The Folia test pass (5, "Folia testing").

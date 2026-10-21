@@ -36,6 +36,7 @@ game_stopped: '&8[%prefix%&8] &fThe current game has been stopped with no winner
 no_game_running: '&8[%prefix%&8] &cNo chat game is running right now.'
 global_not_enabled: '&8[%prefix%&8] &f%game% &cisn''t enabled as a global game in global_games.yml.'
 unknown_game: '&8[%prefix%&8] &cThere is no game called &f%game%&c.'
+unknown_menu: '&8[%prefix%&8] &cThere is no menu called &f%menu%&c.'
 
 presets:
   loaded: '&8[%prefix%&8] &fLoaded the preset &a%preset% &f(%games%).'
@@ -152,7 +153,7 @@ help_command:
   - '&6'
   - '&6&lCOMMANDS:'
   - '&6'
-  - '&a/chatgames menu &f- &3Opens the menu: profile, challenges, streaks, leaderboards.'
+  - '&a/chatgames menu [menu] &f- &3Opens the menu: profile, challenges, streaks, leaderboards (or any menu in menus.yml).'
   - '&a/chatgames profile [player] &f- &3Shows your stats (or another player''s).'
   - '&a/chatgames top &f- &3Shows the top 10 players with most points.'
   - '&a/chatgames fastest [game] &f- &3Shows the fastest winners, overall or for one game.'

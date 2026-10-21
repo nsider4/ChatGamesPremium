@@ -1,11 +1,12 @@
 package org.nsider.chatgames.menus;
 
-import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.inventorymanager.item.Materials;
+import org.nsider.inventorymanager.menu.Slots;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,9 +14,13 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,8 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The shipped menus.yml: every item is a real material, sits inside its menu, and no two
- * items share a slot. Every menu the code opens exists.
+ * The shipped menus.yml: every menu the code opens exists, every item is a real material and
+ * sits inside its menu, no two items share a slot, and every action is one that exists and
+ * opens a menu that exists.
  */
 class MenusFileTest {
 
@@ -32,19 +38,32 @@ class MenusFileTest {
             "leaderboard-games", "leaderboard-events", "admin", "admin-start", "admin-global", "admin-events",
             "admin-presets", "admin-logs", "debug", "debug-session"};
 
+    /** The library's own actions plus the ones {@link Menus} registers. */
+    private static final Set<String> ACTIONS = new HashSet<>(Arrays.asList("command", "player", "console", "message",
+            "broadcast", "sound", "open", "switch", "back", "refresh", "close", "next-page", "previous-page", "page",
+            "wait", "delay", "chatgames:no-permission", "chatgames:claim-challenge", "chatgames:claim-streak",
+            "chatgames:debug", "chatgames:debug-answer", "chatgames:debug-timeout", "chatgames:debug-reroll",
+            "chatgames:debug-end"));
+
+    private static final String[] ACTION_PATHS = {"actions", "left-actions", "right-actions", "shift-left-actions",
+            "shift-right-actions", "middle-actions", "drop-actions", "deny-actions", "open-actions", "open-deny-actions"};
+
     private static YamlConfiguration file;
+    private static ConfigurationSection menus;
 
     @BeforeAll
     static void load() throws IOException {
         try (Reader reader = new InputStreamReader(new FileInputStream("src/main/resources/menus.yml"), StandardCharsets.UTF_8)) {
             file = YamlConfiguration.loadConfiguration(reader);
         }
+        menus = file.getConfigurationSection("menus");
     }
 
     @Test
     void everyMenuExistsAndFits() {
+        assertNotNull(menus);
         for (String key : MENUS) {
-            ConfigurationSection menu = file.getConfigurationSection(key);
+            ConfigurationSection menu = menus.getConfigurationSection(key);
             assertNotNull(menu, key);
             int size = menu.getInt("rows") * 9;
             assertTrue(size >= 9 && size <= 54, key + " rows");
@@ -52,9 +71,8 @@ class MenusFileTest {
             Map<Integer, String> used = new HashMap<>();
             ConfigurationSection items = menu.getConfigurationSection("items");
             for (String item : items == null ? new ArrayList<String>() : new ArrayList<>(items.getKeys(false))) {
-                ConfigurationSection section = items.getConfigurationSection(item);
-                List<Integer> slots = section.isList("slots") ? section.getIntegerList("slots")
-                        : java.util.Collections.singletonList(section.getInt("slot", -1));
+                List<Integer> slots = Slots.of(items.getConfigurationSection(item));
+                assertFalse(slots.isEmpty(), key + "." + item + " has no slot");
                 for (int slot : slots) {
                     assertTrue(slot >= 0 && slot < size, key + "." + item + " slot " + slot);
                     // "none" only shows when the list is empty, so it may sit on a list slot
@@ -64,8 +82,12 @@ class MenusFileTest {
                     }
                 }
             }
-            for (String path : new String[]{"list-slots", "delay-slots", "ladders.challenge", "ladders.daily", "ladders.global"}) {
-                for (int slot : menu.getIntegerList(path)) {
+            List<String> lists = new ArrayList<>();
+            lists.add("list-slots");
+            ConfigurationSection named = menu.getConfigurationSection("lists");
+            if (named != null) for (String list : named.getKeys(false)) lists.add("lists." + list);
+            for (String path : lists) {
+                for (int slot : Slots.at(menu, path)) {
                     assertTrue(slot >= 0 && slot < size, key + "." + path + " slot " + slot);
                     assertFalse(used.containsKey(slot), key + "." + path + " slot " + slot + " holds " + used.get(slot));
                 }
@@ -76,20 +98,41 @@ class MenusFileTest {
     @Test
     void everyMaterialExists() {
         List<String> materials = new ArrayList<>();
-        collect(file, materials);
+        collect(file, "material", materials);
         for (GameType type : GameType.values()) {
             materials.add(file.getString("game-icons." + type.getConfigKey(), "missing icon for " + type));
         }
         for (String material : materials) {
             if (material.contains("%")) continue; // filled in per entry
-            assertTrue(XMaterial.matchXMaterial(material).isPresent(), "unknown material " + material);
+            assertTrue(Materials.match(material).isPresent(), "unknown material " + material);
         }
     }
 
-    private static void collect(ConfigurationSection section, List<String> materials) {
-        for (String key : section.getKeys(false)) {
-            if (section.isConfigurationSection(key)) collect(section.getConfigurationSection(key), materials);
-            else if (key.equals("material")) materials.add(section.getString(key));
+    @Test
+    void everyActionExistsAndOpensARealMenu() {
+        List<String> actions = new ArrayList<>();
+        for (String path : ACTION_PATHS) collect(menus, path, actions);
+        assertFalse(actions.isEmpty());
+        for (String action : actions) {
+            assertTrue(action.startsWith("[") && action.indexOf(']') > 0, "not an action: " + action);
+            String name = action.substring(1, action.indexOf(']')).toLowerCase(Locale.ROOT);
+            assertTrue(ACTIONS.contains(name), "unknown action " + action);
+            String argument = action.substring(action.indexOf(']') + 1).trim();
+            if ((name.equals("open") || name.equals("switch") || name.equals("back")) && !argument.isEmpty()) {
+                String target = argument.split("\\s+")[0];
+                assertNotNull(menus.getConfigurationSection(target), action + " opens a menu that doesn't exist");
+            }
+        }
+    }
+
+    private static void collect(ConfigurationSection section, String key, List<String> values) {
+        for (String child : section.getKeys(false)) {
+            if (section.isConfigurationSection(child)) {
+                collect(section.getConfigurationSection(child), key, values);
+            } else if (child.equals(key)) {
+                if (section.isList(child)) values.addAll(section.getStringList(child));
+                else values.add(section.getString(child));
+            }
         }
     }
 
@@ -97,7 +140,8 @@ class MenusFileTest {
     void togglesHaveTheirOffLook() {
         for (String path : new String[]{"main.items.games-toggle", "main.items.sound-toggle", "challenges.items.tab-daily",
                 "challenges.items.tab-weekly", "admin.items.toggle", "admin.items.toggle-all"}) {
-            assertNotNull(file.getConfigurationSection(path + ".when-off"), path);
+            assertNotNull(menus.getConfigurationSection(path + ".when-off"), path);
+            assertNotNull(menus.getString(path + ".state"), path + " has no state");
         }
     }
 

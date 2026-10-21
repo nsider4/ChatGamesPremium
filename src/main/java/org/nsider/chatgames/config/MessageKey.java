@@ -186,6 +186,11 @@ public enum MessageKey {
             "unknown_game",
             "&8[%prefix%&8] &cThere is no game called &f%game%&c."
     ),
+    UNKNOWN_MENU(
+            "messages",
+            "unknown_menu",
+            "&8[%prefix%&8] &cThere is no menu called &f%menu%&c."
+    ),
     LOGS_HEADER(
             "messages",
             "logs.header",
