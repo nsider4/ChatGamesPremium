@@ -9,6 +9,7 @@ import org.nsider.chatgames.games.round.Round;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,6 +46,22 @@ class ApiRoundGeneratorTest {
         assertNotNull(component);
         assertEquals("%button%", component.getPlaceholder());
         assertEquals("[Click]", component.getText());
+    }
+
+    @Test
+    void clickingAnswersOnlyWhenTheClickRunsChatgamesWithTheAnswer() {
+        Round click = ApiRoundGenerator.toRound(GameType.TRIVIA,
+                Question.builder("k3y").component("%button%", "[Click]", "Click me", "/chatgames k3y").build());
+        assertTrue(click.isClickAnswer("k3y"));
+        assertFalse(click.isClickAnswer("other"));
+
+        Round hover = ApiRoundGenerator.toRound(GameType.TRIVIA,
+                Question.builder("k3y").component("%word%", "Hover", "secret", null).build());
+        assertFalse(hover.isClickAnswer("k3y"), "hover-only text is answered by typing");
+
+        Round ownCommand = ApiRoundGenerator.toRound(GameType.TRIVIA,
+                Question.builder("k3y").component("%button%", "[Shop]", "Open", "/shop").build());
+        assertFalse(ownCommand.isClickAnswer("k3y"), "a click that runs another command isn't an answer");
     }
 
     @Test

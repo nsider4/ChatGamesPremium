@@ -143,7 +143,12 @@ public final class Question {
         }
 
         /**
-         * Interactive chat text that replaces {@code placeholder} in the start announcement.
+         * Interactive chat text that replaces {@code placeholder} in the start announcement, so
+         * the game's start message must contain that placeholder.
+         *
+         * <p>To make a click answer the round, use {@code "/chatgames " + answer} as the command,
+         * like the built-in Clickable game: the click then counts as that answer, and typing the
+         * answer in chat doesn't. Give such a round an answer nobody can guess, e.g. a random key.</p>
          *
          * @param hoverText    shown when the text is hovered
          * @param clickCommand run by the player who clicks it, or null for text that is only hovered

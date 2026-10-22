@@ -44,8 +44,9 @@ public final class AnswerHandler {
      */
     public boolean onChat(@Nonnull Player player, @Nonnull String message) {
         Game game = plugin.getGameManager().getGame();
-        // The clickable key is only reachable by clicking, never by typing
-        if (game == null || game.getGameType() == GameType.CLICKABLE) return false;
+        // A clickable key is only reachable by clicking, never by typing
+        Round round = game == null ? null : game.getRound();
+        if (round == null || round.isClickAnswer(round.getMainAnswer())) return false;
         return submit(player, game, message);
     }
 
@@ -57,7 +58,8 @@ public final class AnswerHandler {
     public boolean onClick(@Nonnull Player player, @Nonnull String key) {
         if (plugin.getGlobalGameManager().isRunning()) return plugin.getGlobalGameManager().onClick(player, key);
         Game game = plugin.getGameManager().getGame();
-        if (game == null || game.getGameType() != GameType.CLICKABLE || !game.getAnswer().equals(key)) return false;
+        Round round = game == null ? null : game.getRound();
+        if (round == null || !round.isClickAnswer(key)) return false;
         submit(player, game, key);
         return true;
     }

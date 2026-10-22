@@ -72,7 +72,8 @@ public final class RaceManager {
                 if (RaceTarget.resolve(type, target) != null) continue;
                 plugin.getLogger().info("races.yml: " + type.getConfigKey() + " target " + target + (MythicHook.isMythicName(target)
                         ? " isn't a MythicMobs mob (or MythicMobs isn't installed) and will be skipped."
-                        : " doesn't exist on this server version and will be skipped."));
+                        : type.isBuiltIn() ? " doesn't exist on this server version and will be skipped."
+                        : " isn't a target " + type.getOwner() + " accepts and will be skipped."));
             }
             loaded.put(type, races);
         }
@@ -187,7 +188,8 @@ public final class RaceManager {
         }
         if (resolved == null) {
             plugin.getLogger().warning("Can't start the " + type.getConfigKey() + " race: " + target + " is not a valid "
-                    + (type == GameType.HUNT ? "mob" : type.isMaterialRace() ? "material" : "target") + " on this server version.");
+                    + (type == GameType.HUNT ? "mob" : type.isMaterialRace() ? "material" : "target")
+                    + (type.isBuiltIn() ? " on this server version." : " for " + type.getOwner() + "."));
             return null;
         }
         int time = options.raceTimeSeconds() > 0 ? options.raceTimeSeconds()

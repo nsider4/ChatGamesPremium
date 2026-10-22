@@ -56,6 +56,14 @@ public final class Round {
         return answers.get(0);
     }
 
+    /**
+     * @return true if clicking this round's text answers it with {@code key}: the click runs
+     *         {@code /chatgames <key>}, as in Clickable and API games built the same way
+     */
+    public boolean isClickAnswer(@Nonnull String key) {
+        return component != null && ("/chatgames " + key).equals(component.getClickCommand()) && answers.contains(key);
+    }
+
     public static Builder builder(@Nonnull GameType type, @Nonnull String answer) {
         return new Builder(type).answer(answer);
     }

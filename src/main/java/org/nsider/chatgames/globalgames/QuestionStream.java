@@ -119,6 +119,8 @@ final class QuestionStream extends GlobalSession {
     boolean onChat(@Nonnull Player player, @Nonnull String message) {
         Game game = question;
         if (game == null || game.getRound() == null) return false;
+        // A clickable key is only reachable by clicking, never by typing
+        if (game.getRound().isClickAnswer(game.getRound().getMainAnswer())) return false;
         AnswerChecker.Result result = AnswerChecker.check(game.getRound(), message, settings.isCaseSensitive());
         if (game.hasResult(player.getUniqueId()) || game.isFinished()) {
             // Saying a correct answer again would hand it to everyone still answering
@@ -137,7 +139,8 @@ final class QuestionStream extends GlobalSession {
     @Override
     boolean onClick(@Nonnull Player player, @Nonnull String key) {
         Game game = question;
-        if (game == null || getType() != GameType.CLICKABLE || !game.getAnswer().equals(key)) return false;
+        Round round = game == null ? null : game.getRound();
+        if (round == null || !round.isClickAnswer(key)) return false;
         if (!game.hasResult(player.getUniqueId()) && !game.isFinished()) answered(player, game);
         return true;
     }
