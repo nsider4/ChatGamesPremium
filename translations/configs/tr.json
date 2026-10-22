@@ -1272,6 +1272,9 @@
   "The units in %resets%, e.g. 2d 5h, 5h 12m or 40m": "%resets% içindeki birimler, örn. 2g 5sa, 5sa 12dk veya 40dk",
   "%amount%d": "%amount%g",
   "%amount%h": "%amount%sa",
-  "%amount%m": "%amount%dk"
+  "%amount%m": "%amount%dk",
+  "Sounds from a resource pack work too: write them with their namespace, e.g. 'myserver:custom.ding'": "Kaynak paketindeki sesler de çalışır: onları ad alanlarıyla yazın, örn. 'myserver:custom.ding'",
+  "Whether MythicMobs mobs also count for the mob they are based on (a MythicMobs zombie as a ZOMBIE).": "MythicMobs moblarının dayandıkları mob için de sayılıp sayılmayacağı (bir MythicMobs zombisi ZOMBIE olarak).",
+  "With MythicMobs installed, mythic:<mob type> is one of its mobs (an example is at the end of this list)": "MythicMobs kuruluysa mythic:<mob türü> onun moblarından biridir (bu listenin sonunda bir örnek var)"
  }
 }

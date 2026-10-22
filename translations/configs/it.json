@@ -1272,6 +1272,9 @@
   "The units in %resets%, e.g. 2d 5h, 5h 12m or 40m": "Le unità di %resets%, ad es. 2g 5h, 5h 12min o 40min",
   "%amount%d": "%amount%g",
   "%amount%h": "%amount%h",
-  "%amount%m": "%amount%min"
+  "%amount%m": "%amount%min",
+  "Sounds from a resource pack work too: write them with their namespace, e.g. 'myserver:custom.ding'": "Funzionano anche i suoni di un pacchetto di risorse: scrivili con il loro namespace, es. 'myserver:custom.ding'",
+  "Whether MythicMobs mobs also count for the mob they are based on (a MythicMobs zombie as a ZOMBIE).": "Se i mob di MythicMobs contano anche per il mob su cui sono basati (uno zombie di MythicMobs come ZOMBIE).",
+  "With MythicMobs installed, mythic:<mob type> is one of its mobs (an example is at the end of this list)": "Con MythicMobs installato, mythic:<tipo di mob> è uno dei suoi mob (c'è un esempio alla fine di questa lista)"
  }
 }

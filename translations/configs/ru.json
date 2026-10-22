@@ -1272,6 +1272,9 @@
   "The units in %resets%, e.g. 2d 5h, 5h 12m or 40m": "Единицы в %resets%, напр. 2д 5ч, 5ч 12мин или 40мин",
   "%amount%d": "%amount%д",
   "%amount%h": "%amount%ч",
-  "%amount%m": "%amount%мин"
+  "%amount%m": "%amount%мин",
+  "Sounds from a resource pack work too: write them with their namespace, e.g. 'myserver:custom.ding'": "Звуки из пакета ресурсов тоже работают: пишите их с пространством имён, например 'myserver:custom.ding'",
+  "Whether MythicMobs mobs also count for the mob they are based on (a MythicMobs zombie as a ZOMBIE).": "Засчитываются ли мобы MythicMobs также как моб, на котором они основаны (зомби MythicMobs как ZOMBIE).",
+  "With MythicMobs installed, mythic:<mob type> is one of its mobs (an example is at the end of this list)": "Если установлен MythicMobs, mythic:<тип моба> — один из его мобов (пример в конце этого списка)"
  }
 }

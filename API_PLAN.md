@@ -27,7 +27,7 @@ own logic). Everything ships in 2.0.0, not 2.1.0. The plugin itself also support
 - [x] `MythicHook`: is it installed, an entity's mob type, mob names, display names.
 - [x] Hunt targets `mythic:<MobType>` in races.yml, commands, tab completion and global races.
 - [x] `count-mythic-mobs` in hunt, so MythicMobs zombies can stop counting as ZOMBIE.
-- [ ] races.yml example and comment, translated into the 9 languages.
+- [x] races.yml example and comment, translated into the 9 languages.
 
 ### B. Registry (no visible change)
 - [x] GameType class: Kind {CHAT, RACE, GLOBAL_ONLY}, the owning plugin, and a display name.
