@@ -34,6 +34,7 @@ Drop the new jar in and restart. On the first start:
 - **Anti-macro:** answers typed faster than a per-game minimum are ignored and logged.
 - **Many new PlaceholderAPI placeholders** for wins, races, streaks, challenges, events and global games. Every 1.9.9 placeholder still works.
 - **Translations:** item, block and mob names are now up to date with 26.x, and there are over 140 languages. Outdated files are re-downloaded automatically.
+- **Translated config files:** set `lang` to Spanish, French, Portuguese, German, Italian, Dutch, Polish, Russian or Turkish and every config file switches to that language: messages, menus, word lists, trivia and comments. Your settings are kept and the old files are backed up first. `config-language` in config.yml can pick a language or turn this off.
 
 ## Fixed
 

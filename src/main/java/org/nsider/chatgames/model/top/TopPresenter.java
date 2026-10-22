@@ -1,5 +1,6 @@
 package org.nsider.chatgames.model.top;
 
+import org.nsider.chatgames.menus.Menus;
 import org.bukkit.command.CommandSender;
 import org.nsider.chatgames.config.YamlConfig;
 import org.nsider.chatgames.enums.GameType;
@@ -38,7 +39,7 @@ public class TopPresenter {
             return;
         }
 
-        send(line("header").replace("%game%", game != null ? game.getConfigKey() : ""));
+        send(line("header").replace("%game%", game != null ? Menus.gameName(game) : ""));
         send(line("separators"));
         for (TopData row : rows) {
             String value = row.getFormattedValue(top);

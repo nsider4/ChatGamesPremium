@@ -1,5 +1,6 @@
 package org.nsider.chatgames.races;
 
+import org.nsider.chatgames.menus.Menus;
 import com.cryptomorin.xseries.messages.Titles;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -298,7 +299,7 @@ public final class RaceManager {
                 .with("%value%", race.getDisplayName())
                 .with("%amount%", race.getAmount())
                 .with("%timeToComplete%", race.getTimeLimitSeconds())
-                .with("%game%", race.getType().getConfigKey());
+                .with("%game%", Menus.gameName(race.getType()));
     }
 
     private static String fill(Race race, String text) {

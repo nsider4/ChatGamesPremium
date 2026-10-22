@@ -1,13 +1,9 @@
 package org.nsider.chatgames.config;
 
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.inventorymanager.extras.Nonnull;
-import org.nsider.inventorymanager.extras.Nullable;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,12 +12,18 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static org.nsider.chatgames.config.YamlText.leaves;
+import static org.nsider.chatgames.config.YamlText.load;
+import static org.nsider.chatgames.config.YamlText.parse;
+import static org.nsider.chatgames.config.YamlText.plain;
+import static org.nsider.chatgames.config.YamlText.read;
+import static org.nsider.chatgames.config.YamlText.values;
 import java.util.function.Function;
 
 /**
@@ -123,19 +125,7 @@ public final class LegacyMigration {
             String shipped = new String(read(resources, target), StandardCharsets.UTF_8);
             YamlConfiguration merged = parse(shipped, target);
             for (String path : paths) merged.set(path, changed.get(path));
-
-            // Bukkit before 1.18 drops every comment when it saves, so first try writing the
-            // values into the shipped text, and use that only if it reads back as exactly the
-            // merged configuration
-            String patched = shipped;
-            for (String path : paths) {
-                patched = patched == null ? null : patch(patched, path, changed.get(path));
-            }
-            if (patched != null && values(parse(patched, target)).equals(values(merged))) {
-                write(file, patched.getBytes(StandardCharsets.UTF_8));
-            } else {
-                write(file, merged.saveToString().getBytes(StandardCharsets.UTF_8));
-            }
+            write(file, YamlText.write(shipped, merged).getBytes(StandardCharsets.UTF_8));
         }
 
         migrateRewards(folder, resources, result);
@@ -169,103 +159,6 @@ public final class LegacyMigration {
         write(file, merged.saveToString().getBytes(StandardCharsets.UTF_8));
     }
 
-    /**
-     * Replaces one value in YAML text, keeping every other line (and so every comment) as it is.
-     * Handles a scalar on the key's line, or a list written as "- item" lines under the key.
-     *
-     * @return the new text, or null if the path or its layout isn't one of those
-     */
-    @Nullable
-    static String patch(String text, String path, Object value) {
-        List<String> lines = new ArrayList<>(Arrays.asList(text.split("\n", -1)));
-        List<Integer> indents = new ArrayList<>(); // of each key the current line is under
-        List<String> keys = new ArrayList<>();
-        for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i);
-            String trimmed = line.trim();
-            if (trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith("- ") || trimmed.equals("-")) continue;
-            int colon = keyEnd(trimmed);
-            if (colon < 0) continue;
-            int indent = line.indexOf(trimmed);
-            while (!indents.isEmpty() && indents.get(indents.size() - 1) >= indent) {
-                indents.remove(indents.size() - 1);
-                keys.remove(keys.size() - 1);
-            }
-            String key = unquote(trimmed.substring(0, colon));
-            indents.add(indent);
-            keys.add(key);
-            if (!String.join(".", keys).equals(path)) continue;
-
-            String rest = trimmed.substring(colon + 1).trim();
-            if (rest.startsWith("|") || rest.startsWith(">")) return null;
-            String prefix = line.substring(0, indent) + trimmed.substring(0, colon) + ":";
-
-            // The "- item" lines under the key, if its value is a list written that way
-            int end = i + 1;
-            String itemIndent = null;
-            if (rest.isEmpty()) {
-                while (end < lines.size()) {
-                    String next = lines.get(end);
-                    String nextTrimmed = next.trim();
-                    if (nextTrimmed.startsWith("- ") || nextTrimmed.equals("-")) {
-                        if (itemIndent == null) itemIndent = next.substring(0, next.indexOf(nextTrimmed));
-                        end++;
-                    } else if (nextTrimmed.isEmpty() || nextTrimmed.startsWith("#")) {
-                        end++;
-                    } else {
-                        break;
-                    }
-                }
-                // Keep blank lines and comments that follow the list where they were
-                while (end > i + 1 && (lines.get(end - 1).trim().isEmpty() || lines.get(end - 1).trim().startsWith("#"))) end--;
-                // Nothing but a nested section under the key: not a value
-                if (itemIndent == null) return null;
-            }
-
-            List<String> replacement = new ArrayList<>();
-            if (value instanceof List) {
-                if (itemIndent == null) itemIndent = line.substring(0, indent) + "  ";
-                for (Object item : (List<?>) value) {
-                    String scalar = scalar(item);
-                    if (scalar == null) return null;
-                    replacement.add(itemIndent + "- " + scalar);
-                }
-                replacement.add(0, prefix + (replacement.isEmpty() ? " []" : ""));
-            } else {
-                String scalar = scalar(value);
-                if (scalar == null) return null;
-                replacement.add(prefix + " " + scalar);
-            }
-            lines.subList(i, end).clear();
-            lines.addAll(i, replacement);
-            return String.join("\n", lines);
-        }
-        return null;
-    }
-
-    /** Where a "key:" ends in a trimmed line, or -1 if the line isn't a key. */
-    private static int keyEnd(String trimmed) {
-        if (trimmed.startsWith("'") || trimmed.startsWith("\"")) {
-            int close = trimmed.indexOf(trimmed.charAt(0), 1);
-            return close > 0 && trimmed.startsWith(":", close + 1) ? close + 1 : -1;
-        }
-        int colon = trimmed.indexOf(':');
-        while (colon >= 0 && colon + 1 < trimmed.length() && trimmed.charAt(colon + 1) != ' ') colon = trimmed.indexOf(':', colon + 1);
-        return colon;
-    }
-
-    private static String unquote(String key) {
-        return key.length() >= 2 && (key.startsWith("'") || key.startsWith("\"")) ? key.substring(1, key.length() - 1) : key;
-    }
-
-    /** A value as one YAML token, or null for anything that needs more than one line. */
-    @Nullable
-    private static String scalar(Object value) {
-        if (value instanceof Number || value instanceof Boolean) return value.toString();
-        if (value instanceof String && ((String) value).indexOf('\n') < 0) return "'" + ((String) value).replace("'", "''") + "'";
-        return null;
-    }
-
     /** The values in an old file that differ from 1.9.9's default for the same path. */
     private static Map<String, Object> changed(File folder, String name, Function<String, InputStream> resources) throws IOException {
         Map<String, Object> changed = new LinkedHashMap<>();
@@ -291,26 +184,6 @@ public final class LegacyMigration {
         return backup;
     }
 
-    /** Every non-section path, so a value is compared and moved on its own. */
-    private static List<String> leaves(ConfigurationSection section) {
-        List<String> paths = new ArrayList<>();
-        for (String path : section.getKeys(true)) {
-            if (!section.isConfigurationSection(path)) paths.add(path);
-        }
-        return paths;
-    }
-
-    private static Map<String, Object> values(ConfigurationSection section) {
-        Map<String, Object> values = new LinkedHashMap<>();
-        for (String path : leaves(section)) values.put(path, plain(section.get(path)));
-        return values;
-    }
-
-    /** Compares numbers by value: YAML reads 5 and 5.0 as different types. */
-    private static Object plain(Object value) {
-        return value instanceof Number && !(value instanceof Double) ? ((Number) value).doubleValue() : value;
-    }
-
     private static boolean isOldGameKey(String key) {
         return contains(oldGameKeys(), key);
     }
@@ -333,36 +206,6 @@ public final class LegacyMigration {
             if (candidate.equals(value)) return true;
         }
         return false;
-    }
-
-    @Nullable
-    private static YamlConfiguration load(File file) {
-        try {
-            return parse(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8), file.getName());
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    private static YamlConfiguration parse(String text, String name) throws IOException {
-        YamlConfiguration yaml = new YamlConfiguration();
-        try {
-            yaml.loadFromString(text);
-        } catch (InvalidConfigurationException e) {
-            throw new IOException(name + " isn't valid YAML", e);
-        }
-        return yaml;
-    }
-
-    private static byte[] read(Function<String, InputStream> resources, String name) throws IOException {
-        try (InputStream in = resources.apply(name)) {
-            if (in == null) throw new IOException(name + " is missing from the jar");
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
-            return out.toByteArray();
-        }
     }
 
     private static void write(File file, byte[] content) throws IOException {

@@ -1,5 +1,6 @@
 package org.nsider.chatgames.gameevents;
 
+import org.nsider.chatgames.menus.Menus;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -178,7 +179,7 @@ public final class EventManager implements Listener {
             return;
         }
 
-        broadcast(Msg.of(messages("step")).with("%game%", step.getType().getConfigKey()), current);
+        broadcast(Msg.of(messages("step")).with("%game%", Menus.gameName(step.getType())), current);
         current.awaiting = true;
         boolean started;
         try {

@@ -82,10 +82,10 @@ public final class Menus {
         return debug;
     }
 
-    /** @return the game's name for menus: menus.yml {@code game-names}, else "Guess The Number" from the key */
+    /** @return the game's name for menus and messages: menus.yml {@code game-names}, else "Guess The Number" from the key */
     @Nonnull
     public static String gameName(@Nonnull GameType type) {
-        String configured = ConfigManager.getMenus().getString("game-names." + type.getConfigKey());
+        String configured = ConfigManager.getMenus() == null ? null : ConfigManager.getMenus().getString("game-names." + type.getConfigKey());
         if (configured != null) return configured;
         StringBuilder name = new StringBuilder();
         for (String word : type.getConfigKey().split("_")) {

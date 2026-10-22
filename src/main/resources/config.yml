@@ -3,14 +3,22 @@
 #############################
 check-update: true
 
-#These translations are for plugin sided things such as material and entity names that are used for races. Over 140 languages supported!
-#IT WILL ONLY TRANSLATE THOSE THINGS, CUSTOMIZABLE MESSAGES(messages.yml) HAVE TO BE CHANGED MANUALLY.
-#
-#See the ID for your language here: https://github.com/nsider4/mine-translator/blob/main/language_names.txt
-#
-#The file is downloaded into translations/ and replaced automatically when names for a newer
-#Minecraft version are published. A change here applies on /chatgames reload.
+#The server's language. Block, item and mob names (in races and Memorize) are translated
+#into it, in over 140 languages. See the ID for your language here:
+#https://github.com/nsider4/mine-translator/blob/main/language_names.txt
+#The names are downloaded into translations/ and updated automatically when a newer Minecraft
+#version is out. A change here applies on /chatgames reload.
 lang: 'en_us'
+
+#The language of these config files: messages, menus, word lists, trivia, comments...
+#  auto: switch them when 'lang' above changes, if that language has translated files
+#  none: never change them
+#  or a language code: en, es, fr, pt, de, it, nl, pl, ru, tr
+#Switching keeps your settings and the changes you made to them; your own messages are
+#replaced by the translation (the old files are copied to backups/ first). Translations are
+#downloaded from https://github.com/nsider4/mine-translator (folder Configs) and updated
+#automatically. More languages can be added there.
+config-language: 'auto'
 
 #Storage type, available: SQLite or MySQL
 Storage: 'SQLite'

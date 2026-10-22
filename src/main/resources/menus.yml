@@ -39,12 +39,31 @@
 #A lore line that is only a list placeholder, like '%game_wins%', becomes several lines.
 #Every menu also has %player%, %page%, %pages% and %entries% (how many entries the list has).
 
-#Names and icons for games in every menu. A game not listed here is named from its key.
+#Names and icons for games, in every menu and in messages that name a game (%game%).
+#A game not listed here is named from its key.
 game-names:
+  unscramble: 'Unscramble'
+  unreverse: 'Unreverse'
+  reaction: 'Reaction'
   guess_the_number: 'Guess the Number'
+  clickable: 'Clickable'
   fillout: 'Fill-out'
+  hoverable: 'Hoverable'
+  random: 'Random'
+  math: 'Math'
+  variable: 'Variable'
+  sequence: 'Sequence'
+  memorize: 'Memorize'
   word_association: 'Word Association'
+  trivia: 'Trivia'
   count: 'Count'
+  hunt: 'Hunt'
+  mine: 'Mine'
+  place: 'Place'
+  fish: 'Fish'
+  eat: 'Eat'
+  craft: 'Craft'
+  furnace: 'Furnace'
 game-icons:
   unscramble: book
   math: redstone

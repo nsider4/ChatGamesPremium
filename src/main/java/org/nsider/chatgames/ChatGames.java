@@ -26,6 +26,7 @@ import org.nsider.chatgames.listeners.DiscordListener;
 import org.nsider.chatgames.listeners.LogListener;
 import org.nsider.chatgames.listeners.LoginListener;
 import org.nsider.chatgames.managers.LanguageManager;
+import org.nsider.chatgames.config.ConfigLanguage;
 import org.nsider.chatgames.managers.MilestoneManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.model.player.PlayerRepository;
@@ -65,6 +66,7 @@ public final class ChatGames extends JavaPlugin {
     private ProgressionManager progressionManager;
     private RewardManager rewardManager;
     private LanguageManager languageManager;
+    private ConfigLanguage configLanguage;
     private GlobalGameManager globalGameManager;
     private EventManager eventManager;
     private Menus menus;
@@ -108,6 +110,7 @@ public final class ChatGames extends JavaPlugin {
         // 5. Game systems
         this.languageManager = new LanguageManager(this);
         this.languageManager.load(ConfigValue.getString(ConfigPaths.LANGUAGE));
+        this.configLanguage = new ConfigLanguage(this);
         this.gameBuilder = new GameBuilder(this);
         this.gameConfigManager = new GameConfigManager(this);
         this.gameUtils = new GameUtils(this);
@@ -148,6 +151,7 @@ public final class ChatGames extends JavaPlugin {
         leaderboardCache.start();
         scheduler.asyncTimer(ChatGamesPlayerManager::saveAll, AUTOSAVE_TICKS, AUTOSAVE_TICKS);
         checkForUpdate();
+        configLanguage.check();
     }
 
     /**
@@ -207,6 +211,7 @@ public final class ChatGames extends JavaPlugin {
         if (newLanguage != null && !newLanguage.equalsIgnoreCase(oldLanguage)) {
             languageManager.load(newLanguage);
         }
+        configLanguage.check();
 
         MilestoneManager.loadMilestones();
         raceManager.load();

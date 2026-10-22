@@ -24,6 +24,13 @@ public enum ConfigPaths {
             ConfigType.STRING
     ),
 
+    /** Language of the config files: 'auto' (follows lang), 'none', or a code such as 'es'. */
+    CONFIG_LANGUAGE(
+            ConfigFile.CONFIG,
+            "config-language",
+            ConfigType.STRING
+    ),
+
     /** Storage backend to use: 'SQLite' or 'MySQL'. */
     STORAGE_TYPE(
             ConfigFile.CONFIG,

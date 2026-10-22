@@ -128,15 +128,15 @@ class LegacyMigrationTest {
         String text = lines("# top", "root:", "  # about a", "  a: 1", "  list:", "  - x", "  - y", "", "  # after",
                 "  b: 'two'", "other:", "  a: 5");
         assertEquals(lines("# top", "root:", "  # about a", "  a: 3", "  list:", "  - x", "  - y", "", "  # after",
-                "  b: 'two'", "other:", "  a: 5"), LegacyMigration.patch(text, "root.a", 3));
+                "  b: 'two'", "other:", "  a: 5"), YamlText.patch(text, "root.a", 3));
         assertEquals(lines("# top", "root:", "  # about a", "  a: 1", "  list:", "  - 'it''s'", "", "  # after",
-                "  b: 'two'", "other:", "  a: 5"), LegacyMigration.patch(text, "root.list", Collections.singletonList("it's")));
+                "  b: 'two'", "other:", "  a: 5"), YamlText.patch(text, "root.list", Collections.singletonList("it's")));
         assertEquals(lines("# top", "root:", "  # about a", "  a: 1", "  list:", "  - x", "  - y", "", "  # after",
-                "  b: 'two'", "other:", "  a: true"), LegacyMigration.patch(text, "other.a", true));
+                "  b: 'two'", "other:", "  a: true"), YamlText.patch(text, "other.a", true));
         assertEquals(lines("# top", "root:", "  # about a", "  a: 1", "  list: 'one line'", "", "  # after",
-                "  b: 'two'", "other:", "  a: 5"), LegacyMigration.patch(text, "root.list", "one line"));
-        assertEquals(null, LegacyMigration.patch(text, "root.missing", 1), "an unknown path falls back to Bukkit's save");
-        assertEquals(null, LegacyMigration.patch(text, "root", 1), "a section isn't a value");
+                "  b: 'two'", "other:", "  a: 5"), YamlText.patch(text, "root.list", "one line"));
+        assertEquals(null, YamlText.patch(text, "root.missing", 1), "an unknown path falls back to Bukkit's save");
+        assertEquals(null, YamlText.patch(text, "root", 1), "a section isn't a value");
     }
 
     private static String lines(String... lines) {

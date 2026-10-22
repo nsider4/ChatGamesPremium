@@ -1,5 +1,6 @@
 package org.nsider.chatgames.commands.sub;
 
+import org.nsider.chatgames.menus.Menus;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
@@ -85,7 +86,7 @@ public class StartGameCommand extends SubCommand {
                 started = false;
             }
             CommandSupport.send(sender, started ? MessageKey.GAME_STARTED : MessageKey.GAME_NOT_STARTED,
-                    "%game%", type.getConfigKey());
+                    "%game%", Menus.gameName(type));
         });
     }
 

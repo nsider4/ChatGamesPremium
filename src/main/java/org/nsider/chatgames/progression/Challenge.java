@@ -1,5 +1,6 @@
 package org.nsider.chatgames.progression;
 
+import org.nsider.chatgames.menus.Menus;
 import org.nsider.chatgames.enums.GameType;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
@@ -74,7 +75,7 @@ public final class Challenge {
         // The name goes in first, so its own placeholders are filled too
         return text.replace("%challenge%", name)
                 .replace("%amount%", String.valueOf(amount))
-                .replace("%game%", game == null ? "" : game.getConfigKey())
+                .replace("%game%", game == null ? "" : Menus.gameName(game))
                 .replace("%seconds%", seconds);
     }
 

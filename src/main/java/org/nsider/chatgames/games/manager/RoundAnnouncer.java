@@ -1,5 +1,6 @@
 package org.nsider.chatgames.games.manager;
 
+import org.nsider.chatgames.menus.Menus;
 import com.cryptomorin.xseries.messages.ActionBar;
 import com.cryptomorin.xseries.messages.Titles;
 import org.bukkit.Bukkit;
@@ -144,7 +145,7 @@ public final class RoundAnnouncer {
         Map<String, String> values = new LinkedHashMap<>(round.getPlaceholders());
         values.put("%selection%", round.getDisplay());
         values.put("%timeToGuess%", String.valueOf(settings.getTimeSeconds()));
-        values.put("%game%", round.getType().getConfigKey());
+        values.put("%game%", Menus.gameName(round.getType()));
         return values;
     }
 
