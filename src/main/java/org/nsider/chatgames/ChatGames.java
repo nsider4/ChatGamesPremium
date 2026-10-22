@@ -20,6 +20,7 @@ import org.nsider.chatgames.games.builder.GameBuilder;
 import org.nsider.chatgames.games.manager.GameConfigManager;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.utils.GameUtils;
+import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.globalgames.GlobalGameManager;
 import org.nsider.chatgames.listeners.ChatListener;
 import org.nsider.chatgames.listeners.DiscordListener;
@@ -107,7 +108,8 @@ public final class ChatGames extends JavaPlugin {
         ChatGamesPlayerManager.loadOnlinePlayers();
         this.leaderboardCache = new LeaderboardCache(this, playerRepository);
 
-        // 5. Game systems
+        // 5. Game systems. MythicMobs first: races.yml's mythic: targets are checked as races load
+        MythicHook.initialize(getLogger());
         this.languageManager = new LanguageManager(this);
         this.languageManager.load(ConfigValue.getString(ConfigPaths.LANGUAGE));
         this.configLanguage = new ConfigLanguage(this);

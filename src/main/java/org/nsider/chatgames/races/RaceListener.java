@@ -62,7 +62,7 @@ public final class RaceListener implements Listener {
         if (fromSpawner) entity.removeMetadata(SPAWNER_MOB, plugin);
 
         Race race = running(GameType.HUNT, entity.getKiller());
-        if (race == null || !race.getTarget().matches(entity.getType())) return;
+        if (race == null || !race.getTarget().matches(entity, countsMythicMobs())) return;
         if (fromSpawner && !countsSpawnerMobs()) return;
         plugin.getRaceManager().progress(race, entity.getKiller(), 1);
     }
@@ -192,6 +192,11 @@ public final class RaceListener implements Listener {
 
     private static boolean countsSpawnerMobs() {
         return ConfigValue.getBoolean(ConfigPaths.RACE_HUNT_COUNT_SPAWNER_MOBS);
+    }
+
+    private static boolean countsMythicMobs() {
+        // A races.yml from before this setting existed keeps counting them
+        return RaceManager.section(GameType.HUNT).getBoolean("count-mythic-mobs", true);
     }
 
     private static boolean isSpawnerReason(CreatureSpawnEvent.SpawnReason reason) {

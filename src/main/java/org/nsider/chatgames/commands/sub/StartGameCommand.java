@@ -11,6 +11,7 @@ import org.nsider.chatgames.config.PermissionKey;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.races.RaceData;
 import org.nsider.chatgames.races.RaceTarget;
 import org.nsider.chatgames.utils.messages.MessageUtils;
@@ -154,6 +155,13 @@ public class StartGameCommand extends SubCommand {
         if (args.length == 1) {
             List<String> targets = new ArrayList<>();
             for (String target : data.getTargets()) targets.add(target.toLowerCase(Locale.ROOT));
+            if (type == GameType.HUNT) {
+                for (String mob : MythicHook.mobTypes()) {
+                    // races.yml may already list it, lower-cased above
+                    String target = MythicHook.PREFIX + mob;
+                    if (!targets.contains(target.toLowerCase(Locale.ROOT))) targets.add(target);
+                }
+            }
             List<String> matches = MessageUtils.filterSuggestions(targets, args[0]);
             return matches.isEmpty() ? Collections.singletonList(type == GameType.HUNT ? "<mob>" : "<material>") : matches;
         }

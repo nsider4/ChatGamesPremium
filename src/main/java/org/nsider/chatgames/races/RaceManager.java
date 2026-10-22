@@ -17,6 +17,7 @@ import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 import org.nsider.chatgames.games.utils.PlayerResult;
 import org.nsider.chatgames.games.StartOptions;
+import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.managers.TopManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
@@ -66,10 +67,10 @@ public final class RaceManager {
             RaceData races = RaceData.load(section(type).getConfigurationSection("data"),
                     problem -> plugin.getLogger().warning("races.yml: " + problem));
             for (String target : races.getTargets()) {
-                if (RaceTarget.resolve(type, target) == null) {
-                    plugin.getLogger().info("races.yml: " + type.getConfigKey() + " target " + target
-                            + " doesn't exist on this server version and will be skipped.");
-                }
+                if (RaceTarget.resolve(type, target) != null) continue;
+                plugin.getLogger().info("races.yml: " + type.getConfigKey() + " target " + target + (MythicHook.isMythicName(target)
+                        ? " isn't a MythicMobs mob (or MythicMobs isn't installed) and will be skipped."
+                        : " doesn't exist on this server version and will be skipped."));
             }
             loaded.put(type, races);
         }
@@ -177,6 +178,11 @@ public final class RaceManager {
             }
         }
         RaceTarget resolved = RaceTarget.resolve(type, target);
+        if (resolved == null && MythicHook.isMythicName(target)) {
+            plugin.getLogger().warning("Can't start the " + type.getConfigKey() + " race: " + (MythicHook.isEnabled()
+                    ? "MythicMobs has no mob called " + MythicHook.stripPrefix(target) + "." : "MythicMobs isn't installed."));
+            return null;
+        }
         if (resolved == null) {
             plugin.getLogger().warning("Can't start the " + type.getConfigKey() + " race: " + target
                     + " is not a valid " + (type == GameType.HUNT ? "mob" : "material") + " on this server version.");

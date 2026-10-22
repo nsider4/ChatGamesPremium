@@ -113,6 +113,7 @@ GameSounds:
   volume: 0.5
   pitch: 1.0
   #LEAVE ANY OF THESE EMPTY TO DISABLE THEM
+  #Sounds from a resource pack work too: write them with their namespace, e.g. 'myserver:custom.ding'
   win: 'minecraft:entity.experience_orb.pickup'
   game-start: 'minecraft:entity.player.levelup'
   time-expired: 'minecraft:entity.villager.no'

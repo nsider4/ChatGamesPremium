@@ -5,7 +5,9 @@ import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.Entity;
 import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.managers.LanguageManager;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
@@ -14,7 +16,8 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * What a race asks for: a mob for Hunt, a material for every other race.
+ * What a race asks for: a mob for Hunt (vanilla, or a MythicMobs mob type written
+ * {@code mythic:<MobType>}), a material for every other race.
  *
  * <p>Names in races.yml may be modern or legacy (MOOSHROOM or MUSHROOM_COW, COD or
  * RAW_FISH); XSeries maps them to this server's version. Items are compared with their
@@ -27,12 +30,15 @@ public final class RaceTarget {
     @Nullable private final XMaterial material;
     @Nullable private final Material bukkitMaterial;
     @Nullable private final EntityType entity;
+    /** The MythicMobs mob type as MythicMobs spells it, for mythic: targets. */
+    @Nullable private final String mythicType;
 
-    private RaceTarget(String name, @Nullable XMaterial material, @Nullable EntityType entity) {
+    private RaceTarget(String name, @Nullable XMaterial material, @Nullable EntityType entity, @Nullable String mythicType) {
         this.name = name;
         this.material = material;
         this.bukkitMaterial = material == null ? null : material.get();
         this.entity = entity;
+        this.mythicType = mythicType;
     }
 
     /**
@@ -43,13 +49,17 @@ public final class RaceTarget {
     public static RaceTarget resolve(@Nonnull GameType race, @Nonnull String name) {
         String key = name.trim().toUpperCase(Locale.ROOT);
         try {
+            if (race == GameType.HUNT && MythicHook.isMythicName(key)) {
+                String mythic = MythicHook.isEnabled() ? MythicHook.findMobType(key) : null;
+                return mythic == null ? null : new RaceTarget(key, null, null, mythic);
+            }
             if (race == GameType.HUNT) {
                 Optional<XEntityType> type = XEntityType.of(key);
                 EntityType entity = type.isPresent() ? type.get().get() : null;
-                return entity == null || !entity.isAlive() ? null : new RaceTarget(key, null, entity);
+                return entity == null || !entity.isAlive() ? null : new RaceTarget(key, null, entity, null);
             }
             Optional<XMaterial> type = XMaterial.matchXMaterial(key);
-            return type.isPresent() && type.get().get() != null ? new RaceTarget(key, type.get(), null) : null;
+            return type.isPresent() && type.get().get() != null ? new RaceTarget(key, type.get(), null, null) : null;
         } catch (RuntimeException e) {
             // Names XSeries can't parse at all
             return null;
@@ -65,12 +75,27 @@ public final class RaceTarget {
     /** @return the Bukkit name on this server, for logs */
     @Nonnull
     public String getServerName() {
+        if (mythicType != null) return MythicHook.PREFIX + mythicType;
         if (entity != null) return entity.name();
         return bukkitMaterial != null ? bukkitMaterial.name() : name;
     }
 
     public boolean matches(@Nullable EntityType type) {
         return entity != null && entity == type;
+    }
+
+    /**
+     * @param countMythicMobs whether a MythicMobs mob also counts for a vanilla target of its type
+     */
+    public boolean matches(@Nonnull Entity killed, boolean countMythicMobs) {
+        if (mythicType != null) return mythicType.equalsIgnoreCase(String.valueOf(MythicHook.mobType(killed)));
+        if (!matches(killed.getType())) return false;
+        return countMythicMobs || !MythicHook.isEnabled() || MythicHook.mobType(killed) == null;
+    }
+
+    /** @return true for a {@code mythic:<MobType>} target */
+    public boolean isMythic() {
+        return mythicType != null;
     }
 
     public boolean matchesBlock(@Nullable Material type) {
@@ -92,6 +117,10 @@ public final class RaceTarget {
      */
     @Nonnull
     public String displayName(@Nullable LanguageManager language) {
+        if (mythicType != null) {
+            String display = MythicHook.displayName(mythicType);
+            return display != null ? display : titleCase(mythicType);
+        }
         String modern = entity != null ? XEntityType.of(entity).name() : material != null ? material.name() : name;
         String lower = modern.toLowerCase(Locale.ROOT);
         if (language != null) {

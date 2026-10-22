@@ -40,7 +40,7 @@ public final class GameSoundManager {
         float volume = plugin.getGameConfigManager().getGameSoundVolume();
         float pitch = plugin.getGameConfigManager().getGameSoundPitch();
 
-        Optional<XSound> sound = XSound.of(toEnumName(name));
+        Optional<XSound> sound = isVanilla(name) ? XSound.of(toEnumName(name)) : Optional.empty();
         Sound bukkitSound = sound.isPresent() ? sound.get().parseSound() : null;
         // Played at the player's location, which only their own thread may read on Folia
         plugin.getScheduler().onPlayer(player, () -> {
@@ -54,6 +54,12 @@ public final class GameSoundManager {
                 plugin.getLogger().warning("Invalid sound in config.yml GameSounds." + type + ": " + name);
             }
         });
+    }
+
+    /** No namespace, or minecraft:; any other namespace is a resource-pack sound, played as written. */
+    static boolean isVanilla(String name) {
+        int namespace = name.indexOf(':');
+        return namespace < 0 || name.substring(0, namespace).trim().equalsIgnoreCase("minecraft");
     }
 
     /** "minecraft:entity.player.levelup" → "ENTITY_PLAYER_LEVELUP". */

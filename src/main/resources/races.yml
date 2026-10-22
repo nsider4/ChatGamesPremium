@@ -29,9 +29,12 @@ hunt:
 
   #Whether to count mobs that were spawned by spawner blocks or spawn eggs.
   count-spawner-mobs: true
+  #Whether MythicMobs mobs also count for the mob they are based on (a MythicMobs zombie as a ZOMBIE).
+  count-mythic-mobs: true
 
   data:
     #These values have to be valid minecraft mobs IDs (see Useful Links at the top of the file)
+    #With MythicMobs installed, mythic:<mob type> is one of its mobs (an example is at the end of this list)
     ZOMBIE:
       3:
         #THE SUM OF ALL CHANCES OF REWARDS YOU ADD CANNOT EXCEED 100%
@@ -97,6 +100,10 @@ hunt:
       5:
         rewards:
           - reward_1
+    #mythic:SkeletonKing:
+    #  1:
+    #    rewards:
+    #      - reward_1
 
 mine:
   enable: true
