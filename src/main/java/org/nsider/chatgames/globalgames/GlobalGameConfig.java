@@ -2,14 +2,13 @@ package org.nsider.chatgames.globalgames;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -64,7 +63,7 @@ public final class GlobalGameConfig {
     public static GlobalGameConfig load(@Nonnull ConfigurationSection file, @Nonnull Consumer<String> warn) {
         ConfigurationSection defaults = file.getConfigurationSection("defaults");
         if (defaults == null) defaults = new MemoryConfiguration();
-        Map<GameType, Entry> games = new EnumMap<>(GameType.class);
+        Map<GameType, Entry> games = new LinkedHashMap<>();
         ConfigurationSection section = file.getConfigurationSection("games");
         if (section != null) {
             for (String key : section.getKeys(false)) {

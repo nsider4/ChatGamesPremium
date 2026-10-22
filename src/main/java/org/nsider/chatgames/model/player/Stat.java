@@ -1,6 +1,6 @@
 package org.nsider.chatgames.model.player;
 
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 
 /**
  * Names of the per-player counters kept in the stats table.

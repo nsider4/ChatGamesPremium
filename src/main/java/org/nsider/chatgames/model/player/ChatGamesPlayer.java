@@ -1,9 +1,8 @@
 package org.nsider.chatgames.model.player;
 
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,7 +28,7 @@ public final class ChatGamesPlayer {
     private final Map<String, Long> stats = new HashMap<>();
     private final Set<String> dirtyStats = new HashSet<>();
 
-    private final EnumMap<GameType, Double> fastest = new EnumMap<>(GameType.class);
+    private final Map<GameType, Double> fastest = new HashMap<>();
     private final Set<GameType> dirtyFastest = new HashSet<>();
     // The one overall best a 1.9.9 database kept; read-only, so never saved
     private double legacyBest;
@@ -156,7 +155,7 @@ public final class ChatGamesPlayer {
     }
 
     public synchronized Map<GameType, Double> getFastestTimes() {
-        return Collections.unmodifiableMap(new EnumMap<>(fastest));
+        return Collections.unmodifiableMap(new HashMap<>(fastest));
     }
 
     /* ------------------------------------------ persistence ------------------------------------- */
@@ -183,7 +182,7 @@ public final class ChatGamesPlayer {
     synchronized Snapshot snapshot() {
         Map<String, Long> changedStats = new HashMap<>();
         for (String name : dirtyStats) changedStats.put(name, stats.get(name));
-        Map<GameType, Double> changedTimes = new EnumMap<>(GameType.class);
+        Map<GameType, Double> changedTimes = new HashMap<>();
         for (GameType game : dirtyFastest) changedTimes.put(game, fastest.get(game));
         dirtyStats.clear();
         dirtyFastest.clear();

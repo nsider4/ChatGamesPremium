@@ -13,7 +13,7 @@ import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.games.Game;
 import org.nsider.chatgames.games.round.GameSettings;
 import org.nsider.chatgames.games.round.Round;
-import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.api.PlayerResult;
 import org.nsider.chatgames.managers.TopManager;
 import org.nsider.chatgames.utils.management.TimeUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;

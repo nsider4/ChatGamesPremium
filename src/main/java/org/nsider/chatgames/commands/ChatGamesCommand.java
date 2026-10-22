@@ -27,7 +27,7 @@ import org.nsider.chatgames.commands.sub.StreaksCommand;
 import org.nsider.chatgames.commands.sub.ToggleAllCommand;
 import org.nsider.chatgames.commands.sub.ToggleCommand;
 import org.nsider.chatgames.commands.sub.TopCommand;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.MessageKey;
 import org.nsider.chatgames.utils.messages.MessageUtils;

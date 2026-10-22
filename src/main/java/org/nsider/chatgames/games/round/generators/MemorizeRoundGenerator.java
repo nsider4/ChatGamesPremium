@@ -1,6 +1,6 @@
 package org.nsider.chatgames.games.round.generators;
 
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.games.round.Hints;
 import org.nsider.chatgames.games.round.Round;
 import org.nsider.chatgames.games.round.RoundContext;

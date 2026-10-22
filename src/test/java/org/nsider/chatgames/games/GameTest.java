@@ -2,8 +2,8 @@ package org.nsider.chatgames.games;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.api.PlayerResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -6,7 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Entity;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.managers.LanguageManager;
 import org.nsider.inventorymanager.extras.Nonnull;

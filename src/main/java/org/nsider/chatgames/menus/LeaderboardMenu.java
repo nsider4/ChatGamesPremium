@@ -1,7 +1,7 @@
 package org.nsider.chatgames.menus;
 
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.gameevents.EventDefinition;
 import org.nsider.chatgames.placeholders.LeaderboardSnapshot;
 import org.nsider.inventorymanager.extras.Nonnull;

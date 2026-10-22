@@ -7,7 +7,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.commands.CommandSupport;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.games.round.AnswerChecker;
 import org.nsider.chatgames.games.round.GameSettings;
 import org.nsider.chatgames.games.round.Round;

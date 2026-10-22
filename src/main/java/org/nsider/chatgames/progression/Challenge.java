@@ -1,7 +1,7 @@
 package org.nsider.chatgames.progression;
 
 import org.nsider.chatgames.menus.Menus;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 

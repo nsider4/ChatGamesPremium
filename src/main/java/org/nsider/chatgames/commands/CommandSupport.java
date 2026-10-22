@@ -8,7 +8,7 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.MessageKey;
 import org.nsider.chatgames.config.PermissionKey;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 import org.nsider.inventorymanager.extras.Nonnull;

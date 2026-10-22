@@ -7,7 +7,7 @@ import org.nsider.chatgames.commands.CommandSupport;
 import org.nsider.chatgames.commands.SubCommand;
 import org.nsider.chatgames.config.MessageKey;
 import org.nsider.chatgames.config.PermissionKey;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.util.Arrays;

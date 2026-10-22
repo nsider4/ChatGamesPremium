@@ -1,6 +1,6 @@
 package org.nsider.chatgames.games.round;
 
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.games.round.generators.MathRoundGenerator;
 import org.nsider.chatgames.games.round.generators.MemorizeRoundGenerator;
 import org.nsider.chatgames.games.round.generators.SequenceRoundGenerator;
@@ -10,7 +10,7 @@ import org.nsider.chatgames.games.round.generators.WordAssociationRoundGenerator
 import org.nsider.chatgames.games.round.generators.WordRoundGenerator;
 
 import org.nsider.inventorymanager.extras.Nullable;
-import java.util.EnumMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 /**
@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public final class RoundGenerators {
 
-    private static final Map<GameType, RoundGenerator> GENERATORS = new EnumMap<>(GameType.class);
+    private static final Map<GameType, RoundGenerator> GENERATORS = new ConcurrentHashMap<>();
 
     static {
         for (GameType type : new GameType[]{GameType.UNSCRAMBLE, GameType.UNREVERSE, GameType.REACTION,

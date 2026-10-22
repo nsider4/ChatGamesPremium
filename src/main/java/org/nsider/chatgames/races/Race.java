@@ -1,7 +1,7 @@
 package org.nsider.chatgames.races;
 
 import lombok.Getter;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.util.List;

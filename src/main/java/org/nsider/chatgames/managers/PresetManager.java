@@ -3,7 +3,7 @@ package org.nsider.chatgames.managers;
 import org.bukkit.configuration.ConfigurationSection;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.YamlConfig;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 

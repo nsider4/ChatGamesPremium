@@ -10,12 +10,12 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
-import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.events.ChatGamesEndEvent;
-import org.nsider.chatgames.events.ChatGamesStartEvent;
+import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.api.event.ChatGamesEndEvent;
+import org.nsider.chatgames.api.event.ChatGamesStartEvent;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
-import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.api.PlayerResult;
 import org.nsider.chatgames.games.StartOptions;
 import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.managers.TopManager;
@@ -32,7 +32,7 @@ import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +61,7 @@ public final class RaceManager {
 
     /** Reads every race's targets and amounts from races.yml. */
     public void load() {
-        Map<GameType, RaceData> loaded = new EnumMap<>(GameType.class);
+        Map<GameType, RaceData> loaded = new LinkedHashMap<>();
         for (GameType type : GameType.values()) {
             if (!type.isRace()) continue;
             RaceData races = RaceData.load(section(type).getConfigurationSection("data"),

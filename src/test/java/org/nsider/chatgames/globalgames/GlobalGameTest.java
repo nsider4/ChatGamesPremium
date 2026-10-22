@@ -2,7 +2,7 @@ package org.nsider.chatgames.globalgames;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Test;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 
 import java.io.InputStreamReader;
 import java.io.Reader;

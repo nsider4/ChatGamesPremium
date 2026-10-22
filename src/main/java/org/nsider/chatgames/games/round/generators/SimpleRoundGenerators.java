@@ -1,7 +1,7 @@
 package org.nsider.chatgames.games.round.generators;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.games.round.Hints;
 import org.nsider.chatgames.games.round.Round;
 import org.nsider.chatgames.games.round.RoundGenerator;

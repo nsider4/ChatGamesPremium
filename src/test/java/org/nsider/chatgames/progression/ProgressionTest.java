@@ -2,7 +2,7 @@ package org.nsider.chatgames.progression;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Test;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.Stat;
 import org.nsider.chatgames.placeholders.LeaderboardSnapshot;

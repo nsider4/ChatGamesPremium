@@ -1,7 +1,7 @@
 package org.nsider.chatgames.gameevents;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.globalgames.GlobalGameConfig;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;

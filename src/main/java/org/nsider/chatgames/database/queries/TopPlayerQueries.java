@@ -8,7 +8,7 @@ import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.YamlConfig;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.enums.TopType;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
@@ -31,6 +31,20 @@ public class TopPlayerQueries {
     private static String tableName;
     private static String fastestTable;
 
+    /**
+     * @return every race's id as a quoted SQL list, e.g. {@code 'hunt','place'}. Ids are only
+     *         lower-case letters, digits and underscores (GameType checks), so safe to put in a query.
+     */
+    static String raceKeysForSql() {
+        StringBuilder keys = new StringBuilder();
+        for (GameType type : GameType.values()) {
+            if (!type.isRace()) continue;
+            if (keys.length() > 0) keys.append(',');
+            keys.append('\'').append(type.getConfigKey()).append('\'');
+        }
+        return keys.toString();
+    }
+
     public static void initialize(ChatGames instance) {
         plugin = instance;
         tableName = ConfigValue.getString(ConfigPaths.TABLE_NAME);
@@ -52,7 +66,7 @@ public class TopPlayerQueries {
             case TypersTop:
                 // Races are timed too, but the overall list is for chat games ("fastest typers")
                 sql = "SELECT UUID, MIN(fastest_time) AS val FROM " + fastestTable + " WHERE fastest_time > 0 AND game_name NOT IN ("
-                        + GameType.raceKeysForSql() + ") GROUP BY UUID ORDER BY val ASC LIMIT 10";
+                        + raceKeysForSql() + ") GROUP BY UUID ORDER BY val ASC LIMIT 10";
                 break;
             case GameTypersTop:
                 sql = "SELECT UUID, fastest_time AS val FROM " + fastestTable + " WHERE game_name = ? AND fastest_time > 0 ORDER BY val ASC LIMIT 10";

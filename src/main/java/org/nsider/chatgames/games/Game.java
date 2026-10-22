@@ -1,10 +1,10 @@
 package org.nsider.chatgames.games;
 
 import lombok.Getter;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.games.round.GameSettings;
 import org.nsider.chatgames.games.round.Round;
-import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.api.PlayerResult;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 

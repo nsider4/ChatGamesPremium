@@ -1,7 +1,7 @@
 package org.nsider.chatgames.games.round;
 
 import org.junit.jupiter.api.Test;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 
 import java.util.Arrays;
 

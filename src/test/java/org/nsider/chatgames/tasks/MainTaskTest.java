@@ -1,11 +1,11 @@
 package org.nsider.chatgames.tasks;
 
 import org.junit.jupiter.api.Test;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -38,7 +38,7 @@ class MainTaskTest {
     @Test
     void weightsSetHowOftenEachGameIsPicked() {
         List<GameType> games = Arrays.asList(GameType.MATH, GameType.TRIVIA, GameType.REACTION);
-        Map<GameType, Integer> counts = new EnumMap<>(GameType.class);
+        Map<GameType, Integer> counts = new HashMap<>();
         Random random = new Random(11);
         for (int i = 0; i < 30000; i++) {
             GameType next = MainTask.pickGame(games, null, random, type -> type == GameType.MATH ? 3 : type == GameType.TRIVIA ? 1 : 0);

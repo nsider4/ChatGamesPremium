@@ -1,6 +1,6 @@
 package org.nsider.chatgames.gameevents;
 
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.games.StartOptions;
 import org.nsider.chatgames.globalgames.GlobalGameConfig;
 import org.nsider.inventorymanager.extras.Nonnull;

@@ -1,6 +1,6 @@
 package org.nsider.chatgames.games.round.generators;
 
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.games.round.Hints;
 import org.nsider.chatgames.games.round.Round;
 import org.nsider.chatgames.games.round.RoundContext;
@@ -31,25 +31,26 @@ public final class WordRoundGenerator implements RoundGenerator {
                 : context.randomWord(type.getConfigKey() + ".Words");
         Round.Builder round = Round.builder(type, word);
 
-        switch (type) {
-            case UNSCRAMBLE:
-                return round.display(scramble(word, context.getRandom()))
-                        .hints(Hints.revealFromStart(word)).build();
-            case UNREVERSE:
-                return round.display(new StringBuilder(word).reverse().toString())
-                        .hints(Hints.revealFromStart(word)).build();
-            case FILLOUT:
-                String puzzle = hideLetters(word, context.getSettings().getInt("difficulty", 30), context.getRandom());
-                return round.display(puzzle)
-                        .hints(Hints.fillBlanks(word, puzzle, context.getRandom())).build();
-            case HOVERABLE:
-                // The word is only in the hover text; the title must not give it away
-                String text = context.getMessages().getString("hoverableText", "&eHover Here!");
-                String hover = context.getMessages().getString("hoverText", "&b%selection%").replace("%selection%", word);
-                return round.component(new Round.ComponentSpec("%hoverableText%", text, hover, null)).build();
-            default:
-                return round.display(word).build();
+        if (type == GameType.UNSCRAMBLE) {
+            return round.display(scramble(word, context.getRandom()))
+                    .hints(Hints.revealFromStart(word)).build();
         }
+        if (type == GameType.UNREVERSE) {
+            return round.display(new StringBuilder(word).reverse().toString())
+                    .hints(Hints.revealFromStart(word)).build();
+        }
+        if (type == GameType.FILLOUT) {
+            String puzzle = hideLetters(word, context.getSettings().getInt("difficulty", 30), context.getRandom());
+            return round.display(puzzle)
+                    .hints(Hints.fillBlanks(word, puzzle, context.getRandom())).build();
+        }
+        if (type == GameType.HOVERABLE) {
+            // The word is only in the hover text; the title must not give it away
+            String text = context.getMessages().getString("hoverableText", "&eHover Here!");
+            String hover = context.getMessages().getString("hoverText", "&b%selection%").replace("%selection%", word);
+            return round.component(new Round.ComponentSpec("%hoverableText%", text, hover, null)).build();
+        }
+        return round.display(word).build();
     }
 
     /**

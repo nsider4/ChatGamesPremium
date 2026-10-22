@@ -8,7 +8,7 @@ import org.nsider.chatgames.config.PermissionKey;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.database.queries.TopPlayerQueries;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.enums.TopType;
 import org.nsider.inventorymanager.extras.Nonnull;
 

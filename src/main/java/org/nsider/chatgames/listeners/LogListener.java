@@ -6,10 +6,10 @@ import org.bukkit.event.Listener;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
-import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.events.ChatGamesEndEvent;
-import org.nsider.chatgames.events.ChatGamesStartEvent;
-import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.api.event.ChatGamesEndEvent;
+import org.nsider.chatgames.api.event.ChatGamesStartEvent;
+import org.nsider.chatgames.api.PlayerResult;
 import org.nsider.chatgames.races.Race;
 import org.nsider.chatgames.races.RaceTarget;
 

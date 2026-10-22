@@ -7,14 +7,14 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
-import org.nsider.chatgames.enums.GameType;
-import org.nsider.chatgames.events.ChatGamesEndEvent;
-import org.nsider.chatgames.events.ChatGamesGlobalEndEvent;
-import org.nsider.chatgames.events.ChatGamesStartEvent;
+import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.api.event.ChatGamesEndEvent;
+import org.nsider.chatgames.api.event.ChatGamesGlobalEndEvent;
+import org.nsider.chatgames.api.event.ChatGamesStartEvent;
 import org.nsider.chatgames.games.StartOptions;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
-import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.api.PlayerResult;
 import org.nsider.chatgames.managers.TopManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
@@ -297,8 +297,12 @@ public final class GlobalGameManager {
             }
         }
         Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(session.getType(), "global: " + session.getGoalText(), results));
-        Bukkit.getPluginManager().callEvent(new ChatGamesGlobalEndEvent(session.getType(), outcome,
-                progress.getProgress(), progress.getGoal(), session.getEntry().getMinContribution(), ranking));
+        List<ChatGamesGlobalEndEvent.Contributor> contributors = new ArrayList<>();
+        for (CoopProgress.Contributor contributor : ranking) {
+            contributors.add(new ChatGamesGlobalEndEvent.Contributor(contributor.getUuid(), contributor.getAmount(), contributor.getPlace()));
+        }
+        Bukkit.getPluginManager().callEvent(new ChatGamesGlobalEndEvent(session.getType(), ChatGamesGlobalEndEvent.Outcome.valueOf(outcome.name()),
+                progress.getProgress(), progress.getGoal(), session.getEntry().getMinContribution(), contributors));
         plugin.getGameManager().endGame();
         plugin.getLeaderboardCache().refresh();
     }

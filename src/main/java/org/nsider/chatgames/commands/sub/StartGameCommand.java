@@ -10,7 +10,7 @@ import org.nsider.chatgames.config.MessageKey;
 import org.nsider.chatgames.config.PermissionKey;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.races.RaceData;
 import org.nsider.chatgames.races.RaceTarget;
@@ -19,8 +19,10 @@ import org.nsider.inventorymanager.extras.Nonnull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -126,27 +128,22 @@ public class StartGameCommand extends SubCommand {
         if (type.isRace()) return raceSuggestions(plugin, type, args);
         if (args.length != 1) return Collections.emptyList();
         // A hint of what each game accepts
-        switch (type) {
-            case MATH:
-                return Collections.singletonList("<expression>");
-            case GUESS_THE_NUMBER:
-                return Collections.singletonList("<number> <spread>");
-            case RANDOM:
-            case MEMORIZE:
-                return Collections.singletonList("<length>");
-            case UNSCRAMBLE:
-            case UNREVERSE:
-            case REACTION:
-            case FILLOUT:
-            case HOVERABLE:
-                return Collections.singletonList("<word>");
-            case TRIVIA:
-                return Collections.singletonList("<question id>");
-            case WORD_ASSOCIATION:
-                return Collections.singletonList("<association id>");
-            default:
-                return Collections.emptyList();
+        String hint = ARGUMENT_HINTS.get(type);
+        return hint == null ? Collections.<String>emptyList() : Collections.singletonList(hint);
+    }
+
+    private static final Map<GameType, String> ARGUMENT_HINTS = new HashMap<>();
+
+    static {
+        ARGUMENT_HINTS.put(GameType.MATH, "<expression>");
+        ARGUMENT_HINTS.put(GameType.GUESS_THE_NUMBER, "<number> <spread>");
+        ARGUMENT_HINTS.put(GameType.RANDOM, "<length>");
+        ARGUMENT_HINTS.put(GameType.MEMORIZE, "<length>");
+        for (GameType word : new GameType[]{GameType.UNSCRAMBLE, GameType.UNREVERSE, GameType.REACTION, GameType.FILLOUT, GameType.HOVERABLE}) {
+            ARGUMENT_HINTS.put(word, "<word>");
         }
+        ARGUMENT_HINTS.put(GameType.TRIVIA, "<question id>");
+        ARGUMENT_HINTS.put(GameType.WORD_ASSOCIATION, "<association id>");
     }
 
     /** The targets races.yml lists, then their amounts; any other valid name also works. */

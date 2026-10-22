@@ -2,7 +2,7 @@ package org.nsider.chatgames.globalgames;
 
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.menus.Menus;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.chatgames.utils.messages.Msg;

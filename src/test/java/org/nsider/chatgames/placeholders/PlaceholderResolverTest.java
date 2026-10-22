@@ -1,7 +1,7 @@
 package org.nsider.chatgames.placeholders;
 
 import org.junit.jupiter.api.Test;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.Stat;
 

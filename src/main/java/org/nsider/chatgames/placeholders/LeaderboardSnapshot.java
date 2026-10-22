@@ -1,13 +1,12 @@
 package org.nsider.chatgames.placeholders;
 
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public final class LeaderboardSnapshot {
 
         // Overall best time = the lowest of a player's chat-game times; races only have per-race lists
         Map<UUID, Double> best = new HashMap<>();
-        Map<GameType, List<Row>> byGame = new EnumMap<>(GameType.class);
+        Map<GameType, List<Row>> byGame = new HashMap<>();
         for (TimeRow row : fastestRows) {
             if (row.seconds <= 0) continue;
             if (row.game == null || !row.game.isRace()) best.merge(row.uuid, row.seconds, Math::min);
@@ -87,7 +86,7 @@ public final class LeaderboardSnapshot {
         Map<UUID, Integer> fastestRank = new HashMap<>();
         List<Entry> fastest = rank(byTime, fastestRank, cachedNames);
 
-        Map<GameType, List<Entry>> fastestByGame = new EnumMap<>(GameType.class);
+        Map<GameType, List<Entry>> fastestByGame = new HashMap<>();
         for (Map.Entry<GameType, List<Row>> entry : byGame.entrySet()) {
             List<Row> rows = entry.getValue();
             rows.sort(Comparator.comparingDouble(r -> r.value));

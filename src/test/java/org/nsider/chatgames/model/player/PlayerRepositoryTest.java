@@ -3,7 +3,7 @@ package org.nsider.chatgames.model.player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.utils.database.QueryUtils;
 
 import java.nio.file.Path;

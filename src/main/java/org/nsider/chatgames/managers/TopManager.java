@@ -1,7 +1,7 @@
 package org.nsider.chatgames.managers;
 
 import org.bukkit.OfflinePlayer;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.utils.gameplay.MilestoneUtils;

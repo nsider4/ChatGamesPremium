@@ -1,6 +1,6 @@
 package org.nsider.chatgames.model.player;
 
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.placeholders.LeaderboardSnapshot;
 import org.nsider.chatgames.utils.database.QueryUtils;
 import org.nsider.inventorymanager.extras.Nonnull;

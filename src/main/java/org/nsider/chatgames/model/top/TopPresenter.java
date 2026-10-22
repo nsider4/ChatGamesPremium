@@ -3,7 +3,7 @@ package org.nsider.chatgames.model.top;
 import org.nsider.chatgames.menus.Menus;
 import org.bukkit.command.CommandSender;
 import org.nsider.chatgames.config.YamlConfig;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.enums.TopType;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 import org.nsider.inventorymanager.extras.Nonnull;

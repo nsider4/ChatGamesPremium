@@ -6,7 +6,7 @@ import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.config.settings.ListConfigValue;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.games.round.GameSettings;
 
 import org.nsider.inventorymanager.extras.Nonnull;

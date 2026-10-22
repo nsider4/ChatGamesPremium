@@ -9,12 +9,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.events.ChatGamesEndEvent;
-import org.nsider.chatgames.events.ChatGamesGlobalEndEvent;
+import org.nsider.chatgames.api.event.ChatGamesEndEvent;
+import org.nsider.chatgames.api.event.ChatGamesGlobalEndEvent;
 import org.nsider.chatgames.globalgames.CoopProgress;
-import org.nsider.chatgames.events.ChatGamesEventEndEvent;
-import org.nsider.chatgames.events.ChatGamesEventStartEvent;
-import org.nsider.chatgames.games.utils.PlayerResult;
+import org.nsider.chatgames.api.event.ChatGamesEventEndEvent;
+import org.nsider.chatgames.api.event.ChatGamesEventStartEvent;
+import org.nsider.chatgames.api.PlayerResult;
 import org.nsider.chatgames.listeners.DiscordListener;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.model.player.Stat;
@@ -115,7 +115,7 @@ public final class EventManager implements Listener {
         if (scheduled && plugin.getGameManager().getGamePlayerManager().getOnlinePlayers() < definition.getMinimumPlayers()) {
             return StartResult.NOT_ENOUGH_PLAYERS;
         }
-        ChatGamesEventStartEvent event = new ChatGamesEventStartEvent(definition, scheduled);
+        ChatGamesEventStartEvent event = new ChatGamesEventStartEvent(definition.getId(), definition.getName(), scheduled);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return StartResult.CANCELLED;
         Run started = new Run(definition);
@@ -138,7 +138,8 @@ public final class EventManager implements Listener {
         ChatGamesScheduler.cancel(current.pending);
         if (current.awaiting) plugin.getGameManager().stopCurrent();
         broadcast(Msg.of(messages("stopped")), current);
-        Bukkit.getPluginManager().callEvent(new ChatGamesEventEndEvent(current.definition, Collections.emptyList(), true));
+        Bukkit.getPluginManager().callEvent(new ChatGamesEventEndEvent(current.definition.getId(),
+                current.definition.getName(), Collections.<ChatGamesEventEndEvent.Standing>emptyList(), true));
         return current.definition;
     }
 
@@ -226,7 +227,7 @@ public final class EventManager implements Listener {
 
         List<UUID> byContribution = new ArrayList<>();
         if (event.isCompleted()) {
-            for (CoopProgress.Contributor contributor : event.getContributors()) {
+            for (ChatGamesGlobalEndEvent.Contributor contributor : event.getContributors()) {
                 if (contributor.getAmount() >= event.getMinContribution()) byContribution.add(contributor.getUuid());
             }
         }
@@ -305,7 +306,11 @@ public final class EventManager implements Listener {
             String title = ConfigManager.getEvents().getString("discord.title", "%event% results");
             DiscordListener.sendLines(plugin, title.replace("%event%", definition.getName()), discordLines);
         }
-        Bukkit.getPluginManager().callEvent(new ChatGamesEventEndEvent(definition, ranking, false));
+        List<ChatGamesEventEndEvent.Standing> standings = new ArrayList<>();
+        for (EventScores.Standing standing : ranking) {
+            standings.add(new ChatGamesEventEndEvent.Standing(standing.getUuid(), standing.getPoints(), standing.getPlace()));
+        }
+        Bukkit.getPluginManager().callEvent(new ChatGamesEventEndEvent(definition.getId(), definition.getName(), standings, false));
     }
 
     /** @return the stat holding one of a player's totals for an event, e.g. {@code event.weekend.points} */

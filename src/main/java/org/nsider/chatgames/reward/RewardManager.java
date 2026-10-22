@@ -5,7 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
-import org.nsider.chatgames.enums.GameType;
+import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.globalgames.GlobalGameManager;
 import org.nsider.chatgames.utils.gameplay.CommandUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
