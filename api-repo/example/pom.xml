@@ -41,6 +41,13 @@
             <artifactId>spigot-api</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+            <!-- No longer in Spigot's repository, and nothing here uses it -->
+            <exclusions>
+                <exclusion>
+                    <groupId>net.md-5</groupId>
+                    <artifactId>bungeecord-chat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- provided: ChatGames-Premium is on the server; never shade the API -->
         <dependency>
