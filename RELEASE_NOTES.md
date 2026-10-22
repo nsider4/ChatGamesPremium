@@ -35,6 +35,12 @@ Drop the new jar in and restart. On the first start:
 - **Many new PlaceholderAPI placeholders** for wins, races, streaks, challenges, events and global games. Every 1.9.9 placeholder still works.
 - **Translations:** item, block and mob names are now up to date with 26.x, and there are over 140 languages. Outdated files are re-downloaded automatically.
 - **Translated config files:** set `lang` to Spanish, French, Portuguese, German, Italian, Dutch, Polish, Russian or Turkish and every config file switches to that language: messages, menus, word lists, trivia and comments. Your settings are kept and the old files are backed up first. `config-language` in config.yml can pick a language or turn this off.
+- **MythicMobs:** Hunt races can target a MythicMobs mob with `mythic:<MobType>`. `count-mythic-mobs` in races.yml decides whether MythicMobs mobs also count as their vanilla type.
+- **Custom sounds:** any sound from a resource pack (`namespace:sound`) works in game sounds and menus.
+- **Developer API** ([ChatGames-API](https://github.com/nsider4/ChatGames-API) on JitPack). Plugins can add:
+  - chat games and races that play like the built-in ones: rotation, presets, events, challenges, menus, leaderboards and placeholders;
+  - reward actions and challenge types.
+  They can also start and stop games, read and change points, and listen to new events for answers, wins, challenges, streaks and points. The API's events replace 1.9.9's `customevents` package.
 
 ## Fixed
 

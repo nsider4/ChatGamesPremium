@@ -9,6 +9,7 @@
 //          click:<slot>  clicks a slot of the open menu (opened by a chat command), then waits 1.5 s
 //          rclick:<slot> the same with a right click
 //          close         closes the open menu
+//          walk:<ms> / sprint:<ms> / sneak:<ms>  moves forward that long, turning back halfway
 //          Every menu that opens is printed as "[menu] <title>" and one "[slot N] name | lore | lore" line per item
 //          (the gray glass-pane filler is left out).
 //          autoplay:<seconds>  plays the chat games for that long (see autoplay below)
@@ -363,6 +364,16 @@ function play(message) {
     }
     else if (kind === 'close') {
       if (bot.currentWindow) bot.closeWindow(bot.currentWindow);
+    }
+    else if (kind === 'walk' || kind === 'sprint' || kind === 'sneak') {
+      // Holds forward (and sprint or sneak) for <ms>, turning around halfway so it stays near spawn
+      const ms = Number(arg);
+      if (kind !== 'walk') bot.setControlState(kind, true);
+      bot.setControlState('forward', true);
+      await sleep(ms / 2);
+      await bot.look(bot.entity.yaw + Math.PI, 0, true);
+      await sleep(ms / 2);
+      bot.clearControlStates();
     }
     else if (['dig', 'place', 'eat', 'craft', 'attack', 'smelt'].includes(kind)) await race(kind, arg);
     else if (kind === 'quit') await quit();

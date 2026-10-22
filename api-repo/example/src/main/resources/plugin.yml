@@ -1,0 +1,7 @@
+name: ChatGames-Example
+version: 1.0.0
+main: org.nsider.chatgamesexample.ExamplePlugin
+api-version: '1.13'
+folia-supported: true
+depend: [ChatGames-Premium]
+description: Shows the ChatGames API - a chat game, a race, a reward action and a challenge type.
