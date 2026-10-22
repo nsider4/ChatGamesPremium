@@ -93,6 +93,23 @@ public class ChatGamesCommand implements TabExecutor {
         command.setTabCompleter(this);
     }
 
+    /** Adds {@code /chatgames <id>} for a game another plugin added. */
+    public void addGame(@Nonnull GameType type) {
+        register(new StartGameCommand(plugin, type));
+    }
+
+    public void removeGame(@Nonnull GameType type) {
+        SubCommand command = commands.get(type.getConfigKey());
+        if (!(command instanceof StartGameCommand)) return;
+        commands.remove(type.getConfigKey());
+        registered.remove(command);
+    }
+
+    /** @return true if a sub-command (or alias) already uses this name */
+    public boolean isTaken(@Nonnull String name) {
+        return commands.containsKey(name.toLowerCase(Locale.ROOT));
+    }
+
     private void register(SubCommand command) {
         registered.add(command);
         commands.put(command.getName().toLowerCase(Locale.ROOT), command);

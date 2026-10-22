@@ -3,6 +3,7 @@ package org.nsider.chatgames.races;
 import org.nsider.chatgames.menus.Menus;
 import com.cryptomorin.xseries.messages.Titles;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.Player;
@@ -16,6 +17,7 @@ import org.nsider.chatgames.api.event.ChatGamesStartEvent;
 import org.nsider.chatgames.games.manager.GameManager;
 import org.nsider.chatgames.games.manager.GameSoundManager;
 import org.nsider.chatgames.api.PlayerResult;
+import org.nsider.chatgames.api.event.ChatGamesWinEvent;
 import org.nsider.chatgames.games.StartOptions;
 import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.managers.TopManager;
@@ -184,14 +186,32 @@ public final class RaceManager {
             return null;
         }
         if (resolved == null) {
-            plugin.getLogger().warning("Can't start the " + type.getConfigKey() + " race: " + target
-                    + " is not a valid " + (type == GameType.HUNT ? "mob" : "material") + " on this server version.");
+            plugin.getLogger().warning("Can't start the " + type.getConfigKey() + " race: " + target + " is not a valid "
+                    + (type == GameType.HUNT ? "mob" : type.isMaterialRace() ? "material" : "target") + " on this server version.");
             return null;
         }
         int time = options.raceTimeSeconds() > 0 ? options.raceTimeSeconds()
                 : section(type).getInt(StartOptions.RACE_TIME, DEFAULT_TIME_LIMIT);
         return new Race(type, resolved, resolved.displayName(plugin.getLanguageManager()), amount,
                 races.getRewards(resolved.getName(), amount), time > 0 ? time : DEFAULT_TIME_LIMIT, options.isGlobal());
+    }
+
+    /**
+     * Counts something a player did towards a running race another plugin added. Any thread.
+     *
+     * @param target the target it counts for, without case; null counts for any
+     */
+    public void progress(@Nonnull GameType type, @Nonnull Player player, @Nullable String target, int amount) {
+        Race race = current;
+        if (race == null || race.getType() != type || amount <= 0 || race.getProgress().isOver()) return;
+        if (target != null && !race.getTarget().getName().equalsIgnoreCase(target.trim())) return;
+        if (canTakePart(player)) progress(race, player, amount);
+    }
+
+    /** @return whether what the player does counts towards races: not creative (unless allowed), an enabled world, games on */
+    public boolean canTakePart(@Nonnull Player player) {
+        if (player.getGameMode() == GameMode.CREATIVE && !ConfigValue.getBoolean(ConfigPaths.RACES_CREATIVE_ENABLED)) return false;
+        return plugin.getGameManager().worldEnabled(player) && plugin.getGameManager().gamesIsToggled(player);
     }
 
     /**
@@ -220,7 +240,9 @@ public final class RaceManager {
             data.incrementStat(Stat.RACE_WINS, 1);
             data.incrementStat(Stat.wins(type), 1);
         }
-        int points = section(type).getInt("points", DEFAULT_POINTS);
+        ChatGamesWinEvent win = new ChatGamesWinEvent(player, type, 1, seconds, Math.max(0, section(type).getInt("points", DEFAULT_POINTS)));
+        Bukkit.getPluginManager().callEvent(win);
+        int points = win.getPoints();
         if (points > 0) TopManager.addPoints(player, points);
         if (ConfigValue.getBoolean(ConfigPaths.FASTEST_TYPERS_TOP)) {
             TopManager.recordTime(player, type, seconds);
@@ -240,7 +262,7 @@ public final class RaceManager {
         }
         GameSoundManager.playGameSound(player, "win");
 
-        plugin.getGameUtils().giveRaceRewards(type.getConfigKey(), player, race.getRewards());
+        if (win.isGiveRewards()) plugin.getGameUtils().giveRaceRewards(type.getConfigKey(), player, race.getRewards());
         plugin.getProgressionManager().record(player, Activity.win(type, seconds, Math.max(0, points)));
         plugin.getLeaderboardCache().refresh();
         end(race);

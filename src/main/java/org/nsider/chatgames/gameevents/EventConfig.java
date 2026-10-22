@@ -3,6 +3,7 @@ package org.nsider.chatgames.gameevents;
 import org.bukkit.configuration.ConfigurationSection;
 import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.globalgames.GlobalGameConfig;
+import org.nsider.chatgames.registry.GameRegistry;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
@@ -94,7 +95,7 @@ public final class EventConfig {
         Object game = map.get("game");
         GameType type = game == null ? null : GameType.fromName(String.valueOf(game));
         if (type == null) {
-            warn.accept("step game '" + game + "' isn't a game or race; skipped");
+            GameRegistry.unknownName(warn, "step game '" + game + "' isn't a game or race; skipped");
             return null;
         }
         boolean global = type.isGlobalOnly() || Boolean.TRUE.equals(map.get("global"))

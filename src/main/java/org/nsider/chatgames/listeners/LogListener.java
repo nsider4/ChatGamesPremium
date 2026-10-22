@@ -96,7 +96,8 @@ public class LogListener implements Listener {
 
     private static String target(Race race) {
         RaceTarget target = race.getTarget();
-        return (race.getType().isMaterialRace() ? "Material: " : "Entity: ") + target.getServerName();
+        String kind = race.getType().isMaterialRace() ? "Material: " : race.getType() == GameType.HUNT ? "Entity: " : "Target: ";
+        return kind + target.getServerName();
     }
 
     /**

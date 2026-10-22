@@ -8,8 +8,9 @@ import org.nsider.chatgames.games.round.generators.SimpleRoundGenerators;
 import org.nsider.chatgames.games.round.generators.VariableRoundGenerator;
 import org.nsider.chatgames.games.round.generators.WordAssociationRoundGenerator;
 import org.nsider.chatgames.games.round.generators.WordRoundGenerator;
-
+import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
@@ -37,6 +38,15 @@ public final class RoundGenerators {
     }
 
     private RoundGenerators() {}
+
+    /** For a game another plugin added. */
+    public static void register(@Nonnull GameType type, @Nonnull RoundGenerator generator) {
+        GENERATORS.put(type, generator);
+    }
+
+    public static void unregister(@Nonnull GameType type) {
+        if (!type.isBuiltIn()) GENERATORS.remove(type);
+    }
 
     @Nullable
     public static RoundGenerator get(GameType type) {

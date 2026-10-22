@@ -5,7 +5,9 @@ import lombok.Setter;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.nsider.chatgames.api.ChatGamesAPI;
 import org.nsider.chatgames.commands.ChatGamesCommand;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
@@ -37,12 +39,15 @@ import org.nsider.chatgames.placeholders.LeaderboardCache;
 import org.nsider.chatgames.races.RaceListener;
 import org.nsider.chatgames.progression.ProgressionManager;
 import org.nsider.chatgames.races.RaceManager;
+import org.nsider.chatgames.registry.ChatGamesApiImpl;
+import org.nsider.chatgames.registry.GameRegistry;
 import org.nsider.chatgames.reward.RewardManager;
 import org.nsider.chatgames.tasks.MainTask;
 import org.nsider.chatgames.utils.gameplay.VersionUtils;
 import org.nsider.chatgames.utils.management.ChatGamesScheduler;
 import org.nsider.chatgames.utils.management.LogUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
+import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.Random;
 
@@ -72,6 +77,8 @@ public final class ChatGames extends JavaPlugin {
     private EventManager eventManager;
     private Menus menus;
     private MainTask mainTask;
+    private GameRegistry gameRegistry;
+    @Nullable private ChatGamesCommand chatGamesCommand;
     private LeaderboardCache leaderboardCache;
     private ChatGamesExpansion placeholderExpansion;
     private boolean isPlaceHolderAPIEnabled = false;
@@ -110,6 +117,7 @@ public final class ChatGames extends JavaPlugin {
 
         // 5. Game systems. MythicMobs first: races.yml's mythic: targets are checked as races load
         MythicHook.initialize(getLogger());
+        this.gameRegistry = new GameRegistry(this);
         this.languageManager = new LanguageManager(this);
         this.languageManager.load(ConfigValue.getString(ConfigPaths.LANGUAGE));
         this.configLanguage = new ConfigLanguage(this);
@@ -134,11 +142,13 @@ public final class ChatGames extends JavaPlugin {
         pluginManager.registerEvents(new RaceListener(this), this);
         pluginManager.registerEvents(new DiscordListener(this), this);
         pluginManager.registerEvents(eventManager, this);
+        pluginManager.registerEvents(gameRegistry, this);
 
         // 7. Command
         PluginCommand command = getCommand("chatgames");
         if (command != null) {
-            new ChatGamesCommand(this).bind(command);
+            this.chatGamesCommand = new ChatGamesCommand(this);
+            chatGamesCommand.bind(command);
         }
 
         // 8. Integrations
@@ -148,7 +158,11 @@ public final class ChatGames extends JavaPlugin {
             placeholderExpansion.register();
         }
 
-        // 9. Scheduled tasks
+        // The API, for plugins that add games (they enable after ChatGames)
+        getServer().getServicesManager().register(ChatGamesAPI.class, new ChatGamesApiImpl(this, gameRegistry), this, ServicePriority.Normal);
+
+        // 9. Scheduled tasks. The first tick runs once every plugin has enabled.
+        scheduler.global(gameRegistry::markStarted);
         startGameRotation();
         leaderboardCache.start();
         scheduler.asyncTimer(ChatGamesPlayerManager::saveAll, AUTOSAVE_TICKS, AUTOSAVE_TICKS);
@@ -188,6 +202,7 @@ public final class ChatGames extends JavaPlugin {
         }
 
         HandlerList.unregisterAll(this);
+        getServer().getServicesManager().unregisterAll(this);
 
         if (dataHandler != null) {
             // Blocks until every player is saved: the server would otherwise close the pool mid-save

@@ -2,6 +2,7 @@ package org.nsider.chatgames.progression;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.registry.GameRegistry;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
@@ -154,11 +155,20 @@ public final class ChallengeConfig {
                 return null;
             }
             ChallengeType type;
+            String customType = null;
+            String typeName = entry.getString("type", "").trim();
             try {
-                type = ChallengeType.valueOf(entry.getString("type", "").trim().toUpperCase(Locale.ROOT));
+                type = ChallengeType.valueOf(typeName.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
-                warn.accept(where + ": unknown type '" + entry.getString("type") + "'; skipped");
-                return null;
+                type = ChallengeType.CUSTOM;
+            }
+            if (type == ChallengeType.CUSTOM) {
+                // A type another plugin added (CUSTOM itself isn't written in challenges.yml)
+                if (!GameRegistry.isChallengeType(typeName)) {
+                    GameRegistry.unknownName(warn, where + ": unknown type '" + entry.getString("type") + "'; skipped");
+                    return null;
+                }
+                customType = typeName.toLowerCase(Locale.ROOT);
             }
             int amount = entry.getInt("amount", 1);
             if (amount < 1) {
@@ -169,7 +179,7 @@ public final class ChallengeConfig {
             if (type == ChallengeType.WIN_GAME) {
                 game = GameType.fromName(entry.getString("game"));
                 if (game == null) {
-                    warn.accept(where + ": WIN_GAME needs a game, '" + entry.getString("game") + "' isn't one; skipped");
+                    GameRegistry.unknownName(warn, where + ": WIN_GAME needs a game, '" + entry.getString("game") + "' isn't one; skipped");
                     return null;
                 }
             }
@@ -178,7 +188,7 @@ public final class ChallengeConfig {
                 warn.accept(where + ": FAST_WIN needs seconds above 0; skipped");
                 return null;
             }
-            return new Challenge(id, period, type, amount, game, seconds,
+            return new Challenge(id, period, type, customType, amount, game, seconds,
                     entry.getString("name", id), entry.getString("description", ""),
                     entry.getString("icon", "PAPER"), entry.getStringList("rewards"));
         }

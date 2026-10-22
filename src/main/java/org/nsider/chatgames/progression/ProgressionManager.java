@@ -1,7 +1,10 @@
 package org.nsider.chatgames.progression;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.api.event.ChatGamesChallengeCompleteEvent;
+import org.nsider.chatgames.api.event.ChatGamesStreakEvent;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.MessageKey;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
@@ -69,6 +72,8 @@ public final class ProgressionManager {
         for (Challenge challenge : result.getCompleted()) {
             send(player, MessageKey.CHALLENGE_COMPLETED, "%challenge%", challenge.getName(),
                     "%period%", periodName(challenge.getPeriod()));
+            Bukkit.getPluginManager().callEvent(new ChatGamesChallengeCompleteEvent(player, challenge.getId(), challenge.getName(),
+                    challenge.getPeriod().getKey()));
         }
 
         if (result.isAllDailyCompleted()) grow(player, data, StreakType.CHALLENGE, today);
@@ -82,6 +87,7 @@ public final class ProgressionManager {
         int days = StreakTracker.advance(data, type, today);
         if (days > 0) {
             send(player, MessageKey.STREAK_GREW, "%streak%", streaks.getName(type), "%days%", String.valueOf(days));
+            Bukkit.getPluginManager().callEvent(new ChatGamesStreakEvent(player, type.getKey(), days));
         }
     }
 

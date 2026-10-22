@@ -7,6 +7,7 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.globalgames.GlobalGameManager;
+import org.nsider.chatgames.registry.GameRegistry;
 import org.nsider.chatgames.utils.gameplay.CommandUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
@@ -104,7 +105,7 @@ public class RewardManager {
                     .forEach(p -> p.sendMessage(message));
         } else if (cmd.startsWith("[player_as_op]")) {
             plugin.getScheduler().onPlayer(player, () -> CommandUtils.executeAsOp(player, strip(cmd, "[player_as_op]")));
-        } else {
+        } else if (!GameRegistry.runRewardAction(plugin, player, cmd)) {
             plugin.getLogger().warning("Unknown reward action (expected [consolecmd], [playercmd], ...): " + command);
         }
     }

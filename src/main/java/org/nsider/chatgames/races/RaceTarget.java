@@ -7,8 +7,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Entity;
 import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.api.RaceGame;
 import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.managers.LanguageManager;
+import org.nsider.chatgames.registry.GameRegistry;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
@@ -32,9 +34,17 @@ public final class RaceTarget {
     @Nullable private final EntityType entity;
     /** The MythicMobs mob type as MythicMobs spells it, for mythic: targets. */
     @Nullable private final String mythicType;
+    /** For a race another plugin added: how its target is shown. */
+    @Nullable private final String customName;
 
     private RaceTarget(String name, @Nullable XMaterial material, @Nullable EntityType entity, @Nullable String mythicType) {
+        this(name, material, entity, mythicType, null);
+    }
+
+    private RaceTarget(String name, @Nullable XMaterial material, @Nullable EntityType entity, @Nullable String mythicType,
+                       @Nullable String customName) {
         this.name = name;
+        this.customName = customName;
         this.material = material;
         this.bukkitMaterial = material == null ? null : material.get();
         this.entity = entity;
@@ -49,6 +59,10 @@ public final class RaceTarget {
     public static RaceTarget resolve(@Nonnull GameType race, @Nonnull String name) {
         String key = name.trim().toUpperCase(Locale.ROOT);
         try {
+            if (!race.isBuiltIn()) {
+                RaceGame added = GameRegistry.race(race);
+                return added == null || !added.isValidTarget(key) ? null : new RaceTarget(key, null, null, null, added.targetName(key));
+            }
             if (race == GameType.HUNT && MythicHook.isMythicName(key)) {
                 String mythic = MythicHook.isEnabled() ? MythicHook.findMobType(key) : null;
                 return mythic == null ? null : new RaceTarget(key, null, null, mythic);
@@ -117,6 +131,7 @@ public final class RaceTarget {
      */
     @Nonnull
     public String displayName(@Nullable LanguageManager language) {
+        if (customName != null) return customName;
         if (mythicType != null) {
             String display = MythicHook.displayName(mythicType);
             return display != null ? display : titleCase(mythicType);

@@ -1,6 +1,5 @@
 package org.nsider.chatgames.races;
 
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
@@ -132,9 +131,7 @@ public final class RaceListener implements Listener {
     private Race running(GameType type, @Nullable Player player) {
         Race race = plugin.getRaceManager().getCurrent();
         if (race == null || race.getType() != type || player == null || race.getProgress().isOver()) return null;
-        if (player.getGameMode() == GameMode.CREATIVE && !ConfigValue.getBoolean(ConfigPaths.RACES_CREATIVE_ENABLED)) return null;
-        if (!plugin.getGameManager().worldEnabled(player) || !plugin.getGameManager().gamesIsToggled(player)) return null;
-        return race;
+        return plugin.getRaceManager().canTakePart(player) ? race : null;
     }
 
     /**

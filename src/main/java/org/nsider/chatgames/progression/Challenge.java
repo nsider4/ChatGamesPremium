@@ -16,6 +16,8 @@ public final class Challenge {
     private final String id;
     private final Period period;
     private final ChallengeType type;
+    /** For {@link ChallengeType#CUSTOM}: the type another plugin added, lower-case. */
+    @Nullable private final String customType;
     private final int amount;
     @Nullable private final GameType game;
     private final double seconds;
@@ -24,11 +26,12 @@ public final class Challenge {
     private final String icon;
     private final List<String> rewards;
 
-    Challenge(String id, Period period, ChallengeType type, int amount, @Nullable GameType game, double seconds,
-              String name, String description, String icon, List<String> rewards) {
+    Challenge(String id, Period period, ChallengeType type, @Nullable String customType, int amount, @Nullable GameType game,
+              double seconds, String name, String description, String icon, List<String> rewards) {
         this.id = id;
         this.period = period;
         this.type = type;
+        this.customType = customType;
         this.amount = amount;
         this.game = game;
         this.seconds = seconds;
@@ -60,6 +63,9 @@ public final class Challenge {
                 return Math.max(0, activity.getPoints());
             case PLAY_EVENT:
                 return activity.getKind() == Activity.Kind.EVENT ? 1 : 0;
+            case CUSTOM:
+                return activity.getKind() == Activity.Kind.CUSTOM && activity.getCustomType().equals(customType)
+                        ? activity.getPoints() : 0;
             default:
                 return 0;
         }

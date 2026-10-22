@@ -6,6 +6,7 @@ import org.nsider.chatgames.commands.CommandSupport;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.MessageKey;
 import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.registry.GameRegistry;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.menu.Menu;
@@ -87,6 +88,8 @@ public final class Menus {
     public static String gameName(@Nonnull GameType type) {
         String configured = ConfigManager.getMenus() == null ? null : ConfigManager.getMenus().getString("game-names." + type.getConfigKey());
         if (configured != null) return configured;
+        String added = GameRegistry.displayName(type);
+        if (added != null) return added;
         StringBuilder name = new StringBuilder();
         for (String word : type.getConfigKey().split("_")) {
             if (name.length() > 0) name.append(' ');
@@ -98,7 +101,8 @@ public final class Menus {
     /** @return the game's icon from menus.yml {@code game-icons} */
     @Nonnull
     public static String gameIcon(@Nonnull GameType type) {
-        return ConfigManager.getMenus().getString("game-icons." + type.getConfigKey(), "paper");
+        String added = GameRegistry.icon(type);
+        return ConfigManager.getMenus().getString("game-icons." + type.getConfigKey(), added != null ? added : "paper");
     }
 
     /** %game%, %key% (as in commands) and %icon%, for list entries. */

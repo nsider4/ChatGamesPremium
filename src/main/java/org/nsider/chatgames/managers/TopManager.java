@@ -1,7 +1,9 @@
 package org.nsider.chatgames.managers;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.api.event.ChatGamesPointsChangeEvent;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.utils.gameplay.MilestoneUtils;
@@ -34,6 +36,7 @@ public final class TopManager {
             int before = data.getPoints();
             int after = data.addPoints(amount);
             MilestoneUtils.checkMilestones(data, before, after);
+            if (after != before) Bukkit.getPluginManager().callEvent(new ChatGamesPointsChangeEvent(uuid, before, after));
         });
     }
 
@@ -41,7 +44,11 @@ public final class TopManager {
      * Sets points to an exact value. Milestones are not run: this is an admin correction.
      */
     public static void setPoints(OfflinePlayer player, int points) {
-        ChatGamesPlayerManager.modify(player.getUniqueId(), data -> data.setPoints(points));
+        ChatGamesPlayerManager.modify(player.getUniqueId(), data -> {
+            int before = data.getPoints();
+            data.setPoints(points);
+            if (points != before) Bukkit.getPluginManager().callEvent(new ChatGamesPointsChangeEvent(player.getUniqueId(), before, points));
+        });
     }
 
     /**

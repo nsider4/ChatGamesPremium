@@ -3,6 +3,7 @@ package org.nsider.chatgames.globalgames;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.registry.GameRegistry;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
@@ -70,7 +71,7 @@ public final class GlobalGameConfig {
                 GameType type = GameType.fromName(key);
                 ConfigurationSection entry = section.getConfigurationSection(key);
                 if (type == null || entry == null) {
-                    warn.accept("games." + key + " isn't a game or race; skipped");
+                    GameRegistry.unknownName(warn, "games." + key + " isn't a game or race; skipped");
                     continue;
                 }
                 if (!supports(type)) {

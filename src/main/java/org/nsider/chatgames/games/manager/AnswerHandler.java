@@ -1,5 +1,6 @@
 package org.nsider.chatgames.games.manager;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
@@ -12,13 +13,14 @@ import org.nsider.chatgames.games.round.AnswerChecker;
 import org.nsider.chatgames.games.round.GameSettings;
 import org.nsider.chatgames.games.round.Round;
 import org.nsider.chatgames.api.PlayerResult;
+import org.nsider.chatgames.api.event.ChatGamesAnswerEvent;
+import org.nsider.chatgames.api.event.ChatGamesWinEvent;
 import org.nsider.chatgames.managers.TopManager;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.model.player.Stat;
 import org.nsider.chatgames.progression.Activity;
 import org.nsider.chatgames.utils.messages.MessageUtils;
-
 import org.nsider.inventorymanager.extras.Nonnull;
 
 /**
@@ -84,6 +86,10 @@ public final class AnswerHandler {
             return false;
         }
 
+        ChatGamesAnswerEvent answered = new ChatGamesAnswerEvent(player, game.getGameType(), message, millis);
+        Bukkit.getPluginManager().callEvent(answered);
+        if (answered.isCancelled()) return false;
+
         PlayerResult placed = game.claimPlace(player.getUniqueId());
         if (placed == null) return false; // every place was taken a moment earlier
 
@@ -104,13 +110,15 @@ public final class AnswerHandler {
             data.incrementStat(Stat.WINS, 1);
             data.incrementStat(Stat.wins(type), 1);
         }
-        if (settings.getPoints() > 0) {
-            TopManager.addPoints(player, settings.getPoints());
+        ChatGamesWinEvent win = new ChatGamesWinEvent(player, type, placed.getPlace(), placed.getTime(), settings.getPoints());
+        Bukkit.getPluginManager().callEvent(win);
+        if (win.getPoints() > 0) {
+            TopManager.addPoints(player, win.getPoints());
         }
         if (ConfigValue.getBoolean(ConfigPaths.FASTEST_TYPERS_TOP)) {
             TopManager.recordTime(player, type, placed.getTime());
         }
-        plugin.getGameUtils().giveRewards(type.getConfigKey(), player, placed.getPlace());
-        plugin.getProgressionManager().record(player, Activity.win(type, placed.getTime(), settings.getPoints()));
+        if (win.isGiveRewards()) plugin.getGameUtils().giveRewards(type.getConfigKey(), player, placed.getPlace());
+        plugin.getProgressionManager().record(player, Activity.win(type, placed.getTime(), win.getPoints()));
     }
 }

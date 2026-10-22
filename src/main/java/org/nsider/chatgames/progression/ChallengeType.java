@@ -19,5 +19,7 @@ public enum ChallengeType {
     /** Points earned from games. */
     EARN_POINTS,
     /** Game events taken part in. */
-    PLAY_EVENT
+    PLAY_EVENT,
+    /** A type another plugin added through the API; challenges.yml names that type instead. */
+    CUSTOM
 }

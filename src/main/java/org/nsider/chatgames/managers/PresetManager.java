@@ -4,6 +4,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.YamlConfig;
 import org.nsider.chatgames.api.GameType;
+import org.nsider.chatgames.registry.GameRegistry;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
@@ -54,7 +55,7 @@ public final class PresetManager {
         for (String key : file().getStringList(PRESETS + "." + name + ".games")) {
             GameType type = GameType.fromName(key);
             if (type == null) {
-                if (logger != null) logger.warning("Preset '" + name + "' lists an unknown game: " + key);
+                if (logger != null) GameRegistry.unknownName(logger::warning, "Preset '" + name + "' lists an unknown game: " + key);
             } else if (!games.contains(type)) {
                 games.add(type);
             }
