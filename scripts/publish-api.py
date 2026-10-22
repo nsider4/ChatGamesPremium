@@ -1,18 +1,23 @@
 """Copies the developer API into a checkout of the public nsider4/ChatGames-API repository.
 
 usage: python scripts/publish-api.py <ChatGames-API checkout>
+       python scripts/publish-api.py --wiki <ChatGames-API.wiki checkout>
 
 The API is the org.nsider.chatgames.api package (ApiBoundaryTest keeps it to Bukkit and the JDK).
 The checkout gets those sources, plus everything in api-repo/ (pom, README, jitpack.yml and the
 example plugin). API sources that no longer exist here are deleted there. The version in both
 poms is set to this plugin's version, so tag the API repo with that version for JitPack.
 Nothing is committed or pushed.
+
+--wiki copies the pages in api-repo/wiki/ into a checkout of the repository's GitHub wiki
+(https://github.com/nsider4/ChatGames-API.wiki.git) and deletes pages that no longer exist here.
 """
 import os, re, shutil, sys
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 API = os.path.join('src', 'main', 'java', 'org', 'nsider', 'chatgames', 'api')
 TEMPLATE = os.path.join(ROOT, 'api-repo')
+WIKI = os.path.join(TEMPLATE, 'wiki')
 
 
 def plugin_version():
@@ -30,17 +35,36 @@ def write(path, text):
         out.write(text.replace('\r\n', '\n'))
 
 
+def publish_wiki(target):
+    pages = set()
+    for name in os.listdir(WIKI):
+        if name.endswith('.md'):
+            write(os.path.join(target, name), open(os.path.join(WIKI, name), encoding='utf-8').read())
+            pages.add(name)
+    removed = 0
+    for name in os.listdir(target):
+        if name.endswith('.md') and name not in pages:
+            os.remove(os.path.join(target, name))
+            removed += 1
+    print('copied %d wiki pages, removed %d' % (len(pages), removed))
+
+
 def main():
-    if len(sys.argv) != 2:
+    wiki = len(sys.argv) == 3 and sys.argv[1] == '--wiki'
+    if len(sys.argv) != 2 and not wiki:
         sys.exit(__doc__)
-    target = sys.argv[1]
+    target = sys.argv[-1]
     if not os.path.isdir(os.path.join(target, '.git')):
         sys.exit(target + ' is not a git checkout')
+    if wiki:
+        publish_wiki(target)
+        return
     version = plugin_version()
 
     copied = set()
     for base, dirs, files in os.walk(TEMPLATE):
-        dirs[:] = [d for d in dirs if d != 'target']
+        # The wiki is its own repository (see --wiki)
+        dirs[:] = [d for d in dirs if d != 'target' and os.path.join(base, d) != WIKI]
         for name in files:
             source = os.path.join(base, name)
             relative = os.path.relpath(source, TEMPLATE)

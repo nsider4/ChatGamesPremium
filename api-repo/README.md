@@ -13,6 +13,14 @@ It lets your plugin:
 
 It works on Spigot and Paper 1.8.8 to 26.x and on Folia.
 
+**📖 The [wiki](https://github.com/nsider4/ChatGames-API/wiki) explains every part step by step, with recipes:**
+[Getting Started](https://github.com/nsider4/ChatGames-API/wiki/Getting-Started) ·
+[Chat Games](https://github.com/nsider4/ChatGames-API/wiki/Chat-Games) ·
+[Races](https://github.com/nsider4/ChatGames-API/wiki/Races) ·
+[Reward Actions](https://github.com/nsider4/ChatGames-API/wiki/Reward-Actions) ·
+[Challenge Types](https://github.com/nsider4/ChatGames-API/wiki/Challenge-Types) ·
+[Events](https://github.com/nsider4/ChatGames-API/wiki/Events)
+
 ## Adding it
 
 The API is on [JitPack](https://jitpack.io/#nsider4/ChatGames-API). Use `provided` (Maven) or
