@@ -46,7 +46,7 @@ TEXT_RULES = {
     'events.yml': [r'events.*.name', r'messages.**'],
     'rewards.yml': [r'**.data[]'],
     'config.yml': [],
-    'add-ons.yml': [],
+    'add-ons.yml': [r'discord.message-content', r'discord.title', r'discord.description', r'discord.game-field'],
     'presets.yml': [],
     'milestones.yml': [],
 }
@@ -165,6 +165,11 @@ def segments(name, text):
             if raw == '':
                 stack.append((indent, name_))
                 continue
+            inline = INLINE_COMMENT.match(raw)
+            if inline and LETTER.search(inline.group(3)):
+                # 'minimum-players: 2 #explanation': the setting stays, the comment is text
+                yield number, 'comment', None, inline.group(3), (lambda t, h=head + inline.group(1) + inline.group(2): h + t)
+                continue
         elif item:
             indent = len(item.group(1))
             while stack and stack[-1][0] > indent:
@@ -176,6 +181,12 @@ def segments(name, text):
         else:
             continue
         flow = flow_items(raw)
+        reward = reward_text(raw) if flow is None else None
+        if reward:
+            # A message reward, in any file: only its text is translated, the chance, tag and permission stay
+            before, english, after, quote_char = reward
+            yield number, 'value', path, english, (lambda t, h=head, b=before, a=after, q=quote_char: h + quote(b + t + a, q))
+            continue
         if flow is None and not any(r.match(path) for r in rules):
             continue
         if flow is not None:
@@ -196,14 +207,31 @@ def segments(name, text):
             continue
         value, quote_char = parsed
         if name == 'rewards.yml':
-            tag = next((t for t in REWARD_TEXT_TAGS if value.startswith(t)), None)
-            if not tag:
-                continue
-            rest = value[len(tag):]
-            lead = rest[:len(rest) - len(rest.lstrip())]
-            yield number, 'value', path, rest.strip(), (lambda t, h=head, q=quote_char, tg=tag, ld=lead: h + quote(tg + ld + t, q))
-            continue
+            continue  # only its message rewards are text, and those were handled above
         yield number, 'value', path, value, (lambda t, h=head, q=quote_char: h + quote(t, q))
+
+
+# Console commands whose text players read, as in milestones.yml: 'say <text>', '[consolecmd] broadcast <text>'
+COMMAND_TEXT = re.compile(r'^((?:\[consolecmd\]\s*)?(?:minecraft:)?(?:say|broadcast|bc) )(.*?)$')
+INLINE_COMMENT = re.compile(r'''^([^'"#][^#]*?)(\s+#\s*)(.*)$''')
+
+
+REWARD_LINE = re.compile(r'^((?:\d+(?:\.\d+)?%~ )?(?:' + '|'.join(re.escape(t) for t in REWARD_TEXT_TAGS)
+                         + r')\s*)(.*?)((?:\s+has:\S+)?)$')
+
+
+def reward_text(raw):
+    """(before, text, after, quote) for a reward line that sends a message, else None."""
+    parsed = unquote(raw)
+    if not parsed:
+        return None
+    match = REWARD_LINE.match(parsed[0])
+    if match and LETTER.search(match.group(2)):
+        return match.group(1), match.group(2), match.group(3), parsed[1]
+    match = COMMAND_TEXT.match(parsed[0])
+    if match and LETTER.search(match.group(2)):
+        return match.group(1), match.group(2), '', parsed[1]
+    return None
 
 
 def read(name):

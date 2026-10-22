@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.commands.CommandSupport;
 import org.nsider.chatgames.commands.SubCommand;
+import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.MessageKey;
 import org.nsider.chatgames.config.PermissionKey;
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
@@ -103,9 +104,13 @@ public class ChallengesCommand extends SubCommand {
         long minutes = Math.max(1, Duration.between(ZonedDateTime.now(config.getZone()), end).toMinutes());
         long days = minutes / (24 * 60);
         long hours = minutes / 60 % 24;
-        if (days > 0) return days + "d " + hours + "h";
-        if (hours > 0) return hours + "h " + minutes % 60 + "m";
-        return minutes + "m";
+        if (days > 0) return unit(MessageKey.CHALLENGES_TIME_DAYS, days) + " " + unit(MessageKey.CHALLENGES_TIME_HOURS, hours);
+        if (hours > 0) return unit(MessageKey.CHALLENGES_TIME_HOURS, hours) + " " + unit(MessageKey.CHALLENGES_TIME_MINUTES, minutes % 60);
+        return unit(MessageKey.CHALLENGES_TIME_MINUTES, minutes);
+    }
+
+    private static String unit(MessageKey key, long amount) {
+        return ConfigManager.getMessages().get(key, "%amount%", String.valueOf(amount));
     }
 
     @Nonnull

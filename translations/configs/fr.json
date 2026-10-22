@@ -1261,6 +1261,18 @@
   "Commands (permission chatgames.preset):": "Commandes (permission chatgames.preset) :",
   "/chatgames preset load <name>   (or 'none')": "/chatgames preset load <name>   (ou 'none')",
   "/chatgames preset save <name>   saves the games enabled right now as a preset": "/chatgames preset save <name>   enregistre les jeux activés en ce moment comme preset",
-  "The plugin rewrites this file when you use those commands.": "Le plugin réécrit ce fichier quand vous utilisez ces commandes."
+  "The plugin rewrites this file when you use those commands.": "Le plugin réécrit ce fichier quand vous utilisez ces commandes.",
+  "&d%player% &fhas completed every daily challenge &d%day% &fdays in a row!": "&d%player% &fa terminé tous les défis quotidiens &d%day% &fjours d'affilée !",
+  "Online players-based condition, reward can only be chosen if there are 2 or more players online": "Condition selon les joueurs en ligne : la récompense ne peut sortir que s'il y a 2 joueurs en ligne ou plus",
+  "Latest game results:": "Derniers résultats :",
+  "Chat Games Result": "Résultat de Chat Games",
+  "The winner is:": "Le gagnant est :",
+  "Game: %game%": "Jeu : %game%",
+  "%player% reached 100 points!": "%player% a atteint 100 points !",
+  "%player% is now a legend with 500 points!": "%player% est maintenant une légende avec 500 points !",
+  "The units in %resets%, e.g. 2d 5h, 5h 12m or 40m": "Les unités de %resets%, p. ex. 2j 5h, 5h 12min ou 40min",
+  "%amount%d": "%amount%j",
+  "%amount%h": "%amount%h",
+  "%amount%m": "%amount%min"
  }
 }

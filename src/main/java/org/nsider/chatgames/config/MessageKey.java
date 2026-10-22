@@ -301,6 +301,21 @@ public enum MessageKey {
             "challenges.weekly",
             "Weekly"
     ),
+    CHALLENGES_TIME_DAYS(
+            "messages",
+            "challenges.time_days",
+            "%amount%d"
+    ),
+    CHALLENGES_TIME_HOURS(
+            "messages",
+            "challenges.time_hours",
+            "%amount%h"
+    ),
+    CHALLENGES_TIME_MINUTES(
+            "messages",
+            "challenges.time_minutes",
+            "%amount%m"
+    ),
     CHALLENGES_RESET(
             "messages",
             "challenges.reset",

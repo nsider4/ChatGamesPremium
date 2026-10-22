@@ -1261,6 +1261,18 @@
   "Commands (permission chatgames.preset):": "Commando's (permissie chatgames.preset):",
   "/chatgames preset load <name>   (or 'none')": "/chatgames preset load <name>   (of 'none')",
   "/chatgames preset save <name>   saves the games enabled right now as a preset": "/chatgames preset save <name>   slaat de spellen die nu aanstaan op als preset",
-  "The plugin rewrites this file when you use those commands.": "De plugin herschrijft dit bestand als je die commando's gebruikt."
+  "The plugin rewrites this file when you use those commands.": "De plugin herschrijft dit bestand als je die commando's gebruikt.",
+  "&d%player% &fhas completed every daily challenge &d%day% &fdays in a row!": "&d%player% &fheeft &d%day% &fdagen op rij elke dagelijkse uitdaging voltooid!",
+  "Online players-based condition, reward can only be chosen if there are 2 or more players online": "Voorwaarde op basis van spelers online: de beloning kan alleen gekozen worden als er 2 of meer spelers online zijn",
+  "Latest game results:": "Laatste spelresultaten:",
+  "Chat Games Result": "Chat Games-resultaat",
+  "The winner is:": "De winnaar is:",
+  "Game: %game%": "Spel: %game%",
+  "%player% reached 100 points!": "%player% heeft 100 punten bereikt!",
+  "%player% is now a legend with 500 points!": "%player% is nu een legende met 500 punten!",
+  "The units in %resets%, e.g. 2d 5h, 5h 12m or 40m": "De eenheden in %resets%, bijv. 2d 5u, 5u 12m of 40m",
+  "%amount%d": "%amount%d",
+  "%amount%h": "%amount%u",
+  "%amount%m": "%amount%m"
  }
 }

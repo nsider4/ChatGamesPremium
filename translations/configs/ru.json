@@ -1260,6 +1260,18 @@
   "Commands (permission chatgames.preset):": "Команды (право chatgames.preset):",
   "/chatgames preset load <name>   (or 'none')": "/chatgames preset load <name>   (или 'none')",
   "/chatgames preset save <name>   saves the games enabled right now as a preset": "/chatgames preset save <name>   сохраняет включённые сейчас игры как пресет",
-  "The plugin rewrites this file when you use those commands.": "Плагин перезаписывает этот файл, когда вы используете эти команды."
+  "The plugin rewrites this file when you use those commands.": "Плагин перезаписывает этот файл, когда вы используете эти команды.",
+  "&d%player% &fhas completed every daily challenge &d%day% &fdays in a row!": "&d%player% &fвыполняет все ежедневные испытания уже &d%day% &fдн. подряд!",
+  "Online players-based condition, reward can only be chosen if there are 2 or more players online": "Условие по игрокам онлайн: награда может выпасть, только если онлайн 2 или больше игроков",
+  "Latest game results:": "Последние результаты игр:",
+  "Chat Games Result": "Результат Chat Games",
+  "The winner is:": "Победитель:",
+  "Game: %game%": "Игра: %game%",
+  "%player% reached 100 points!": "%player% набрал 100 очков!",
+  "%player% is now a legend with 500 points!": "%player% теперь легенда с 500 очками!",
+  "The units in %resets%, e.g. 2d 5h, 5h 12m or 40m": "Единицы в %resets%, напр. 2д 5ч, 5ч 12мин или 40мин",
+  "%amount%d": "%amount%д",
+  "%amount%h": "%amount%ч",
+  "%amount%m": "%amount%мин"
  }
 }

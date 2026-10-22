@@ -1260,6 +1260,18 @@
   "Commands (permission chatgames.preset):": "Komutlar (izin chatgames.preset):",
   "/chatgames preset load <name>   (or 'none')": "/chatgames preset load <name>   (veya 'none')",
   "/chatgames preset save <name>   saves the games enabled right now as a preset": "/chatgames preset save <name>   şu an açık oyunları ön ayar olarak kaydeder",
-  "The plugin rewrites this file when you use those commands.": "Bu komutları kullandığında eklenti bu dosyayı yeniden yazar."
+  "The plugin rewrites this file when you use those commands.": "Bu komutları kullandığında eklenti bu dosyayı yeniden yazar.",
+  "&d%player% &fhas completed every daily challenge &d%day% &fdays in a row!": "&d%player% &fher günlük görevi &d%day% &fgündür aralıksız tamamlıyor!",
+  "Online players-based condition, reward can only be chosen if there are 2 or more players online": "Çevrimiçi oyuncu koşulu: ödül yalnızca 2 veya daha fazla oyuncu çevrimiçiyken seçilebilir",
+  "Latest game results:": "Son oyun sonuçları:",
+  "Chat Games Result": "Chat Games Sonucu",
+  "The winner is:": "Kazanan:",
+  "Game: %game%": "Oyun: %game%",
+  "%player% reached 100 points!": "%player% 100 puana ulaştı!",
+  "%player% is now a legend with 500 points!": "%player% artık 500 puanla bir efsane!",
+  "The units in %resets%, e.g. 2d 5h, 5h 12m or 40m": "%resets% içindeki birimler, örn. 2g 5sa, 5sa 12dk veya 40dk",
+  "%amount%d": "%amount%g",
+  "%amount%h": "%amount%sa",
+  "%amount%m": "%amount%dk"
  }
 }
