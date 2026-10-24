@@ -5,6 +5,9 @@ import org.bukkit.entity.Player;
 
 import org.nsider.inventorymanager.extras.Nonnull;
 
+/**
+ * Runs reward commands that need more than the console.
+ */
 public final class CommandUtils {
 
     private CommandUtils() {}

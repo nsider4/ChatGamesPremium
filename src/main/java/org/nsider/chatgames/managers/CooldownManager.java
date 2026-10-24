@@ -11,11 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Manages cooldowns for players to prevent repeated actions within a short time frame.
  */
-public class CooldownManager {
+public final class CooldownManager {
 
-    // By UUID so a player who left isn't kept in memory; commands run on region threads under Folia
+    // By UUID, and expired entries are dropped, so players who left aren't kept; commands run on region threads under Folia
     private static final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private static final long COOLDOWN_MILLIS = 5000;
+
+    private CooldownManager() {}
 
     /**
      * Checks if a player is off cooldown and updates their cooldown if applicable.
@@ -27,7 +29,9 @@ public class CooldownManager {
     public static boolean checkCooldown(@Nonnull Player player) {
         long remainingCooldown = getRemainingCooldown(player);
         if (remainingCooldown <= 0) {
-            cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+            long now = System.currentTimeMillis();
+            cooldowns.values().removeIf(last -> now - last >= COOLDOWN_MILLIS);
+            cooldowns.put(player.getUniqueId(), now);
             return true;
         }
         return false;

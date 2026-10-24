@@ -51,6 +51,10 @@ import org.nsider.inventorymanager.extras.Nullable;
 
 import java.util.Random;
 
+/**
+ * The plugin: creates every manager on enable, in dependency order, and shuts them down on
+ * disable. {@link #reloadAll()} is {@code /chatgames reload}.
+ */
 @Getter
 public final class ChatGames extends JavaPlugin {
 

@@ -3,7 +3,9 @@ package org.nsider.chatgames.database;
 /**
  * A utility class for handling error messages.
  */
-public class Errors {
+public final class Errors {
+
+    private Errors() {}
 
     /**
      * Returns a message indicating a failure to execute a SQL statement.

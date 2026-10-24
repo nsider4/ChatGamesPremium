@@ -92,6 +92,8 @@ public final class Menus {
         if (added != null) return added;
         StringBuilder name = new StringBuilder();
         for (String word : type.getConfigKey().split("_")) {
+            // An added game's id may hold "__"; an empty word would make substring throw
+            if (word.isEmpty()) continue;
             if (name.length() > 0) name.append(' ');
             name.append(word.substring(0, 1).toUpperCase(Locale.ROOT)).append(word.substring(1));
         }

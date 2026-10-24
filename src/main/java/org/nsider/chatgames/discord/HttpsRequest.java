@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -113,7 +114,7 @@ final class HttpsRequest {
             int colon = lines[i].indexOf(':');
             if (colon > 0) headers.put(lines[i].substring(0, colon).trim().toLowerCase(Locale.ROOT), lines[i].substring(colon + 1).trim());
         }
-        byte[] body = java.util.Arrays.copyOfRange(bytes, split + 4, bytes.length);
+        byte[] body = Arrays.copyOfRange(bytes, split + 4, bytes.length);
         if ("chunked".equalsIgnoreCase(headers.get("transfer-encoding"))) body = unchunk(body);
         return new Response(code, headers, new String(body, StandardCharsets.UTF_8));
     }

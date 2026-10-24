@@ -3,6 +3,9 @@ package org.nsider.chatgames.model.top;
 import lombok.Getter;
 import org.nsider.chatgames.enums.TopType;
 
+/**
+ * One line of a {@code /chatgames top} leaderboard.
+ */
 @Getter
 public class TopData {
     private final int rank;

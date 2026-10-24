@@ -147,7 +147,7 @@ public final class MathRoundGenerator implements RoundGenerator {
             for (int i = 0; i < o.length; i++) o[i] = operators.get(i);
             Expression expression = new Expression(n, o);
             if (expression.tryEvaluate() == null) {
-                throw new IllegalArgumentException("The result of " + text + " isn't a whole number");
+                throw new IllegalArgumentException("The result of " + text + " isn't a whole number (or is too big)");
             }
             return expression;
         }
@@ -159,9 +159,18 @@ public final class MathRoundGenerator implements RoundGenerator {
         }
 
         /**
-         * @return the value, or null if a division doesn't come out exact (or divides by zero)
+         * @return the value, or null if a division doesn't come out exact (or divides by zero), or
+         *         the result is too big for a long (several multiplications at a high difficulty)
          */
         Long tryEvaluate() {
+            try {
+                return evaluateExact();
+            } catch (ArithmeticException e) {
+                return null;
+            }
+        }
+
+        private Long evaluateExact() {
             List<Long> terms = new ArrayList<>();
             List<Character> signs = new ArrayList<>();
             long term = numbers[0];
@@ -169,7 +178,7 @@ public final class MathRoundGenerator implements RoundGenerator {
                 long next = numbers[i + 1];
                 char op = operators[i];
                 if (op == 'x') {
-                    term *= next;
+                    term = Math.multiplyExact(term, next);
                 } else if (op == '/') {
                     if (next == 0 || term % next != 0) return null;
                     term /= next;
@@ -182,7 +191,7 @@ public final class MathRoundGenerator implements RoundGenerator {
             terms.add(term);
             long result = terms.get(0);
             for (int i = 0; i < signs.size(); i++) {
-                result = signs.get(i) == '+' ? result + terms.get(i + 1) : result - terms.get(i + 1);
+                result = signs.get(i) == '+' ? Math.addExact(result, terms.get(i + 1)) : Math.subtractExact(result, terms.get(i + 1));
             }
             return result;
         }

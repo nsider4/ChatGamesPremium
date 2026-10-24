@@ -9,6 +9,9 @@ import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.globalgames.GlobalGameManager;
 
+/**
+ * Hands chat to the global game in play, or to the running chat game as an answer. Async chat thread.
+ */
 public class ChatListener implements Listener {
 
     private final ChatGames plugin;

@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+/**
+ * The {@code /chatgames top} leaderboards, read from the database and sent as chat messages.
+ */
 public class TopPlayerQueries {
 
     private static ChatGames plugin;

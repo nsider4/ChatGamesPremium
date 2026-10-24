@@ -9,6 +9,9 @@ import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
+/**
+ * Loads a player's data when they join (and tells operators about updates); saves and drops it when they leave.
+ */
 public class LoginListener implements Listener {
 
     private final ChatGames plugin;

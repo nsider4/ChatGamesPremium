@@ -23,10 +23,8 @@ public class ReloadCommand extends SubCommand {
 
     @Override
     public void execute(@Nonnull CommandSender sender, @Nonnull String[] args) {
-        if (plugin.reloadAll()) {
-            MessageUtils.sendMessage(sender, ConfigManager.getMessages().get(MessageKey.CONFIG_RELOADED));
-        } else {
-            MessageUtils.sendMessage(sender, ConfigManager.getMessages().get(MessageKey.CONFIG_RELOAD_FAILED));
-        }
+        // Reloading restarts the global timers and touches the running game: main/global thread
+        plugin.getScheduler().onGlobal(() -> MessageUtils.sendMessage(sender, ConfigManager.getMessages().get(
+                plugin.reloadAll() ? MessageKey.CONFIG_RELOADED : MessageKey.CONFIG_RELOAD_FAILED)));
     }
 }

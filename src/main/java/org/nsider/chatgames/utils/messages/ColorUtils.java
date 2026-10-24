@@ -1,7 +1,6 @@
 package org.nsider.chatgames.utils.messages;
 
 import org.bukkit.ChatColor;
-import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.utils.gameplay.VersionUtils;
 
 import java.util.regex.Matcher;
@@ -11,13 +10,11 @@ import java.util.regex.Pattern;
  * Utility class for handling color-related operations.
  * Provides methods for colorizing messages in Minecraft using both Minecraft formatting codes and hex color codes.
  */
-public class ColorUtils {
+public final class ColorUtils {
 
-    private static ChatGames plugin;
+    private static final Pattern HEX = Pattern.compile("#[a-fA-F0-9]{6}");
 
-    protected static void initialize(ChatGames plugin) {
-        ColorUtils.plugin = plugin;
-    }
+    private ColorUtils() {}
 
     /**
      * Colorizes a message, translating Minecraft color codes (&) and hex color codes (for Minecraft 1.16+).
@@ -41,23 +38,16 @@ public class ColorUtils {
      * @return the message with hex colors translated to Minecraft color codes
      */
     private static String translateHexColors(String message) {
-        Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
-        Matcher matcher = pattern.matcher(message);
-
-        while (matcher.find()) {
-            String hexCode = message.substring(matcher.start(), matcher.end());
-            String replaceSharp = hexCode.replace('#', 'x');
-
-            char[] ch = replaceSharp.toCharArray();
-            StringBuilder builder = new StringBuilder("");
-            for (char c : ch) {
-                builder.append("&").append(c);
-            }
-
-            message = message.replace(hexCode, builder.toString());
-            matcher = pattern.matcher(message);
-        }
-
-        return ChatColor.translateAlternateColorCodes('&', message);
+        Matcher matcher = HEX.matcher(message);
+        if (!matcher.find()) return ChatColor.translateAlternateColorCodes('&', message);
+        // One pass over the text, instead of searching it again after every colour
+        StringBuffer out = new StringBuffer(message.length() + 32);
+        do {
+            StringBuilder code = new StringBuilder("&x");
+            for (int i = matcher.start() + 1; i < matcher.end(); i++) code.append('&').append(message.charAt(i));
+            matcher.appendReplacement(out, Matcher.quoteReplacement(code.toString()));
+        } while (matcher.find());
+        matcher.appendTail(out);
+        return ChatColor.translateAlternateColorCodes('&', out.toString());
     }
 }

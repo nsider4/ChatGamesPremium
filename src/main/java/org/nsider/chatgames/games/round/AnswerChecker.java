@@ -29,6 +29,7 @@ public final class AnswerChecker {
         String cleaned = clean(input);
         if (cleaned.isEmpty()) return Result.WRONG;
 
+        String typed = normalize(cleaned);
         boolean wrongCase = false;
         for (String answer : round.getAnswers()) {
             if (round.isListAnswer()) {
@@ -36,10 +37,10 @@ public final class AnswerChecker {
                 if (caseSensitive && listsMatch(answer, cleaned, round.isOrderMatters(), false)) wrongCase = true;
             } else {
                 String expected = normalize(answer);
-                if (caseSensitive ? expected.equals(normalize(cleaned)) : expected.equalsIgnoreCase(normalize(cleaned))) {
+                if (caseSensitive ? expected.equals(typed) : expected.equalsIgnoreCase(typed)) {
                     return Result.CORRECT;
                 }
-                if (caseSensitive && expected.equalsIgnoreCase(normalize(cleaned))) wrongCase = true;
+                if (caseSensitive && expected.equalsIgnoreCase(typed)) wrongCase = true;
             }
         }
         return wrongCase ? Result.WRONG_CASE : Result.WRONG;

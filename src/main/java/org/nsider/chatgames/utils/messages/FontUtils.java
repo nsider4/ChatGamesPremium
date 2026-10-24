@@ -2,6 +2,9 @@ package org.nsider.chatgames.utils.messages;
 
 import org.bukkit.ChatColor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Utility class for working with font widths and characters in Minecraft.
  * Provides methods for determining the width of a string based on individual character widths.
@@ -110,6 +113,13 @@ public class FontUtils {
         SPACE(' ', 3),
         DEFAULT('a', 4);
 
+        /** Looked up for every character of every centred line, so built once; the first constant for a character wins. */
+        private static final Map<Character, DefaultFontInfo> BY_CHARACTER = new HashMap<>();
+
+        static {
+            for (DefaultFontInfo info : values()) BY_CHARACTER.putIfAbsent(info.character, info);
+        }
+
         private final char character;
         private final int length;
 
@@ -149,12 +159,8 @@ public class FontUtils {
          * @return the DefaultFontInfo for the character, or the default font if not found
          */
         public static DefaultFontInfo getDefaultFontInfo(char c) {
-            for (DefaultFontInfo dFI : DefaultFontInfo.values()) {
-                if (dFI.getCharacter() == c) {
-                    return dFI;
-                }
-            }
-            return DefaultFontInfo.DEFAULT;
+            DefaultFontInfo info = BY_CHARACTER.get(c);
+            return info != null ? info : DefaultFontInfo.DEFAULT;
         }
     }
 

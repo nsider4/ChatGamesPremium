@@ -12,7 +12,9 @@ import java.sql.SQLException;
  * Utility class for managing database connections.
  * Provides methods to initialize the database handler and retrieve connections.
  */
-public class DatabaseUtils {
+public final class DatabaseUtils {
+
+    private DatabaseUtils() {}
 
     @Nullable
     private static DataHandler dataHandler;

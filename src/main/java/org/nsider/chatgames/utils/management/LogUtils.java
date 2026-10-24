@@ -1,12 +1,16 @@
 package org.nsider.chatgames.utils.management;
 
-import org.bukkit.Bukkit;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.inventorymanager.extras.Nonnull;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -23,7 +27,7 @@ public class LogUtils {
     private final ChatGames plugin;
 
     /**
-     * Constructs a new LogHandler instance.
+     * Constructs a new LogUtils instance.
      *
      * @param instance The plugin instance.
      */
@@ -44,7 +48,7 @@ public class LogUtils {
             try {
                 logFile.createNewFile();
             } catch (IOException e) {
-                Bukkit.getLogger().severe("Failed to create log file: " + e.getMessage());
+                plugin.getLogger().severe("Failed to create log file: " + e.getMessage());
             }
         }
 
@@ -59,13 +63,16 @@ public class LogUtils {
      */
     @Nonnull
     public List<String> getLastLogs(int amount) {
+        // With 0 the size check below never trims, which would return the whole file
+        if (amount <= 0) return new ArrayList<>();
         File logFile = getLogFile();
         if (!logFile.exists()) {
-            Bukkit.getLogger().severe("Log file does not exist.");
+            plugin.getLogger().severe("Log file does not exist.");
             return new ArrayList<>();
         }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+        // UTF-8 as written by LogListener, whatever the server's default charset
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(logFile), StandardCharsets.UTF_8))) {
             Deque<String> lines = new ArrayDeque<>();
             String line;
 
@@ -78,7 +85,7 @@ public class LogUtils {
 
             return new ArrayList<>(lines);
         } catch (IOException e) {
-            Bukkit.getLogger().severe("Failed to read logs: " + e.getMessage());
+            plugin.getLogger().severe("Failed to read logs: " + e.getMessage());
             return new ArrayList<>();
         }
     }

@@ -1,9 +1,13 @@
 package org.nsider.chatgames.config.settings;
 
-
 import java.util.List;
 
-public class ListConfigValue {
+/**
+ * Reads one list setting from the file its {@link ConfigPaths} entry belongs to.
+ */
+public final class ListConfigValue {
+
+    private ListConfigValue() {}
 
     public static List<String> getStringList(ConfigPaths path) {
         return path.getFile().getStringList(path.path());

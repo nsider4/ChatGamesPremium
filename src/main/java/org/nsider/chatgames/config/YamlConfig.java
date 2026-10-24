@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -48,7 +49,8 @@ public class YamlConfig extends YamlConfiguration {
         try (Reader reader = new InputStreamReader(new FileInputStream(this.file), StandardCharsets.UTF_8)) {
             super.load(reader);
         } catch (IOException | InvalidConfigurationException e) {
-            this.plugin.getLogger().log(Level.SEVERE, "Failed to load configuration file {0}!", this.path);
+            // The message says where the YAML is broken (line and column)
+            this.plugin.getLogger().log(Level.SEVERE, "Failed to load configuration file " + this.path + "! " + e.getMessage());
             return false;
         }
         return true;
@@ -77,7 +79,12 @@ public class YamlConfig extends YamlConfiguration {
     public void saveDefault() {
         try {
             if (!this.file.exists()) {
-                if (this.plugin.getResource(this.path) != null) {
+                boolean bundled;
+                // getResource opens a stream; only whether there is one matters here
+                try (InputStream resource = this.plugin.getResource(this.path)) {
+                    bundled = resource != null;
+                }
+                if (bundled) {
                     this.plugin.saveResource(this.path, false);
                 } else {
                     this.file.createNewFile();

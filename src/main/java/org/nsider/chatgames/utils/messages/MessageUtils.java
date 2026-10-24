@@ -3,30 +3,28 @@ package org.nsider.chatgames.utils.messages;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.nsider.chatgames.ChatGames;
 
 import java.util.List;
-import java.util.logging.Level;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
- * Utility class for handling message sending, logging, and message formatting.
+ * Utility class for sending and formatting messages.
  */
-public class MessageUtils {
+public final class MessageUtils {
 
     private static ChatGames plugin;
 
+    private MessageUtils() {}
+
     /**
-     * Initializes the MessageUtils class with the plugin instance.
-     * Ensures that only one instance of MessageUtils is created.
+     * Gives the message helpers the plugin, for its prefix and PlaceholderAPI. Called once on enable.
      *
-     * @param pluginInstance the ElytraTweaks plugin instance
+     * @param pluginInstance the ChatGames plugin instance
      */
     public static void initialize(ChatGames pluginInstance) {
         plugin = pluginInstance;
-        ColorUtils.initialize(pluginInstance);
-        CenteredMessageUtils.initialize(pluginInstance);
     }
 
     /**
@@ -40,8 +38,9 @@ public class MessageUtils {
         if (input == null || input.isEmpty()) {
             return suggestions;
         }
+        String typed = input.toLowerCase(Locale.ROOT);
         return suggestions.stream()
-                .filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+                .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(typed))
                 .collect(Collectors.toList());
     }
 
@@ -82,36 +81,5 @@ public class MessageUtils {
      */
     public static List<String> colorList(List<String> messages) {
         return messages.stream().map(MessageUtils::color).collect(Collectors.toList());
-    }
-
-    /**
-     * Logs a message at the specified level.
-     *
-     * @param level the log level (e.g., INFO, WARNING)
-     * @param msg   the message to log
-     */
-    public static void log(Level level, String msg) {
-        plugin.getLogger().log(level, msg);
-    }
-
-    /**
-     * Sends a centered message to a CommandSender.
-     *
-     * @param sender  the CommandSender
-     * @param message the message to send
-     */
-    public static void sendCenteredMessage(CommandSender sender, String message) {
-        CenteredMessageUtils.sendCenteredMessage(sender, message);
-    }
-
-    /**
-     * Sends a centered message with a clickable component to a player.
-     *
-     * @param player            the player
-     * @param message           the message to send
-     * @param clickableComponent the clickable component
-     */
-    public static void sendCenteredMessage(Player player, String message, TextComponent clickableComponent) {
-        CenteredMessageUtils.sendCenteredMessage(player, message, clickableComponent);
     }
 }

@@ -16,8 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -146,25 +144,17 @@ public class HikariDatabase implements DataHandler {
      */
     private static @Nonnull Properties getProperties() {
         final Properties properties = new Properties();
-
-        Map<String, String> initialProperties = new HashMap<>();
-        initialProperties.put("cachePrepStmts", "true");
-        initialProperties.put("prepStmtCacheSize", "250");
-        initialProperties.put("prepStmtCacheSqlLimit", "2048");
-        initialProperties.put("useServerPrepStmts", "true");
-        initialProperties.put("useLocalSessionState", "true");
-        initialProperties.put("useLocalTransactionState", "true");
-
-        properties.putAll(initialProperties);
-
-        Map<String, String> additionalProperties = new HashMap<>();
-        additionalProperties.put("rewriteBatchedStatements", "true");
-        additionalProperties.put("cacheResultSetMetadata", "true");
-        additionalProperties.put("cacheServerConfiguration", "true");
-        additionalProperties.put("elideSetAutoCommits", "true");
-        additionalProperties.put("maintainTimeStats", "false");
-
-        properties.putAll(additionalProperties);
+        properties.setProperty("cachePrepStmts", "true");
+        properties.setProperty("prepStmtCacheSize", "250");
+        properties.setProperty("prepStmtCacheSqlLimit", "2048");
+        properties.setProperty("useServerPrepStmts", "true");
+        properties.setProperty("useLocalSessionState", "true");
+        properties.setProperty("useLocalTransactionState", "true");
+        properties.setProperty("rewriteBatchedStatements", "true");
+        properties.setProperty("cacheResultSetMetadata", "true");
+        properties.setProperty("cacheServerConfiguration", "true");
+        properties.setProperty("elideSetAutoCommits", "true");
+        properties.setProperty("maintainTimeStats", "false");
         return properties;
     }
 

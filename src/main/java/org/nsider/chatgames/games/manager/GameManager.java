@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.PermissionKey;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
 import org.nsider.chatgames.api.GameType;
@@ -185,7 +186,7 @@ public class GameManager {
     }
 
     public boolean gamesIsToggled(Player player) {
-        if (ConfigValue.getBoolean(ConfigPaths.REQUIRE_PERMISSION_TO_PLAY) && !player.hasPermission("chatgames.play")) {
+        if (ConfigValue.getBoolean(ConfigPaths.REQUIRE_PERMISSION_TO_PLAY) && !player.hasPermission(PermissionKey.PLAY.getPermission())) {
             return false;
         }
         ChatGamesPlayer data = ChatGamesPlayerManager.get(player.getUniqueId());

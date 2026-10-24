@@ -57,7 +57,7 @@ public final class EventConfig {
         List<EventStep> steps = new ArrayList<>();
         List<Map<?, ?>> stepMaps = event.getMapList("steps");
         for (int i = 0; i < stepMaps.size(); i++) {
-            EventStep step = step(stepMaps.get(i), problem -> warn.accept(problem));
+            EventStep step = step(stepMaps.get(i), warn);
             if (step != null) steps.add(step);
         }
         if (steps.isEmpty()) {

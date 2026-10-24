@@ -27,7 +27,7 @@ public class ChatGamesStreakEvent extends Event {
         return player;
     }
 
-    /** @return the streak's type in streaks.yml, e.g. "daily_win" */
+    /** @return the streak's type in streaks.yml: "challenge", "daily" or "global" */
     public String getStreak() {
         return streak;
     }

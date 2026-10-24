@@ -7,9 +7,11 @@ import org.bukkit.configuration.MemoryConfiguration;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -56,7 +58,7 @@ public final class RoundContext {
 
     @Nonnull
     public List<String> filterBlacklisted(@Nonnull List<String> list) {
-        List<String> blacklist = new ArrayList<>();
+        Set<String> blacklist = new HashSet<>();
         for (String word : words.getStringList("blacklistedWords")) {
             blacklist.add(word.toLowerCase(Locale.ROOT));
         }

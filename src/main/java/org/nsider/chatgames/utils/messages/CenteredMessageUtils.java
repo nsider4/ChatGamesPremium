@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.nsider.chatgames.ChatGames;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +13,9 @@ import java.util.List;
  * Provides methods for centering text messages and sending them to players,
  * including support for clickable components.
  */
-public class CenteredMessageUtils {
+public final class CenteredMessageUtils {
 
-    private static ChatGames plugin;
-
-    protected static void initialize(ChatGames plugin) {
-        CenteredMessageUtils.plugin = plugin;
-    }
+    private CenteredMessageUtils() {}
 
     /**
      * Returns a list of centered lines that fit within Minecraft's chat width (320 pixels).

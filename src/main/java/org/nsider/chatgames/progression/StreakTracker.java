@@ -2,6 +2,7 @@ package org.nsider.chatgames.progression;
 
 import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
 
 import java.time.LocalDate;
 
@@ -79,6 +80,7 @@ public final class StreakTracker {
      *
      * @return the first and last streak day claimed now, or null if there was nothing
      */
+    @Nullable
     public static int[] claim(@Nonnull ChatGamesPlayer player, @Nonnull StreakType type, @Nonnull LocalDate today) {
         synchronized (player) {
             if (!alive(player, type, today)) return null;

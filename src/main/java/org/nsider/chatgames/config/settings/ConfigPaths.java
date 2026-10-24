@@ -284,10 +284,7 @@ public enum ConfigPaths {
     ),
     /* -----------------------------------------END OF config.yml----------------------------------------- */
 
-
     /* games.yml is read per game by org.nsider.chatgames.games.round.GameSettings */
-
-
 
     /* ----------------------------------------------races.yml---------------------------------------------- */
 
@@ -311,29 +308,6 @@ public enum ConfigPaths {
             "hunt.count-spawner-mobs",
             ConfigType.BOOLEAN
     ),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /* -----------------------------------------END OF races.yml----------------------------------------- */
 

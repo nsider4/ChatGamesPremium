@@ -12,12 +12,13 @@ import org.nsider.chatgames.games.round.GameSettings;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 import java.util.List;
-import java.util.Random;
 
+/**
+ * Settings shared by every game: per-game sections, the rotation delay, worlds and sounds.
+ */
 public class GameConfigManager {
 
     private final ChatGames plugin;
-    private final Random random = new Random();
 
     public GameConfigManager(ChatGames plugin) {
         this.plugin = plugin;
@@ -52,7 +53,7 @@ public class GameConfigManager {
             int min = ConfigValue.getInt(ConfigPaths.RANDOM_DELAY_MIN);
             int max = ConfigValue.getInt(ConfigPaths.RANDOM_DELAY_LIMIT);
             String unit = ConfigValue.getString(ConfigPaths.RANDOM_DELAY_UNIT);
-            long delay = Math.min(min, max) + random.nextInt(Math.abs(max - min) + 1);
+            long delay = Math.min(min, max) + plugin.getRandom().nextInt(Math.abs(max - min) + 1);
             return "seconds".equalsIgnoreCase(unit) ? delay * 20L : delay * 20L * 60L;
         }
         return ConfigValue.getInt(ConfigPaths.TIME_MINUTES) * 20L * 60L;
@@ -60,10 +61,6 @@ public class GameConfigManager {
 
     public List<String> getDisabledWorlds() {
         return ListConfigValue.getStringList(ConfigPaths.DISABLED_WORLDS);
-    }
-
-    public boolean isPermissionRequiredToPlay() {
-        return ConfigValue.getBoolean(ConfigPaths.REQUIRE_PERMISSION_TO_PLAY);
     }
 
     public boolean countAllPlayers() {

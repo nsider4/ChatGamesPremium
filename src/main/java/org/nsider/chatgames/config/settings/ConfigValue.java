@@ -1,6 +1,11 @@
 package org.nsider.chatgames.config.settings;
 
-public class ConfigValue {
+/**
+ * Reads one setting from the file its {@link ConfigPaths} entry belongs to.
+ */
+public final class ConfigValue {
+
+    private ConfigValue() {}
 
     public static String getString(ConfigPaths path) {
         return path.getFile().getString(path.path());

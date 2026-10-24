@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * One Discord message: text and at most one embed, ready to send through a webhook or
@@ -30,6 +31,8 @@ public final class DiscordMessage {
     static final int MAX_FIELDS = 25;
     /** Discord rejects an empty field name or value; this shows nothing. */
     static final String BLANK = String.valueOf((char) 0x200B);
+    /** A Discord ID (a snowflake): only these are ever allowed to ping. */
+    private static final Pattern ID = Pattern.compile("\\d{5,25}");
 
     @Nullable private String content;
     @Nullable private String username;
@@ -87,7 +90,7 @@ public final class DiscordMessage {
 
     public DiscordMessage allowRoles(@Nonnull Iterable<String> ids) {
         for (String id : ids) {
-            if (id != null && id.trim().matches("\\d{5,25}")) roles.add(id.trim());
+            if (id != null && ID.matcher(id.trim()).matches()) roles.add(id.trim());
         }
         return this;
     }
@@ -97,7 +100,7 @@ public final class DiscordMessage {
     }
 
     public DiscordMessage allowUser(@Nullable String id) {
-        if (id != null && id.matches("\\d{5,25}")) users.add(id);
+        if (id != null && ID.matcher(id).matches()) users.add(id);
         return this;
     }
 

@@ -10,6 +10,7 @@ import org.nsider.chatgames.utils.messages.MessageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -106,8 +107,8 @@ public class GameUtils {
 
     /**
      * Gives the item of a "<prefix> give <player> <item> [amount]" reward. Item names may be
-     * legacy or modern (XSeries maps them to this server's version). If the inventory is
-     * full the item drops at the player's feet.
+     * legacy or modern (XSeries maps them to this server's version). Whatever doesn't fit in
+     * the inventory drops at the player's feet.
      */
     private void giveItemReward(Player player, String[] parts) {
         Optional<XMaterial> material = XMaterial.matchXMaterial(parts[3]);
@@ -127,12 +128,12 @@ public class GameUtils {
         item.setAmount(amount);
         // Inventories belong to the player's region on Folia
         plugin.getScheduler().onPlayer(player, () -> {
-            if (player.getInventory().firstEmpty() == -1) {
-                player.getWorld().dropItemNaturally(player.getLocation(), item);
-                MessageUtils.sendMessage(player, ConfigManager.getMessagesConfig().getString("inventory_full"));
-            } else {
-                player.getInventory().addItem(item);
-            }
+            // Fills part-used stacks as well as empty slots; only what is left over is dropped
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+            if (leftover.isEmpty()) return;
+            for (ItemStack rest : leftover.values()) player.getWorld().dropItemNaturally(player.getLocation(), rest);
+            String full = ConfigManager.getMessagesConfig().getString("inventory_full");
+            if (full != null) MessageUtils.sendMessage(player, full);
         });
     }
 }

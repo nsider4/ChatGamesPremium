@@ -73,14 +73,15 @@ public class LogsCommand extends SubCommand {
                 Msg.of("&7" + log).send(sender);
                 continue;
             }
+            String winners = utils.extractWinnersFromLog(log);
             Msg.of(format)
                     .with("%game%", utils.extractValueFromLog(log, "Game"))
                     .with("%race%", utils.extractValueFromLog(log, "Race"))
                     .with("%hasAnswer%", utils.extractValueFromLog(log, "Has Answer"))
                     .with("%answer%", utils.extractValueFromLog(log, "Answer"))
                     .with("%hasWinner%", utils.extractValueFromLog(log, "Has Winner"))
-                    .with("%winners%", utils.extractWinnersFromLog(log))
-                    .with("%winner%", utils.extractWinnersFromLog(log))
+                    .with("%winners%", winners)
+                    .with("%winner%", winners)
                     .with("%material%", utils.extractValueFromLog(log, "Material"))
                     .with("%entity%", utils.extractValueFromLog(log, "Entity"))
                     .with("%amount%", utils.extractValueFromLog(log, "Amount"))

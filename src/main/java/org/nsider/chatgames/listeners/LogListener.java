@@ -1,6 +1,5 @@
 package org.nsider.chatgames.listeners;
 
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.nsider.chatgames.ChatGames;
@@ -15,10 +14,16 @@ import org.nsider.chatgames.races.RaceTarget;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * Writes a line for every game and race start and end, to the console and/or the log file
+ * that {@code /chatgames logs} reads.
+ */
 public class LogListener implements Listener {
 
     private final ChatGames plugin;
@@ -124,25 +129,23 @@ public class LogListener implements Listener {
             plugin.getLogger().info(logMessage);
         }
         if (ConfigValue.getBoolean(ConfigPaths.LOG_TO_FILE)) {
-            writeLogToFile(logMessage);
+            // Disk work: off the main thread, except while disabling, when no new tasks can start
+            if (plugin.isEnabled()) plugin.getScheduler().async(() -> writeLogToFile(logMessage));
+            else writeLogToFile(logMessage);
         }
     }
 
     /**
-     * Writes logs to a local file.
+     * Appends a line to the log file. Synchronized so lines written from two threads never mix.
      */
-    private void writeLogToFile(String logMessage) {
+    private synchronized void writeLogToFile(String logMessage) {
         File logFile = plugin.getLogUtils().getLogFile();
-        if (logFile == null) {
-            Bukkit.getLogger().severe("Log file is not defined in the gamelog configuration.");
-            return;
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
+        // UTF-8, so answers and names with accents read back the same on any server
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile, true), StandardCharsets.UTF_8))) {
             writer.write(logMessage);
             writer.newLine();
         } catch (IOException e) {
-            Bukkit.getLogger().severe("Failed to write log to file: " + e.getMessage());
+            plugin.getLogger().severe("Failed to write log to file: " + e.getMessage());
         }
     }
 }

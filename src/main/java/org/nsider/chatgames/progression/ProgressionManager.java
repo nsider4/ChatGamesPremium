@@ -11,6 +11,7 @@ import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -146,7 +147,7 @@ public final class ProgressionManager {
     }
 
     /** @param days the first and last streak day just claimed, or null for none */
-    private int payStreak(Player player, StreakConfig streaks, StreakType type, int[] days) {
+    private int payStreak(Player player, StreakConfig streaks, StreakType type, @Nullable int[] days) {
         if (days == null) return 0;
         String name = streaks.getName(type);
         for (int day = days[0]; day <= days[1]; day++) {

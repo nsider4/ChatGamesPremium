@@ -1,9 +1,7 @@
 package org.nsider.chatgames.utils.management;
 
-
-import org.nsider.inventorymanager.extras.Nonnull;
-
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Rounds times for display. Games and races measure their own elapsed time.
@@ -13,16 +11,16 @@ public final class TimeUtils {
     private TimeUtils() {}
 
     /**
-     * Rounds a given value to a specific decimal format pattern.
+     * Rounds half to even, as DecimalFormat did; unlike DecimalFormat it doesn't depend on the
+     * server's locale, whose digits or separators Double.parseDouble may not read back.
      *
-     * @param pattern the decimal format pattern (e.g., "#.#" for 1 decimal place)
+     * @param decimals how many decimal places to keep
      * @param val the value to round
      * @return the rounded value
      */
-    private static double roundToDecimals(@Nonnull String pattern, double val) {
-        DecimalFormat df = new DecimalFormat(pattern);
-        String num = df.format(val).replace(",", ".");
-        return Double.parseDouble(num);
+    private static double roundToDecimals(int decimals, double val) {
+        if (Double.isNaN(val) || Double.isInfinite(val)) return val;
+        return new BigDecimal(val).setScale(decimals, RoundingMode.HALF_EVEN).doubleValue();
     }
 
     /**
@@ -32,7 +30,7 @@ public final class TimeUtils {
      * @return the value rounded to 1 decimal place
      */
     public static double roundTo1Decimal(double val) {
-        return roundToDecimals("#.#", val);
+        return roundToDecimals(1, val);
     }
 
     /**
@@ -42,6 +40,6 @@ public final class TimeUtils {
      * @return the value rounded to 2 decimal places
      */
     public static double roundTo2Decimals(double val) {
-        return roundToDecimals("#.##", val);
+        return roundToDecimals(2, val);
     }
 }
