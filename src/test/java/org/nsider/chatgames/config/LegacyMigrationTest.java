@@ -80,20 +80,23 @@ class LegacyMigrationTest {
         assertEquals(1, games.getInt("math.winners"), "unchanged values are the 2.0.0 defaults");
 
         YamlConfiguration addons = yaml("add-ons.yml");
-        assertEquals("https://example.invalid/hook", addons.getString("discord.webhook-url"));
+        assertFalse(addons.contains("discord"), "Discord has its own file now");
+        assertEquals("https://example.invalid/hook", yaml("discord.yml").getString("channels.main.webhook"));
         assertEquals("my_log.txt", addons.getString("log-file"));
 
         assertFalse(yaml("races.yml").getBoolean("enable-races", true));
         assertEquals("&aWell remembered, %player%!", yaml("messages.yml").getString("memorize.correct_message"));
         assertEquals(Arrays.asList("Apple", "Bread"), yaml("words.yml").getStringList("memorize.pools.shopping_list"));
 
-        for (String target : new String[]{"config.yml", "games.yml", "add-ons.yml", "races.yml", "messages.yml", "words.yml"}) {
+        for (String target : new String[]{"config.yml", "games.yml", "add-ons.yml", "discord.yml", "races.yml", "messages.yml",
+                "words.yml"}) {
             assertEquals(comments(resource(target)), comments(Files.readAllBytes(new File(folder, target).toPath())),
                     target + " keeps every comment, even where Bukkit can't save them");
         }
         assertEquals(1, (int) result.carried.get("config.yml"));
         assertEquals(2, (int) result.carried.get("games.yml"));
-        assertEquals(2, (int) result.carried.get("add-ons.yml"));
+        assertEquals(1, (int) result.carried.get("add-ons.yml"));
+        assertEquals(1, (int) result.carried.get("discord.yml"));
         assertEquals(1, (int) result.carried.get("races.yml"));
     }
 

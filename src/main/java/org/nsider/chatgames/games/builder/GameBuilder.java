@@ -73,6 +73,7 @@ public class GameBuilder {
 
         RoundAnnouncer announcer = manager.getAnnouncer();
         announcer.announceStart(round, settings);
+        plugin.getDiscordManager().gameStarted(round, settings);
         if (round.getMemorizeSeconds() > 0) {
             // Answers open once the list is gone; endGame() cancels this if the game is stopped meanwhile
             manager.addTask(plugin.getScheduler().globalLater(() -> {

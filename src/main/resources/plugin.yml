@@ -42,6 +42,8 @@ permissions:
       chatgames.start.eat: true
       chatgames.start.craft: true
       chatgames.start.furnace: true
+      chatgames.start.tame: true
+      chatgames.start.shear: true
   chatgames.start.word_association:
     description: 'Allows starting word_association by command.'
     default: op
@@ -101,6 +103,9 @@ permissions:
     default: op
   chatgames.logs:
     description: 'Allows viewing the game logs.'
+    default: op
+  chatgames.discord:
+    description: 'Allows sending test messages and the leaderboard to Discord.'
     default: op
   chatgames.challenges:
     description: 'Allows viewing your daily and weekly challenges.'
@@ -197,4 +202,10 @@ permissions:
     default: op
   chatgames.start.furnace:
     description: 'Allows starting furnace by command.'
+    default: op
+  chatgames.start.tame:
+    description: 'Allows starting tame by command.'
+    default: op
+  chatgames.start.shear:
+    description: 'Allows starting shear by command.'
     default: op

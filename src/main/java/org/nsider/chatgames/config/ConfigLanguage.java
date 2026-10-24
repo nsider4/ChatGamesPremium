@@ -49,13 +49,16 @@ import java.util.logging.Level;
  */
 public final class ConfigLanguage {
 
-    /** The config layout the translations are for; a plugin with new config keys gets a new folder. */
+    /**
+     * The config layout the translations are for. A release that moves or removes keys gets a new
+     * folder, so older plugins keep downloading files they understand.
+     */
     static final String FORMAT = "2.0";
     static final String ENGLISH = "en";
     /** The files that have translated copies. */
     static final String[] FILES = {"config.yml", "games.yml", "messages.yml", "menus.yml", "words.yml", "races.yml",
             "global_games.yml", "challenges.yml", "streaks.yml", "events.yml", "rewards.yml", "add-ons.yml",
-            "presets.yml", "milestones.yml"};
+            "presets.yml", "milestones.yml", "discord.yml"};
     // The property points the plugin at a mirror (or a local copy, for testing)
     private static final String BASE_URL = System.getProperty("chatgames.config-translations-url",
             "https://raw.githubusercontent.com/nsider4/mine-translator/main/Configs/");
@@ -87,7 +90,7 @@ public final class ConfigLanguage {
         if (firstRun) {
             // Installs from before this feature have English files, whatever lang says; they
             // switch when lang changes, or when config-language names a language
-            state = new State(ENGLISH, 0, lang);
+            state = new State(ENGLISH, 0, lang, FORMAT);
             state.save(new File(folder, "state.yml"));
         }
         State current = state;
@@ -127,7 +130,9 @@ public final class ConfigLanguage {
             }
             int version = wanted.equals(ENGLISH) || language == null ? 0 : language.version;
             boolean switching = !wanted.equals(current.language);
-            if (!switching && version <= current.version) {
+            // Files from an older layout's folder are updated whatever their version number says
+            boolean newFormat = !FORMAT.equals(current.format) && !wanted.equals(ENGLISH);
+            if (!switching && !newFormat && version <= current.version) {
                 if (langChanged) {
                     current.lang = lang;
                     current.save(new File(folder, "state.yml"));
@@ -161,7 +166,7 @@ public final class ConfigLanguage {
                 if (!target.exists()) continue;
                 String next = code.equals(ENGLISH) ? jar(file) : text(new File(download, file));
                 String previous = previousDefault(state.language, file);
-                Merge merge = merge(text(target), previous, next, switching);
+                Merge merge = merge(text(target), previous, jar(file), next, switching);
                 replaced += merge.replaced;
                 if (!merge.text.equals(text(target))) merged.put(file, merge.text);
             }
@@ -182,7 +187,7 @@ public final class ConfigLanguage {
             File cache = new File(folder, code);
             deleteFolder(cache);
             if (!code.equals(ENGLISH) && !download.renameTo(cache)) throw new IOException("Could not keep " + download);
-            new State(code, version, lang).save(new File(folder, "state.yml"));
+            new State(code, version, lang, FORMAT).save(new File(folder, "state.yml"));
 
             if (switching) {
                 plugin.getLogger().log(Level.INFO, "The config files are now in {0}. Your settings were kept{1}{2}",
@@ -230,13 +235,19 @@ public final class ConfigLanguage {
      *
      * @param current         the owner's file
      * @param previousDefault the defaults the owner's file started from
+     * @param pluginDefault   the English defaults in the jar, for keys {@code previousDefault} doesn't
+     *                        have: sections a plugin update added to the owner's file in English
      * @param newDefault      the new defaults, whose text (and comments) the result is built on
      */
     @Nonnull
-    static Merge merge(@Nonnull String current, @Nonnull String previousDefault, @Nonnull String newDefault, boolean switching) throws IOException {
+    static Merge merge(@Nonnull String current, @Nonnull String previousDefault, @Nonnull String pluginDefault,
+                       @Nonnull String newDefault, boolean switching) throws IOException {
         YamlConfiguration owner = YamlText.parse(current, "file");
         Map<String, Object> mine = YamlText.values(owner);
         Map<String, Object> before = YamlText.values(YamlText.parse(previousDefault, "default"));
+        for (Map.Entry<String, Object> entry : YamlText.values(YamlText.parse(pluginDefault, "plugin default")).entrySet()) {
+            if (mine.containsKey(entry.getKey())) before.putIfAbsent(entry.getKey(), entry.getValue());
+        }
         Map<String, Object> after = YamlText.values(YamlText.parse(newDefault, "new default"));
         YamlConfiguration merged = YamlText.parse(newDefault, "new default");
 
@@ -376,16 +387,21 @@ public final class ConfigLanguage {
         if (dir.exists() && !dir.delete()) dir.deleteOnExit();
     }
 
-    /** translations/configs/state.yml: the language the files are in, its version, and the lang it was picked for. */
+    /**
+     * translations/configs/state.yml: the language the files are in, its version, the lang it was
+     * picked for and the layout (FORMAT) of the files it came from.
+     */
     static final class State {
         final String language;
         final int version;
         String lang;
+        final String format;
 
-        State(String language, int version, String lang) {
+        State(String language, int version, String lang, String format) {
             this.language = language;
             this.version = version;
             this.lang = lang;
+            this.format = format;
         }
 
         @Nullable
@@ -393,7 +409,9 @@ public final class ConfigLanguage {
             if (!file.exists()) return null;
             YamlConfiguration yaml = YamlText.load(file);
             if (yaml == null || !yaml.isString("language")) return null;
-            return new State(yaml.getString("language"), yaml.getInt("version"), yaml.getString("lang", ""));
+            // The first format didn't record itself
+            return new State(yaml.getString("language"), yaml.getInt("version"), yaml.getString("lang", ""),
+                    yaml.getString("format", "2.0"));
         }
 
         void save(File file) {
@@ -401,6 +419,7 @@ public final class ConfigLanguage {
             yaml.set("language", language);
             yaml.set("version", version);
             yaml.set("lang", lang);
+            yaml.set("format", format);
             try {
                 if (!file.getParentFile().isDirectory() && !file.getParentFile().mkdirs()) throw new IOException("no folder");
                 Files.write(file.toPath(), ("# Which language the config files are in. Delete this file to start over (as English).\n"

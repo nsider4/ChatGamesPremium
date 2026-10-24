@@ -127,6 +127,7 @@ public final class RaceManager {
         }
 
         announceStart(race);
+        plugin.getDiscordManager().raceStarted(race);
         expiry = plugin.getScheduler().globalLater(() -> expire(race), race.getTimeLimitSeconds() * 20L);
         return true;
     }
@@ -188,7 +189,7 @@ public final class RaceManager {
         }
         if (resolved == null) {
             plugin.getLogger().warning("Can't start the " + type.getConfigKey() + " race: " + target + " is not a valid "
-                    + (type == GameType.HUNT ? "mob" : type.isMaterialRace() ? "material" : "target")
+                    + (type.isMobRace() ? "mob" : type.isMaterialRace() ? "material" : "target")
                     + (type.isBuiltIn() ? " on this server version." : " for " + type.getOwner() + "."));
             return null;
         }
@@ -263,6 +264,7 @@ public final class RaceManager {
             message.send(online);
         }
         GameSoundManager.playGameSound(player, "win");
+        plugin.getDiscordManager().raceWon(race, player, seconds, points);
 
         if (win.isGiveRewards()) plugin.getGameUtils().giveRaceRewards(type.getConfigKey(), player, race.getRewards());
         plugin.getProgressionManager().record(player, Activity.win(type, seconds, Math.max(0, points)));
@@ -280,6 +282,7 @@ public final class RaceManager {
             message.send(player);
             if (plugin.getGameManager().gamesIsToggled(player)) GameSoundManager.playGameSound(player, "time-expired");
         }
+        plugin.getDiscordManager().raceExpired(race);
         end(race);
         plugin.getGlobalGameManager().afterRegularGame();
     }
@@ -295,6 +298,7 @@ public final class RaceManager {
         if (race == null || race.isGlobal() || !race.getProgress().close()) return false;
         if (notify) {
             Bukkit.getPluginManager().callEvent(new ChatGamesEndEvent(race.getType(), null, Collections.<PlayerResult>emptyList()));
+            plugin.getDiscordManager().raceStopped(race);
         }
         end(race);
         return true;

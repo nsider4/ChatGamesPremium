@@ -56,6 +56,8 @@ public final class GameType {
     public static final GameType EAT = builtIn("eat", Kind.RACE);
     public static final GameType CRAFT = builtIn("craft", Kind.RACE);
     public static final GameType FURNACE = builtIn("furnace", Kind.RACE);
+    public static final GameType TAME = builtIn("tame", Kind.RACE);
+    public static final GameType SHEAR = builtIn("shear", Kind.RACE);
 
     private final String id;
     private final Kind kind;
@@ -101,9 +103,14 @@ public final class GameType {
         return kind == Kind.GLOBAL_ONLY;
     }
 
-    /** @return true for the built-in races that target a material (every one but Hunt) */
+    /** @return true for the built-in races that target a material (every one but Hunt, Tame and Shear) */
     public boolean isMaterialRace() {
-        return builtIn && kind == Kind.RACE && this != HUNT;
+        return builtIn && kind == Kind.RACE && !isMobRace();
+    }
+
+    /** @return true for the built-in races that target a mob: Hunt, Tame and Shear */
+    public boolean isMobRace() {
+        return this == HUNT || this == TAME || this == SHEAR;
     }
 
     /** @return true for the games ChatGames comes with */

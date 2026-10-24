@@ -105,8 +105,4 @@ messages:
   stopped:
     - '&6&l» %event% &chas been stopped.'
 
-#The final standings are posted to the Discord webhook in config.yml, if one is set.
-discord:
-  enabled: true
-  title: '%event% results'
-  line: '#%place% %player% - %points% points'
+#Event starts and final standings are posted to Discord as set in discord.yml.

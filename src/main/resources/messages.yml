@@ -97,6 +97,14 @@ events:
   top_entry: '&c%spot%. &f%player% &8| &e%points% &7points'
   top_empty: '&8[%prefix%&8] &cNobody has scored in %event% &cyet.'
 
+discord:
+  test_sent: '&8[%prefix%&8] &fSent &a%amount% &ftest message(s) to Discord. If nothing shows up, the console says why.'
+  leaderboard_posted: '&8[%prefix%&8] &fThe leaderboard was sent to Discord.'
+  disabled: '&8[%prefix%&8] &cDiscord messages are off: set &fenabled: true &cin discord.yml.'
+  no_channel: '&8[%prefix%&8] &f%section% &chas no channel with a webhook or DiscordSRV channel in discord.yml.'
+  unknown_message: '&8[%prefix%&8] &cThere is no Discord message called &f%message%&c.'
+  empty_message: '&8[%prefix%&8] &f%message% &cis empty or missing in discord.yml.'
+
 logs:
   no_logs: "&cNo logs available or an error occurred."
   header: "&8[%prefix%&8] &eLast &6%amount% &elogs:"
@@ -184,10 +192,11 @@ help_command:
   - '&a/chatgames challenges reset <player> &f- &3Clears a player''s challenge progress.'
   - '&a/chatgames streak set <player> <challenge|daily|global> <days> &f- &3Sets a player''s streak.'
   - '&a/chatgames logs [amount] &f- &3Shows the last game logs.'
+  - '&a/chatgames discord <test <message|all>|leaderboard> &f- &3Sends a test message or the leaderboard to Discord.'
   - '&a/chatgames reload &f- &3Reloads the configuration files.'
   - '&6'
   - '&2&lGAME TYPES:'
-  - '&5unscramble, unreverse, reaction, random, fillout, variable, clickable, math, sequence, memorize, guess_the_number, trivia, word_association, hoverable, hunt, mine, place, fish, craft, eat, furnace'
+  - '&5unscramble, unreverse, reaction, random, fillout, variable, clickable, math, sequence, memorize, guess_the_number, trivia, word_association, hoverable, hunt, mine, place, fish, craft, eat, furnace, tame, shear'
   - '&7&m-------------------------------------------------'
 
 #Use <center> in LIST messages to center the messages, the lines with this will be centered!
@@ -686,3 +695,41 @@ furnace:
     - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
     - ''
     - '<center>&f%timeToComplete%s &chave passed! &fThe cooking challenge is now over!'
+
+tame:
+  gameStartAnnouncement:
+    - ''
+    - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
+    - ''
+    - '<center>&fYou have &e%timeToComplete% seconds &fto &dtame&f: `&b%amount%&fx &3%value%`'
+    - ''
+  correct_message:
+    - ''
+    - '<center>&r✓ ✯ %prefix% &r✯ ✓'
+    - ''
+    - '<center>&a%winner% &7finished taming `&e%amount%&fx &3%value%&7` (&c%time%s&7) and got a prize!'
+    - ''
+  time_expired_message:
+    - ''
+    - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
+    - ''
+    - '<center>&f%timeToComplete%s &chave passed! &fThe tame challenge is now over!'
+
+shear:
+  gameStartAnnouncement:
+    - ''
+    - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
+    - ''
+    - '<center>&fYou have &e%timeToComplete% seconds &fto &dshear&f: `&b%amount%&fx &3%value%`'
+    - ''
+  correct_message:
+    - ''
+    - '<center>&r✓ ✯ %prefix% &r✯ ✓'
+    - ''
+    - '<center>&a%winner% &7finished shearing `&e%amount%&fx &3%value%&7` (&c%time%s&7) and got a prize!'
+    - ''
+  time_expired_message:
+    - ''
+    - '<center>&r✓ ✯ %prefix%&r ✯ ✓'
+    - ''
+    - '<center>&f%timeToComplete%s &chave passed! &fThe shear challenge is now over!'

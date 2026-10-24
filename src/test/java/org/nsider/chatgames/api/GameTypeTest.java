@@ -21,6 +21,9 @@ class GameTypeTest {
         assertEquals("guess_the_number", GameType.GUESS_THE_NUMBER.getConfigKey());
         assertTrue(GameType.MINE.isMaterialRace());
         assertFalse(GameType.HUNT.isMaterialRace());
+        assertTrue(GameType.TAME.isMobRace());
+        assertFalse(GameType.SHEAR.isMaterialRace());
+        assertFalse(GameType.FISH.isMobRace());
         assertTrue(GameType.COUNT.isGlobalOnly());
         assertNull(GameType.fromName("nope"));
     }

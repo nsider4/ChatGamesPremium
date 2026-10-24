@@ -131,6 +131,47 @@ final class YamlText {
         return merged.saveToString();
     }
 
+    /**
+     * Finds the lines of one key and everything nested under it.
+     *
+     * @return {start, end}: the key's line and the line after its last non-blank, non-comment
+     *         line; null if the path isn't a key in the text
+     */
+    @Nullable
+    static int[] block(List<String> lines, String path) {
+        List<Integer> indents = new ArrayList<>();
+        List<String> keys = new ArrayList<>();
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            String trimmed = line.trim();
+            if (trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith("- ") || trimmed.equals("-")) continue;
+            int colon = keyEnd(trimmed);
+            if (colon < 0) continue;
+            int indent = line.indexOf(trimmed);
+            while (!indents.isEmpty() && indents.get(indents.size() - 1) >= indent) {
+                indents.remove(indents.size() - 1);
+                keys.remove(keys.size() - 1);
+            }
+            indents.add(indent);
+            keys.add(unquote(trimmed.substring(0, colon)));
+            if (!String.join(".", keys).equals(path)) continue;
+
+            int end = i + 1;
+            for (int next = i + 1; next < lines.size(); next++) {
+                String nextLine = lines.get(next);
+                String nextTrimmed = nextLine.trim();
+                if (nextTrimmed.isEmpty() || nextTrimmed.startsWith("#")) continue;
+                // A list under the key may sit at the key's own indent
+                boolean item = nextTrimmed.startsWith("- ") || nextTrimmed.equals("-");
+                int nextIndent = nextLine.indexOf(nextTrimmed);
+                if (nextIndent < indent || nextIndent == indent && !item) break;
+                end = next + 1;
+            }
+            return new int[]{i, end};
+        }
+        return null;
+    }
+
     /** Where a "key:" ends in a trimmed line, or -1 if the line isn't a key. */
     private static int keyEnd(String trimmed) {
         if (trimmed.startsWith("'") || trimmed.startsWith("\"")) {

@@ -64,6 +64,8 @@ game-names:
   eat: 'Eat'
   craft: 'Craft'
   furnace: 'Furnace'
+  tame: 'Tame'
+  shear: 'Shear'
 game-icons:
   unscramble: book
   math: redstone
@@ -87,6 +89,8 @@ game-icons:
   eat: cooked_beef
   craft: crafting_table
   furnace: furnace
+  tame: bone
+  shear: shears
 
 formats:
   #Shown instead of a rank for players who aren't ranked yet

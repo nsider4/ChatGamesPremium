@@ -480,3 +480,71 @@ furnace:
         rewards:
           - reward_2
           - reward_3
+
+tame:
+  enable: true
+
+  timeToComplete_seconds: 180
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&bTAME'
+  subtitleMessage: '&aTame %amount% %value%!'
+
+  data:
+    #These values have to be valid minecraft mobs IDs (see Useful Links at the top of the file)
+    #Only mobs that can be tamed on your version are used: OCELOT up to 1.13, CAT from 1.14.
+    WOLF:
+      1:
+        #THE SUM OF ALL CHANCES OF REWARDS YOU ADD CANNOT EXCEED 100%
+        rewards:
+          - reward_1
+          - reward_2
+      2:
+        rewards:
+          - reward_2
+          - reward_3
+    CAT:
+      1:
+        rewards:
+          - reward_1
+          - reward_2
+    OCELOT:
+      1:
+        rewards:
+          - reward_1
+          - reward_2
+    HORSE:
+      1:
+        rewards:
+          - reward_1
+          - reward_2
+    PARROT:
+      1:
+        rewards:
+          - reward_2
+          - reward_3
+
+shear:
+  enable: true
+
+  timeToComplete_seconds: 120
+  #__Leave the following 2 empty to disable them__
+  titleMessage: '&bSHEAR'
+  subtitleMessage: '&aShear %amount% %value%!'
+
+  data:
+    #These values have to be valid minecraft mobs IDs (see Useful Links at the top of the file)
+    SHEEP:
+      3:
+        #THE SUM OF ALL CHANCES OF REWARDS YOU ADD CANNOT EXCEED 100%
+        rewards:
+          - reward_1
+          - reward_2
+      6:
+        rewards:
+          - reward_2
+          - reward_3
+    MOOSHROOM:
+      1:
+        rewards:
+          - reward_1
+          - reward_2

@@ -26,7 +26,9 @@ List<GameType> all = api.getGames();                 // every game, built-in fir
 
 Built-in constants: `UNSCRAMBLE`, `MATH`, `TRIVIA`, `REACTION`, `CLICKABLE`, `RANDOM`, `UNREVERSE`,
 `VARIABLE`, `GUESS_THE_NUMBER`, `MEMORIZE`, `SEQUENCE`, `FILLOUT`, `HOVERABLE`, `WORD_ASSOCIATION`,
-`COUNT`, and the races `HUNT`, `PLACE`, `MINE`, `FISH`, `EAT`, `CRAFT`, `FURNACE`.
+`COUNT`, and the races `HUNT`, `PLACE`, `MINE`, `FISH`, `EAT`, `CRAFT`, `FURNACE`, `TAME`, `SHEAR`.
+`isMobRace()` is true for the built-in races that target a mob (`HUNT`, `TAME`, `SHEAR`), `isMaterialRace()` for the
+other built-in ones.
 
 ## Running games
 

@@ -20,6 +20,8 @@
 //          craft:<names>:<count>   crafts that item in the inventory's 2x2 grid
 //          attack:<names>:<secs>   hits the nearest mob of that kind until it dies or time runs out
 //          smelt:<input>:<count>   places a furnace from the inventory, smelts <count> of <input> with coal, takes the result
+//          use:<mobs>:<item>:<times>  holds <item> and right-clicks the nearest mob of that kind <times> times
+//                                  (shears on a sheep, bones on a wolf)
 // Prints every chat line the bot receives as "[BOT <name>] <text>", and action-bar text as "[BOT <name>] [bar] <text>".
 // Needs mineflayer (npm install mineflayer@4); point NODE_PATH at its node_modules.
 
@@ -195,13 +197,38 @@ async function attack(names, seconds) {
     }
     if (!mob) {
       const near = Object.values(bot.entities).filter((e) => e !== bot.entity && e.position.distanceTo(bot.entity.position) < 8);
-      log(`no ${names} left nearby (near: ${near.map((e) => `${e.name}@${e.position.distanceTo(bot.entity.position).toFixed(1)}`).join(', ') || 'nothing'})`);
+      log(`no ${names} left nearby (near: ${near.map((e) => `${e.name}@${e.position.distanceTo(bot.entity.position).toFixed(1)}`).join(', ') || 'nothing'}, tracked: ${Object.keys(bot.entities).length}, me: ${bot.entity.position})`);
       return;
     }
     await bot.lookAt(mob.position.offset(0, mob.height / 2, 0));
     bot.attack(mob);
     hit = true;
     await sleep(600);
+  }
+}
+
+async function use(arg) {
+  const [names, item, times] = arg.split(':');
+  const wanted = names.toLowerCase().split(',');
+  await equip(item);
+  for (let i = 0; i < Number(times || 1); i++) {
+    let mob = null;
+    // Just summoned mobs take a moment to be tracked
+    for (let tries = 0; !mob && tries < 6; tries++) {
+      // Old versions name mobs by mobType ("Sheep"), newer ones by name ("sheep")
+      mob = bot.nearestEntity((e) => [e.name, e.mobType, e.displayName].some((n) => n && wanted.includes(n.toLowerCase().replace(/ /g, '')))
+        && e.position.distanceTo(bot.entity.position) < 5);
+      if (!mob) await sleep(500);
+    }
+    if (!mob) {
+      const near = Object.values(bot.entities).filter((e) => e !== bot.entity && e.position.distanceTo(bot.entity.position) < 8);
+      log(`no ${names} nearby to use ${item} on (near: ${near.map((e) => `${e.name}/${e.mobType}@${e.position.distanceTo(bot.entity.position).toFixed(1)}`).join(', ') || 'nothing'}, tracked: ${Object.keys(bot.entities).length}, me: ${bot.entity.position})`);
+      return;
+    }
+    await bot.lookAt(mob.position.offset(0, mob.height / 2, 0));
+    await bot.activateEntity(mob);
+    log(`used ${item} on ${mob.name}`);
+    await sleep(700);
   }
 }
 
@@ -376,6 +403,13 @@ function play(message) {
       bot.clearControlStates();
     }
     else if (['dig', 'place', 'eat', 'craft', 'attack', 'smelt'].includes(kind)) await race(kind, arg);
+    else if (kind === 'use') {
+      try {
+        await use(arg);
+      } catch (e) {
+        log(`use failed: ${e.message}`);
+      }
+    }
     else if (kind === 'quit') await quit();
     else if (kind === 'join') await connect();
     else if (kind === 'autoplay') {

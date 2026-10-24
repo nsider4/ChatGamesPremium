@@ -41,11 +41,11 @@ import java.util.function.Function;
  */
 public final class LegacyMigration {
 
-    /** The 2.0.0 files a 1.9.9 folder is turned into. */
-    static final String[] TARGETS = {"config.yml", "games.yml", "add-ons.yml", "races.yml", "messages.yml",
+    /** The 2.x files a 1.9.9 folder is turned into. */
+    static final String[] TARGETS = {"config.yml", "games.yml", "add-ons.yml", "discord.yml", "races.yml", "messages.yml",
             "words.yml", "rewards.yml"};
     private static final String[] OLD_FILES = {"config.yml", "chatRaces.yml", "messages.yml", "words.yml", "rewards.yml"};
-    private static final String[] ADDON_KEYS = {"discord", "log-file", "log-console", "log-local"};
+    private static final String[] ADDON_KEYS = {"log-file", "log-console", "log-local"};
     private static final String OLD_MEMORIZE = "shoppinglist";
 
     private LegacyMigration() {}
@@ -87,12 +87,17 @@ public final class LegacyMigration {
         Map<String, YamlConfiguration> changes = new LinkedHashMap<>();
         for (String target : TARGETS) changes.put(target, new YamlConfiguration());
 
-        // config.yml: game sections → games.yml, Discord and logs → add-ons.yml, the rest stays
+        // config.yml: game sections → games.yml, the webhook → discord.yml, logs → add-ons.yml, the rest stays
         for (Map.Entry<String, Object> change : changed(folder, "config.yml", resources).entrySet()) {
             String path = change.getKey();
             String root = path.split("\\.", 2)[0];
             String target = "config.yml";
-            if (isOldGameKey(root)) {
+            if (root.equals("discord")) {
+                // Only the webhook, its name and picture: the old embed texts don't fit the new messages
+                path = DiscordUpgrade.mapLegacy(path);
+                if (path == null) continue;
+                target = "discord.yml";
+            } else if (isOldGameKey(root)) {
                 target = "games.yml";
                 path = renameMemorize(path);
             } else if (contains(ADDON_KEYS, root)) {

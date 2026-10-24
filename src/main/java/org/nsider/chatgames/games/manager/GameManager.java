@@ -127,6 +127,7 @@ public class GameManager {
         } else {
             announcer.announceTimeExpired(game);
         }
+        plugin.getDiscordManager().gameEnded(game);
         if (this.game == game) {
             endGame();
         }
@@ -169,6 +170,7 @@ public class GameManager {
                         current.getResultsByPlace()));
             }
             endGame();
+            plugin.getDiscordManager().gameStopped();
         } else if (!plugin.getRaceManager().stop(true)) {
             endGame();
         }

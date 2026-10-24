@@ -25,7 +25,7 @@ import org.nsider.chatgames.games.utils.GameUtils;
 import org.nsider.chatgames.hooks.MythicHook;
 import org.nsider.chatgames.globalgames.GlobalGameManager;
 import org.nsider.chatgames.listeners.ChatListener;
-import org.nsider.chatgames.listeners.DiscordListener;
+import org.nsider.chatgames.discord.DiscordManager;
 import org.nsider.chatgames.listeners.LogListener;
 import org.nsider.chatgames.listeners.LoginListener;
 import org.nsider.chatgames.managers.LanguageManager;
@@ -75,6 +75,7 @@ public final class ChatGames extends JavaPlugin {
     private ConfigLanguage configLanguage;
     private GlobalGameManager globalGameManager;
     private EventManager eventManager;
+    private DiscordManager discordManager;
     private Menus menus;
     private MainTask mainTask;
     private GameRegistry gameRegistry;
@@ -131,6 +132,7 @@ public final class ChatGames extends JavaPlugin {
         this.rewardManager = new RewardManager(this);
         this.globalGameManager = new GlobalGameManager(this);
         this.eventManager = new EventManager(this);
+        this.discordManager = new DiscordManager(this);
         this.menus = new Menus(this);
         this.mainTask = new MainTask(this);
 
@@ -140,7 +142,7 @@ public final class ChatGames extends JavaPlugin {
         pluginManager.registerEvents(new ChatListener(this), this);
         pluginManager.registerEvents(new LogListener(this), this);
         pluginManager.registerEvents(new RaceListener(this), this);
-        pluginManager.registerEvents(new DiscordListener(this), this);
+        pluginManager.registerEvents(discordManager, this);
         pluginManager.registerEvents(eventManager, this);
         pluginManager.registerEvents(gameRegistry, this);
 
@@ -157,6 +159,8 @@ public final class ChatGames extends JavaPlugin {
             this.placeholderExpansion = new ChatGamesExpansion(this);
             placeholderExpansion.register();
         }
+        // After the integrations: it checks for DiscordSRV and PlaceholderAPI
+        discordManager.load();
 
         // The API, for plugins that add games (they enable after ChatGames)
         getServer().getServicesManager().register(ChatGamesAPI.class, new ChatGamesApiImpl(this, gameRegistry), this, ServicePriority.Normal);
@@ -200,6 +204,10 @@ public final class ChatGames extends JavaPlugin {
         if (scheduler != null) {
             scheduler.cancelAll();
         }
+        if (discordManager != null) {
+            // Gives messages already queued a moment to go out
+            discordManager.shutdown();
+        }
 
         HandlerList.unregisterAll(this);
         getServer().getServicesManager().unregisterAll(this);
@@ -235,6 +243,7 @@ public final class ChatGames extends JavaPlugin {
         progressionManager.load();
         globalGameManager.load();
         eventManager.load();
+        discordManager.load();
         menus.reload();
         mainTask.reloadEnabledGames();
         startGameRotation();

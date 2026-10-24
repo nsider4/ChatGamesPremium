@@ -187,6 +187,8 @@ already covered before you make your own:
 | `eat` | food eaten | materials |
 | `craft` | items crafted (shift-click counts every item) | materials |
 | `furnace` | items taken out of a furnace | materials |
+| `tame` | mobs tamed | entity types that can be tamed on the server's version |
+| `shear` | mobs sheared | entity types |
 
 ## Message placeholders
 

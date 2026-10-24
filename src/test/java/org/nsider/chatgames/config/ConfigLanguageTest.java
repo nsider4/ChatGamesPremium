@@ -47,7 +47,7 @@ class ConfigLanguageTest {
 
     @Test
     void untouchedFilesBecomeTheTranslationExactly() throws IOException {
-        ConfigLanguage.Merge merge = ConfigLanguage.merge(ENGLISH, ENGLISH, SPANISH, true);
+        ConfigLanguage.Merge merge = ConfigLanguage.merge(ENGLISH, ENGLISH, ENGLISH, SPANISH, true);
         assertEquals(SPANISH, merge.text);
         assertEquals(0, merge.replaced);
     }
@@ -55,14 +55,14 @@ class ConfigLanguageTest {
     @Test
     void settingsTheOwnerChangedAreKeptAndCommentsStay() throws IOException {
         String mine = ENGLISH.replace("time: 20", "time: 45");
-        ConfigLanguage.Merge merge = ConfigLanguage.merge(mine, ENGLISH, SPANISH, true);
+        ConfigLanguage.Merge merge = ConfigLanguage.merge(mine, ENGLISH, ENGLISH, SPANISH, true);
         assertEquals(SPANISH.replace("time: 20", "time: 45"), merge.text, "only that line changes, comments included");
     }
 
     @Test
     void switchingReplacesTheOwnersOwnTextsAndCountsThem() throws IOException {
         String mine = ENGLISH.replace("'Solve it!'", "'Be quick!'");
-        ConfigLanguage.Merge merge = ConfigLanguage.merge(mine, ENGLISH, SPANISH, true);
+        ConfigLanguage.Merge merge = ConfigLanguage.merge(mine, ENGLISH, ENGLISH, SPANISH, true);
         assertEquals("¡Resuélvelo!", yaml(merge.text).getString("math.title"));
         assertEquals(1, merge.replaced);
     }
@@ -71,7 +71,7 @@ class ConfigLanguageTest {
     void anUpdateOfTheSameLanguageKeepsTheOwnersTexts() throws IOException {
         String improved = SPANISH.replace("'¡Resuélvelo!'", "'¡Resuélvelo ya!'").replace("'Pan'", "'Pan de molde'");
         String mine = SPANISH.replace("'¡Resuélvelo!'", "'¡Rápido!'");
-        ConfigLanguage.Merge merge = ConfigLanguage.merge(mine, SPANISH, improved, false);
+        ConfigLanguage.Merge merge = ConfigLanguage.merge(mine, SPANISH, ENGLISH, improved, false);
         YamlConfiguration result = yaml(merge.text);
         assertEquals("¡Rápido!", result.getString("math.title"), "the owner's text wins in an update");
         assertEquals(Arrays.asList("Manzana", "Pan de molde"), result.getStringList("math.words"), "untouched texts get the fix");
@@ -91,10 +91,23 @@ class ConfigLanguageTest {
                 "trivia:",
                 "  '1':",
                 "    question: 'Who made Minecraft?'");
-        YamlConfiguration result = yaml(ConfigLanguage.merge(mine, ENGLISH, SPANISH, true).text);
+        YamlConfiguration result = yaml(ConfigLanguage.merge(mine, ENGLISH, ENGLISH, SPANISH, true).text);
         assertEquals("mine", result.getString("math.custom"));
         assertEquals("¿Quién creó Minecraft?", result.getString("trivia.1.question"));
         assertFalse(result.contains("trivia.2"), "a question the owner deleted doesn't come back");
+    }
+
+    @Test
+    void sectionsAnUpdateAddedInEnglishGetTranslated() throws IOException {
+        String section = lines("shear:", "  title: 'Shear it!'", "  time: 30");
+        String spanishSection = lines("shear:", "  title: '¡Esquílalo!'", "  time: 30");
+        // A 2.0 Spanish file that the plugin update gave an English section; the owner changed its time
+        String mine = SPANISH + section.replace("time: 30", "time: 40");
+        ConfigLanguage.Merge merge = ConfigLanguage.merge(mine, SPANISH, ENGLISH + section, SPANISH + spanishSection, false);
+        YamlConfiguration result = yaml(merge.text);
+        assertEquals("¡Esquílalo!", result.getString("shear.title"));
+        assertEquals(40, result.getInt("shear.time"), "the owner's change in it stays");
+        assertEquals("¡Resuélvelo!", result.getString("math.title"));
     }
 
     @Test

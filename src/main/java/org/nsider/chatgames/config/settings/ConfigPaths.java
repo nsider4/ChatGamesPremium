@@ -339,62 +339,6 @@ public enum ConfigPaths {
 
     /* ----------------------------------------------add-ons.yml---------------------------------------------- */
 
-    /** Webhook URL for sending Discord notifications. Leave empty to disable Discord integration. */
-    DISCORD_WEBHOOK_URL(
-            ConfigFile.ADDONS,
-            "discord.webhook-url",
-            ConfigType.STRING
-    ),
-
-    /** Content shown as the main message in the Discord embed. */
-    DISCORD_MESSAGE_CONTENT(
-            ConfigFile.ADDONS,
-            "discord.message-content",
-            ConfigType.STRING
-    ),
-
-    /** Image URL used in the Discord embed. */
-    DISCORD_IMAGE_URL(
-            ConfigFile.ADDONS,
-            "discord.img-url",
-            ConfigType.STRING
-    ),
-
-    /** Username that appears as the sender in the Discord embed. */
-    DISCORD_USERNAME(
-            ConfigFile.ADDONS,
-            "discord.username",
-            ConfigType.STRING
-    ),
-
-    /** Title of the Discord embed message. */
-    DISCORD_TITLE(
-            ConfigFile.ADDONS,
-            "discord.title",
-            ConfigType.STRING
-    ),
-
-    /** Description section of the Discord embed. */
-    DISCORD_DESCRIPTION(
-            ConfigFile.ADDONS,
-            "discord.description",
-            ConfigType.STRING
-    ),
-
-    /** Format for the winner field in the Discord embed. */
-    DISCORD_WINNER_FIELD(
-            ConfigFile.ADDONS,
-            "discord.winner-field",
-            ConfigType.STRING
-    ),
-
-    /** Format for the game field in the Discord embed. */
-    DISCORD_GAME_FIELD(
-            ConfigFile.ADDONS,
-            "discord.game-field",
-            ConfigType.STRING
-    ),
-
     /** File path where chat game logs will be saved. */
     LOG_FILE_PATH(
             ConfigFile.ADDONS,

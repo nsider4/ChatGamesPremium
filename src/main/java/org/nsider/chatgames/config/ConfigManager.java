@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.nsider.chatgames.ChatGames;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -32,6 +33,7 @@ public class ConfigManager {
     @Getter private static Streaks streaks;
     @Getter private static Events events;
     @Getter private static Menus menus;
+    @Getter private static Discord discord;
 
     private ConfigManager() {}
 
@@ -44,6 +46,8 @@ public class ConfigManager {
     public static void initialize(ChatGames plugin) {
         ConfigManager.plugin = plugin;
         migrateFrom199(plugin);
+        addNewSections(plugin);
+        moveDiscordSettings(plugin);
         plugin.saveDefaultConfig();
 
         config = plugin.getConfig();
@@ -60,6 +64,7 @@ public class ConfigManager {
         streaks = new Streaks();
         events = new Events();
         menus = new Menus();
+        discord = new Discord();
 
         // Messages read messages.yml, so they are built last
         messages = new Messages();
@@ -78,6 +83,24 @@ public class ConfigManager {
                     new Object[]{carried.length() == 0 ? "nothing (all defaults)" : carried, result.backup.getPath()});
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Could not upgrade the 1.9.9 configuration; the old files are in backups/.", e);
+        }
+    }
+
+    private static void moveDiscordSettings(ChatGames plugin) {
+        try {
+            List<String> moved = DiscordUpgrade.run(plugin.getDataFolder(), plugin::getResource);
+            if (!moved.isEmpty()) plugin.getLogger().log(Level.INFO, "Moved the Discord settings to discord.yml: {0}", String.join(", ", moved));
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Could not move the Discord settings to discord.yml; set the webhook there again.", e);
+        }
+    }
+
+    private static void addNewSections(ChatGames plugin) {
+        try {
+            List<String> added = BuiltInSections.addMissing(plugin.getDataFolder(), plugin::getResource);
+            if (!added.isEmpty()) plugin.getLogger().log(Level.INFO, "Added the new sections to your config files: {0}", String.join(", ", added));
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Could not add the new races to your config files; they stay off until their sections are added.", e);
         }
     }
 
@@ -104,7 +127,8 @@ public class ConfigManager {
                 & challenges.reload()
                 & streaks.reload()
                 & events.reload()
-                & menus.reload();
+                & menus.reload()
+                & discord.reload();
 
         messages = new Messages();
         return success;
@@ -229,6 +253,12 @@ public class ConfigManager {
     public static class Menus extends YamlConfig {
         public Menus() {
             super(plugin, "menus");
+        }
+    }
+
+    public static class Discord extends YamlConfig {
+        public Discord() {
+            super(plugin, "discord");
         }
     }
 }

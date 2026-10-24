@@ -25,6 +25,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
+                    <!-- Line numbers stay for stack traces; local variable tables only add weight -->
+                    <debuglevel>source,lines</debuglevel>
                     <compilerArgs>
                         <arg>-Xlint:-options</arg>
                     </compilerArgs>
@@ -47,6 +49,8 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <!-- Drops library classes nothing reaches (XSeries alone is ~770 KB in full) -->
+                            <minimizeJar>true</minimizeJar>
                             <!-- Every shaded library is relocated so it can't clash with another plugin's copy -->
                             <relocations>
                                 <relocation>
@@ -71,6 +75,13 @@
                                 </relocation>
                             </relocations>
                             <filters>
+                                <!-- FoliaLib picks its scheduler implementation by name, which minimizeJar can't see -->
+                                <filter>
+                                    <artifact>com.tcoded:FoliaLib</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -111,6 +122,10 @@
             <url>https://repo.tcoded.com/releases</url>
         </repository>
         <repository>
+            <id>scarsz</id>
+            <url>https://nexus.scarsz.me/content/groups/public/</url>
+        </repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
@@ -133,6 +148,13 @@
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
             <version>2.11.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Optional: posts through a server's DiscordSRV bot; only loaded when DiscordSRV is installed -->
+        <dependency>
+            <groupId>com.discordsrv</groupId>
+            <artifactId>discordsrv</artifactId>
+            <version>1.30.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

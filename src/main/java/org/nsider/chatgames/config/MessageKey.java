@@ -191,6 +191,36 @@ public enum MessageKey {
             "unknown_menu",
             "&8[%prefix%&8] &cThere is no menu called &f%menu%&c."
     ),
+    DISCORD_TEST_SENT(
+            "messages",
+            "discord.test_sent",
+            "&8[%prefix%&8] &fSent &a%amount% &ftest message(s) to Discord. If nothing shows up, the console says why."
+    ),
+    DISCORD_LEADERBOARD_POSTED(
+            "messages",
+            "discord.leaderboard_posted",
+            "&8[%prefix%&8] &fThe leaderboard was sent to Discord."
+    ),
+    DISCORD_DISABLED(
+            "messages",
+            "discord.disabled",
+            "&8[%prefix%&8] &cDiscord messages are off: set &fenabled: true &cin discord.yml."
+    ),
+    DISCORD_NO_CHANNEL(
+            "messages",
+            "discord.no_channel",
+            "&8[%prefix%&8] &f%section% &chas no channel with a webhook or DiscordSRV channel in discord.yml."
+    ),
+    DISCORD_UNKNOWN_MESSAGE(
+            "messages",
+            "discord.unknown_message",
+            "&8[%prefix%&8] &cThere is no Discord message called &f%message%&c."
+    ),
+    DISCORD_EMPTY_MESSAGE(
+            "messages",
+            "discord.empty_message",
+            "&8[%prefix%&8] &f%message% &cis empty or missing in discord.yml."
+    ),
     LOGS_HEADER(
             "messages",
             "logs.header",

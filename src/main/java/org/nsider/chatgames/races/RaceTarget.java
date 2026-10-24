@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Tameable;
 import org.nsider.chatgames.api.GameType;
 import org.nsider.chatgames.api.RaceGame;
 import org.nsider.chatgames.hooks.MythicHook;
@@ -19,7 +20,7 @@ import java.util.Optional;
 
 /**
  * What a race asks for: a mob for Hunt (vanilla, or a MythicMobs mob type written
- * {@code mythic:<MobType>}), a material for every other race.
+ * {@code mythic:<MobType>}), Tame and Shear, a material for every other race.
  *
  * <p>Names in races.yml may be modern or legacy (MOOSHROOM or MUSHROOM_COW, COD or
  * RAW_FISH); XSeries maps them to this server's version. Items are compared with their
@@ -67,10 +68,13 @@ public final class RaceTarget {
                 String mythic = MythicHook.isEnabled() ? MythicHook.findMobType(key) : null;
                 return mythic == null ? null : new RaceTarget(key, null, null, mythic);
             }
-            if (race == GameType.HUNT) {
+            if (race.isMobRace()) {
                 Optional<XEntityType> type = XEntityType.of(key);
                 EntityType entity = type.isPresent() ? type.get().get() : null;
-                return entity == null || !entity.isAlive() ? null : new RaceTarget(key, null, entity, null);
+                if (entity == null || !entity.isAlive()) return null;
+                // Ocelots stopped being tameable in 1.14, when cats took over
+                if (race == GameType.TAME && !isTameable(entity)) return null;
+                return new RaceTarget(key, null, entity, null);
             }
             Optional<XMaterial> type = XMaterial.matchXMaterial(key);
             return type.isPresent() && type.get().get() != null ? new RaceTarget(key, type.get(), null, null) : null;
@@ -145,6 +149,11 @@ public final class RaceTarget {
             if (translated != null && !translated.isEmpty()) return translated;
         }
         return titleCase(modern);
+    }
+
+    private static boolean isTameable(EntityType entity) {
+        Class<? extends Entity> type = entity.getEntityClass();
+        return type != null && Tameable.class.isAssignableFrom(type);
     }
 
     static String titleCase(String name) {

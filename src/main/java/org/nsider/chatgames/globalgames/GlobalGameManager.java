@@ -141,6 +141,7 @@ public final class GlobalGameManager {
             start.send(player);
         }
         session.begin();
+        plugin.getDiscordManager().globalStarted(session);
         session.schedule(plugin.getScheduler().globalTimer(() -> tick(session), 1L, TICK));
         return true;
     }
@@ -288,6 +289,7 @@ public final class GlobalGameManager {
             announceEnd(session, ranking, completed);
             payOut(session, ranking, completed);
         }
+        plugin.getDiscordManager().globalEnded(session, outcome, ranking);
 
         List<PlayerResult> results = new ArrayList<>();
         if (completed) {

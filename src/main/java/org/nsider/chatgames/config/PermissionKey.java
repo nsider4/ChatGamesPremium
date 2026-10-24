@@ -28,6 +28,7 @@ public enum PermissionKey {
     PRESET("chatgames.preset", "Allows listing, loading and saving game presets.", "op"),
     REMOVE("chatgames.remove", "Allows removing a player from the database.", "op"),
     LOGS("chatgames.logs", "Allows viewing the game logs.", "op"),
+    DISCORD("chatgames.discord", "Allows sending test messages and the leaderboard to Discord.", "op"),
     CHALLENGES("chatgames.challenges", "Allows viewing your daily and weekly challenges.", "true"),
     STREAKS("chatgames.streaks", "Allows viewing your streaks.", "true"),
     CLAIM("chatgames.claim", "Allows claiming finished challenges and streak rewards.", "true"),

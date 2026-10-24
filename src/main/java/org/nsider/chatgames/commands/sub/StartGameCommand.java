@@ -151,7 +151,10 @@ public class StartGameCommand extends SubCommand {
         RaceData data = plugin.getRaceManager().getData(type);
         if (args.length == 1) {
             List<String> targets = new ArrayList<>();
-            for (String target : data.getTargets()) targets.add(target.toLowerCase(Locale.ROOT));
+            for (String target : data.getTargets()) {
+                // Targets this server version doesn't have (cats on 1.8, tamed ocelots on 1.14+) can't be started
+                if (RaceTarget.resolve(type, target) != null) targets.add(target.toLowerCase(Locale.ROOT));
+            }
             if (type == GameType.HUNT) {
                 for (String mob : MythicHook.mobTypes()) {
                     // races.yml may already list it, lower-cased above
@@ -160,7 +163,7 @@ public class StartGameCommand extends SubCommand {
                 }
             }
             List<String> matches = MessageUtils.filterSuggestions(targets, args[0]);
-            return matches.isEmpty() ? Collections.singletonList(type == GameType.HUNT ? "<mob>" : "<material>") : matches;
+            return matches.isEmpty() ? Collections.singletonList(type.isMobRace() ? "<mob>" : "<material>") : matches;
         }
         if (args.length == 2) {
             List<String> amounts = new ArrayList<>();

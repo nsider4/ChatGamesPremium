@@ -12,11 +12,13 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.FurnaceExtractEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -121,6 +123,24 @@ public final class RaceListener implements Listener {
         Race race = running(GameType.FURNACE, event.getPlayer());
         if (race != null && race.getTarget().matchesBlock(event.getItemType()) && event.getItemAmount() > 0) {
             plugin.getRaceManager().progress(race, event.getPlayer(), event.getItemAmount());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onTame(EntityTameEvent event) {
+        if (!(event.getOwner() instanceof Player)) return;
+        Player player = (Player) event.getOwner();
+        Race race = running(GameType.TAME, player);
+        if (race != null && race.getTarget().matches(event.getEntityType())) {
+            plugin.getRaceManager().progress(race, player, 1);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onShear(PlayerShearEntityEvent event) {
+        Race race = running(GameType.SHEAR, event.getPlayer());
+        if (race != null && race.getTarget().matches(event.getEntity().getType())) {
+            plugin.getRaceManager().progress(race, event.getPlayer(), 1);
         }
     }
 

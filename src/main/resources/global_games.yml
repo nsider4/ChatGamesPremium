@@ -245,3 +245,11 @@ games:
     enabled: false
     goal: 64
     duration-seconds: 300
+  tame:
+    enabled: false
+    goal: 15
+    duration-seconds: 300
+  shear:
+    enabled: false
+    goal: 40
+    duration-seconds: 240

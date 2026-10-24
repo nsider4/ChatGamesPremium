@@ -12,6 +12,7 @@ import org.nsider.chatgames.commands.sub.ClaimCommand;
 import org.nsider.chatgames.commands.sub.DebugCommand;
 import org.nsider.chatgames.commands.sub.MenuCommand;
 import org.nsider.chatgames.commands.sub.ProfileCommand;
+import org.nsider.chatgames.commands.sub.DiscordCommand;
 import org.nsider.chatgames.commands.sub.EventCommand;
 import org.nsider.chatgames.commands.sub.GlobalCommand;
 import org.nsider.chatgames.commands.sub.HelpCommand;
@@ -73,6 +74,7 @@ public class ChatGamesCommand implements TabExecutor {
         register(new ToggleAllCommand(plugin));
         register(new PresetCommand(plugin));
         register(new LogsCommand(plugin));
+        register(new DiscordCommand(plugin));
         register(new RemoveCommand(plugin));
         for (ManagePointsCommand command : ManagePointsCommand.all(plugin)) {
             register(command);

@@ -15,7 +15,6 @@ import org.nsider.chatgames.globalgames.CoopProgress;
 import org.nsider.chatgames.api.event.ChatGamesEventEndEvent;
 import org.nsider.chatgames.api.event.ChatGamesEventStartEvent;
 import org.nsider.chatgames.api.PlayerResult;
-import org.nsider.chatgames.listeners.DiscordListener;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.model.player.Stat;
 import org.nsider.chatgames.progression.Activity;
@@ -266,17 +265,11 @@ public final class EventManager implements Listener {
 
         String none = ConfigManager.getMessagesConfig().getString("no_winner_placeholder", "---");
         Msg end = Msg.of(messages(ranking.isEmpty() ? "nobody" : "end")).with("%count%", ranking.size());
-        List<String> discordLines = new ArrayList<>();
         for (int place = 1; place <= 3; place++) {
             EventScores.Standing standing = place <= ranking.size() ? ranking.get(place - 1) : null;
             String name = standing == null ? null : nameOf(standing.getUuid());
             end.with("%winner_" + place + "%", name != null ? name : none)
                     .with("%points_" + place + "%", standing != null ? String.valueOf(standing.getPoints()) : none);
-            if (standing != null) {
-                discordLines.add(ConfigManager.getEvents().getString("discord.line", "#%place% %player% - %points% points")
-                        .replace("%place%", String.valueOf(place)).replace("%player%", name != null ? name : none)
-                        .replace("%points%", String.valueOf(standing.getPoints())));
-            }
         }
         broadcast(end, current);
 
@@ -302,10 +295,6 @@ public final class EventManager implements Listener {
             plugin.getProgressionManager().record(player, Activity.event());
         }
 
-        if (!ranking.isEmpty() && ConfigManager.getEvents().getBoolean("discord.enabled", true)) {
-            String title = ConfigManager.getEvents().getString("discord.title", "%event% results");
-            DiscordListener.sendLines(plugin, title.replace("%event%", definition.getName()), discordLines);
-        }
         List<ChatGamesEventEndEvent.Standing> standings = new ArrayList<>();
         for (EventScores.Standing standing : ranking) {
             standings.add(new ChatGamesEventEndEvent.Standing(standing.getUuid(), standing.getPoints(), standing.getPlace()));
