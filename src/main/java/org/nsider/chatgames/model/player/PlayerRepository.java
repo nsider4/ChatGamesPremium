@@ -227,7 +227,12 @@ public final class PlayerRepository {
 
                 connection.commit();
             } catch (SQLException e) {
-                connection.rollback();
+                try {
+                    connection.rollback();
+                } catch (SQLException rollback) {
+                    // Keep the error that caused the rollback; it is the one worth reporting
+                    e.addSuppressed(rollback);
+                }
                 throw e;
             } finally {
                 connection.setAutoCommit(autoCommit);

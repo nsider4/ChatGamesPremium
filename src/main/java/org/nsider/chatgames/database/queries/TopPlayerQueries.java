@@ -28,11 +28,13 @@ import java.util.logging.Level;
 /**
  * The {@code /chatgames top} leaderboards, read from the database and sent as chat messages.
  */
-public class TopPlayerQueries {
+public final class TopPlayerQueries {
 
     private static ChatGames plugin;
     private static String tableName;
     private static String fastestTable;
+
+    private TopPlayerQueries() {}
 
     /**
      * @return every race's id as a quoted SQL list, e.g. {@code 'hunt','place'}. Ids are only
@@ -94,7 +96,9 @@ public class TopPlayerQueries {
                     int rank = 0;
 
                     while (rs.next()) {
-                        UUID uuid = UUID.fromString(rs.getString("UUID"));
+                        UUID uuid = parseUuid(rs.getString("UUID"));
+                        // A hand-edited row isn't worth losing the whole leaderboard over
+                        if (uuid == null) continue;
                         String name = Bukkit.getOfflinePlayer(uuid).getName();
                         if (name == null) name = "?";
                         double value = rs.getDouble("val");
@@ -118,6 +122,14 @@ public class TopPlayerQueries {
             plugin.getScheduler().global(() ->
                     new TopPresenter(sender, messages, top, gameType).present(rows, personal, totalPoints));
         });
+    }
+
+    private static UUID parseUuid(String text) {
+        try {
+            return text == null ? null : UUID.fromString(text);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private static double getPersonalValue(Player player, TopType top, GameType... game) {

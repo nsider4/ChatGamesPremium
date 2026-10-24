@@ -16,7 +16,8 @@ import java.util.function.ToIntFunction;
 import java.util.logging.Level;
 
 /**
- * Handles the primary task logic for managing and scheduling games.
+ * The automatic game rotation: waits the configured delay, then starts a weighted
+ * random game if enough players are online and nothing else is running.
  */
 public class MainTask {
 
@@ -69,7 +70,8 @@ public class MainTask {
                 // One broken game must not stop the rotation for good
                 plugin.getLogger().log(Level.SEVERE, "A game failed to start; the rotation continues with the next one.", e);
             } finally {
-                scheduleNext();
+                // Turned off while the round ran: don't start a new chain
+                if (taskEnabled) scheduleNext();
             }
         }, delayTicks);
     }
@@ -157,6 +159,9 @@ public class MainTask {
      *
      * @return null if no game has a weight above 0
      */
+    /** Caps each weight so even absurd config values can't overflow the total. */
+    private static final int MAX_WEIGHT = 1_000_000;
+
     @Nullable
     static GameType pickGame(@Nonnull List<GameType> games, @Nullable GameType previous, @Nonnull Random random,
                              @Nonnull ToIntFunction<GameType> weightOf) {
@@ -165,7 +170,7 @@ public class MainTask {
         int total = 0;
         int[] weights = new int[candidates.size()];
         for (int i = 0; i < candidates.size(); i++) {
-            weights[i] = Math.max(0, weightOf.applyAsInt(candidates.get(i)));
+            weights[i] = Math.min(MAX_WEIGHT, Math.max(0, weightOf.applyAsInt(candidates.get(i))));
             total += weights[i];
         }
         if (total <= 0) return null;

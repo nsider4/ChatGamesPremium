@@ -271,13 +271,26 @@ public final class ChatGames extends JavaPlugin {
             getLogger().warning("Unknown Storage type '" + configured + "'; using SQLite.");
         }
 
+        // Table names go into the SQL as written, so only plain identifiers are accepted
+        String mainTable = ConfigValue.getString(ConfigPaths.TABLE_NAME);
+        String fastestTable = ConfigValue.getString(ConfigPaths.FASTEST_TIMES_TABLE);
+        if (!isTableName(mainTable) || !isTableName(fastestTable)) {
+            getLogger().severe("table_name and fastest_times_table may only use letters, digits and underscores"
+                    + " (found '" + mainTable + "' and '" + fastestTable + "').");
+            return false;
+        }
+
         this.dataHandler = new HikariDatabase(this, storageType);
         if (!dataHandler.initialize()) return false;
 
-        String mainTable = ConfigValue.getString(ConfigPaths.TABLE_NAME);
         this.playerRepository = new PlayerRepository(dataHandler::getConnection, mainTable,
-                ConfigValue.getString(ConfigPaths.FASTEST_TIMES_TABLE), mainTable + "_stats");
+                fastestTable, mainTable + "_stats");
         return QueryInitializer.initialize(this, playerRepository);
+    }
+
+    private static boolean isTableName(String name) {
+        // Leaves room for the _stats, _upgrading and _1_9_9 suffixes within MySQL's 64 characters
+        return name != null && name.matches("[A-Za-z0-9_]{1,48}");
     }
 
     private static String[] versionParts() {

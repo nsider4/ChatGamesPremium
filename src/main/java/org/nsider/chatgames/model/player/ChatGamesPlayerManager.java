@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +34,8 @@ import java.util.logging.Level;
 public final class ChatGamesPlayerManager {
 
     private static final Map<UUID, ChatGamesPlayer> cache = new ConcurrentHashMap<>();
+    // Who is online as far as join/quit have told us; Bukkit's own player list isn't safe to read off the main thread
+    private static final Set<UUID> online = ConcurrentHashMap.newKeySet();
     private static ChatGames plugin;
     private static PlayerRepository repository;
     private static ExecutorService io;
@@ -66,15 +69,20 @@ public final class ChatGamesPlayerManager {
      */
     public static void load(@Nonnull OfflinePlayer player) {
         UUID uuid = player.getUniqueId();
+        online.add(uuid);
         io.execute(() -> {
             try {
                 ChatGamesPlayer data = repository.load(uuid);
                 // They may have left while this was loading; their quit already ran, so don't cache them
-                if (Bukkit.getPlayer(uuid) != null) {
-                    cache.put(uuid, data);
-                    // Milestones reached while offline (points given by an admin)
-                    MilestoneUtils.payPendingLater(uuid);
+                if (!online.contains(uuid)) return;
+                cache.put(uuid, data);
+                // A quit landing between the check and the put found nothing to unload: undo it here
+                if (!online.contains(uuid)) {
+                    if (cache.remove(uuid, data)) save(data);
+                    return;
                 }
+                // Milestones reached while offline (points given by an admin)
+                MilestoneUtils.payPendingLater(uuid);
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Could not load ChatGames data for " + player.getName(), e);
             }
@@ -94,6 +102,7 @@ public final class ChatGamesPlayerManager {
      * Saves and forgets a player who left.
      */
     public static void unload(@Nonnull OfflinePlayer player) {
+        online.remove(player.getUniqueId());
         ChatGamesPlayer data = cache.remove(player.getUniqueId());
         if (data != null) {
             save(data);
@@ -125,6 +134,7 @@ public final class ChatGamesPlayerManager {
         if (io == null) return;
         saveAll();
         cache.clear();
+        online.clear();
         io.shutdown();
         try {
             if (!io.awaitTermination(30, TimeUnit.SECONDS)) {

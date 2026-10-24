@@ -6,6 +6,8 @@ import org.nsider.inventorymanager.extras.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -14,7 +16,10 @@ import java.util.logging.Level;
  * Utility class for checking plugin updates on SpigotMC.
  * Fetches the latest version information for a specified resource.
  */
-public class UpdateChecker {
+public final class UpdateChecker {
+
+    /** How long to wait for SpigotMC before giving up, in milliseconds. */
+    private static final int TIMEOUT_MILLIS = 10_000;
 
     /** The plugin instance using this update checker. */
     private final ChatGames plugin;
@@ -41,11 +46,17 @@ public class UpdateChecker {
      */
     public void getVersion(@Nonnull final Consumer<String> consumer) {
         plugin.getScheduler().async(() -> {
-            try (InputStream inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId).openStream();
-                 Scanner scanner = new Scanner(inputStream)) {
+            try {
+                URLConnection connection = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId).openConnection();
+                // Without timeouts an unresponsive site would hold an async thread forever
+                connection.setConnectTimeout(TIMEOUT_MILLIS);
+                connection.setReadTimeout(TIMEOUT_MILLIS);
+                try (InputStream inputStream = connection.getInputStream();
+                     Scanner scanner = new Scanner(inputStream, "UTF-8")) {
 
-                if (scanner.hasNext()) {
-                    consumer.accept(scanner.next());
+                    if (scanner.hasNext()) {
+                        consumer.accept(scanner.next());
+                    }
                 }
             } catch (IOException exception) {
                 plugin.getLogger().log(Level.INFO, "Unable to check for updates: {0}", exception.getMessage());
@@ -80,6 +91,6 @@ public class UpdateChecker {
                 result[count++] = part.length() > 9 ? Integer.MAX_VALUE : Integer.parseInt(part);
             }
         }
-        return java.util.Arrays.copyOf(result, count);
+        return Arrays.copyOf(result, count);
     }
 }

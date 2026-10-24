@@ -3,6 +3,7 @@ package org.nsider.chatgames.discord;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.ByteArrayOutputStream;
@@ -79,13 +80,22 @@ final class HttpsRequest {
 
     private static Socket open(String host, int port, boolean https) throws IOException {
         Socket plain = new Socket();
-        plain.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT_MILLIS);
-        plain.setSoTimeout(READ_TIMEOUT_MILLIS);
-        if (!https) return plain;
-        // Layered over the connected socket so the connect timeout applies; the host name gives SNI
-        SSLSocket tls = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(plain, host, port, true);
-        tls.startHandshake();
-        return tls;
+        try {
+            plain.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT_MILLIS);
+            plain.setSoTimeout(READ_TIMEOUT_MILLIS);
+            if (!https) return plain;
+            // Layered over the connected socket so the connect timeout applies; the host name gives SNI
+            SSLSocket tls = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(plain, host, port, true);
+            // A layered socket checks the certificate chain but not that it is for this host; this adds that check
+            SSLParameters params = tls.getSSLParameters();
+            params.setEndpointIdentificationAlgorithm("HTTPS");
+            tls.setSSLParameters(params);
+            tls.startHandshake();
+            return tls;
+        } catch (IOException | RuntimeException e) {
+            plain.close();
+            throw e;
+        }
     }
 
     /** Reads to the end (the server closes the connection), then splits headers and body. */
