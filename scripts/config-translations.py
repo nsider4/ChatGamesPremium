@@ -27,7 +27,8 @@ import yaml
 
 RESOURCES = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src', 'main', 'resources')
 FILES = ['config.yml', 'games.yml', 'messages.yml', 'menus.yml', 'words.yml', 'races.yml', 'global_games.yml',
-         'challenges.yml', 'streaks.yml', 'events.yml', 'rewards.yml', 'add-ons.yml', 'presets.yml', 'milestones.yml']
+         'challenges.yml', 'streaks.yml', 'events.yml', 'rewards.yml', 'add-ons.yml', 'presets.yml', 'milestones.yml',
+         'discord.yml']
 
 # The text values of each file, as path patterns ('*' is one key, '**' any number, '[]' a list item).
 # Everything else (materials, actions, commands, ids, numbers...) is a setting and never changes.
@@ -46,7 +47,11 @@ TEXT_RULES = {
     'events.yml': [r'events.*.name', r'messages.**'],
     'rewards.yml': [r'**.data[]'],
     'config.yml': [],
-    'add-ons.yml': [r'discord.message-content', r'discord.title', r'discord.description', r'discord.game-field'],
+    'add-ons.yml': [],
+    'discord.yml': [r'**.content', r'**.content[]', r'**.title', r'**.description', r'**.description[]', r'**.author',
+                    r'**.author.name', r'**.footer', r'**.footer.text', r'**.fields.name', r'**.fields.value',
+                    r'games.hidden-question', r'lists.*', r'lists.medals[]',
+                    r'challenges.periods.*'],
     'presets.yml': [],
     'milestones.yml': [],
 }
