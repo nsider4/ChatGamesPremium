@@ -82,6 +82,41 @@
                                         <include>**</include>
                                     </includes>
                                 </filter>
+                                <!--
+                                  minimizeJar keeps whatever a kept class names, even in code that never runs.
+                                  XRegistry names every registry only in ensureLoadedRegistries(), reached through
+                                  registryOf()/rawRegistryOf(), which neither ChatGames, InventoryManager nor XSeries
+                                  calls; XReflection names the ASM and proxy generators only in proxify(), also
+                                  never called. The JVM loads a class on first use, so these are never needed.
+                                  Recheck after an XSeries upgrade (scripts/xseries-check.py).
+                                -->
+                                <filter>
+                                    <artifact>com.github.cryptomorin:XSeries</artifact>
+                                    <excludes>
+                                        <exclude>com/cryptomorin/xseries/XAttribute*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/XBiome*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/XItemFlag*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/XPotion*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/particles/**</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/asm/**</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/StaticReflectiveHandle*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/ReflectiveProxy.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/ReflectiveProxy$*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/ClassOverloadedMethods*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/OverloadedMethod*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/processors/**</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/Constructor.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/Field.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/Final.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/MappedMinecraftName*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/Private.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/Protected.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/Proxify.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/ReflectMinecraftPackage.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/ReflectName*.class</exclude>
+                                        <exclude>com/cryptomorin/xseries/reflection/proxy/annotations/Static.class</exclude>
+                                    </excludes>
+                                </filter>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
