@@ -1410,6 +1410,7 @@
     "or one of the language codes above": "lub jeden z kodów języka powyżej",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "W grach czatu utrzymuj goal x question-seconds w granicach duration-seconds, żeby nawet jeden gracz odpowiadający sam mógł osiągnąć cel.",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "Zamiast tego, gdy wciąż trwa inna gra (np. gra globalna); etap zacznie się, gdy ona się skończy.",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- gra &e%step%/%steps% &fzacznie się, gdy skończy się obecna gra."
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- gra &e%step%/%steps% &fzacznie się, gdy skończy się obecna gra.",
+    "&f  Top: &e%top_1% &7(%top_1_amount%)  &e%top_2% &7(%top_2_amount%)  &e%top_3% &7(%top_3_amount%)": "&f  Najlepsi: &e%top_1% &7(%top_1_amount%)  &e%top_2% &7(%top_2_amount%)  &e%top_3% &7(%top_3_amount%)"
   }
 }

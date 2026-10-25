@@ -57,4 +57,14 @@ public abstract class SubCommand {
     public boolean canUse(@Nonnull CommandSender sender) {
         return permission == null || sender.hasPermission(permission);
     }
+
+    /**
+     * For the help list: whether the sender can use one of this command's actions, for a
+     * command whose actions need more than its own permission (e.g. {@code event start}).
+     *
+     * @param action the word after the command name, lower case, or empty
+     */
+    public boolean canUse(@Nonnull CommandSender sender, @Nonnull String action) {
+        return canUse(sender);
+    }
 }

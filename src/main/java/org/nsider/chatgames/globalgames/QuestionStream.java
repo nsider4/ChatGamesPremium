@@ -19,11 +19,15 @@ import org.nsider.chatgames.utils.messages.Msg;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 /**
  * A chat game played globally: a stream of questions. Each player can answer each question
- * once; it moves on after {@code answers-per-question} correct answers, once everyone who
- * can play has answered, or after {@code question-seconds}, so slower players still get to
- * contribute and a small server isn't left waiting out every question. Every correct
+ * once; it moves on after {@code answers-per-question} correct answers, once everyone playing
+ * has answered, or after {@code question-seconds}, so slower players still get to contribute
+ * and a small server isn't left waiting out every question. Every correct
  * answer is +1 for the server. Answers are always hidden, so they can't be copied.
  *
  * <p>Each question is a {@link Game} whose winners are its correct answers, which keeps
@@ -42,6 +46,8 @@ final class QuestionStream extends GlobalSession {
     @Nullable private volatile Game question;
     @Nullable private Round first;
     private int number;
+    /** Everyone who answered an earlier question; main/global thread. */
+    private final Set<UUID> playing = new HashSet<>();
 
     private QuestionStream(ChatGames plugin, GlobalGameManager manager, GlobalGameConfig.Entry entry,
                            ConfigurationSection section, Round first, String[] args) {
@@ -84,6 +90,10 @@ final class QuestionStream extends GlobalSession {
     /** Main/global thread. */
     private void nextQuestion() {
         if (progress.isOver()) return;
+        Game previous = question;
+        if (previous != null) {
+            for (PlayerResult result : previous.getResultsByPlace()) playing.add(result.getUuid());
+        }
         Round round = first;
         first = null;
         for (int i = 0; round == null && i < GENERATE_TRIES; i++) {
@@ -167,12 +177,20 @@ final class QuestionStream extends GlobalSession {
         });
     }
 
-    /** Main/global thread. */
+    /**
+     * Whether everyone playing has answered. Until someone has answered a question, that is
+     * everyone who can play; after that, only those who have answered one, so a player who is
+     * away doesn't make every question run its full time. Main/global thread.
+     */
     private boolean everyoneAnswered(Game game) {
+        boolean anyone = false;
         for (Player player : manager.players()) {
-            if (!game.hasResult(player.getUniqueId())) return false;
+            UUID uuid = player.getUniqueId();
+            if (!playing.isEmpty() && !playing.contains(uuid)) continue;
+            anyone = true;
+            if (!game.hasResult(uuid)) return false;
         }
-        return true;
+        return anyone;
     }
 
     @Override

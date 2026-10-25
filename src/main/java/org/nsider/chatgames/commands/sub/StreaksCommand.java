@@ -72,6 +72,12 @@ public class StreaksCommand extends SubCommand {
         if (!any) CommandSupport.send(sender, MessageKey.STREAKS_NONE);
     }
 
+    @Override
+    public boolean canUse(@Nonnull CommandSender sender, @Nonnull String action) {
+        if (action.equals("set")) return sender.hasPermission(PermissionKey.STREAKS_SET.getPermission());
+        return canUse(sender);
+    }
+
     private void set(CommandSender sender, String[] args) {
         if (!sender.hasPermission(PermissionKey.STREAKS_SET.getPermission())) {
             CommandSupport.send(sender, MessageKey.NOT_ENOUGH_PERMISSIONS);

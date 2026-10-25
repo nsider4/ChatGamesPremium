@@ -1407,6 +1407,9 @@
     "or one of the language codes above": "vagy a fenti nyelvkódok egyike",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "Csetjátékoknál a goal x question-seconds ne legyen több a duration-seconds értéknél, hogy egyetlen, egyedül válaszoló játékos is elérhesse a célt.",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "Helyette, ha még fut egy másik játék (pl. egy globális játék); a lépés akkor indul, amikor az véget ér.",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- a(z) &e%step%/%steps%&f. játék akkor indul, amikor a mostani véget ér."
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- a(z) &e%step%/%steps%&f. játék akkor indul, amikor a mostani véget ér.",
+    "Fish": "Hal",
+    "Furnace": "Kemence",
+    "Tame": "Szelídítés"
   }
 }

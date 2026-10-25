@@ -1407,6 +1407,9 @@
     "or one of the language codes above": "hoặc một trong các mã ngôn ngữ ở trên",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "Với trò chơi chat, giữ goal x question-seconds không vượt quá duration-seconds, để kể cả một người chơi trả lời một mình cũng đạt được mục tiêu.",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "Thay vào đó, khi một trò khác (vd. trò chơi toàn cầu) vẫn đang chạy; bước này bắt đầu ngay khi trò đó kết thúc.",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- trò &e%step%/%steps% &fsẽ bắt đầu khi trò hiện tại kết thúc."
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- trò &e%step%/%steps% &fsẽ bắt đầu khi trò hiện tại kết thúc.",
+    "Fish": "Cá",
+    "Furnace": "Lò nung",
+    "Tame": "Thuần hóa"
   }
 }

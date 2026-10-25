@@ -38,6 +38,12 @@ public class EventCommand extends SubCommand {
 
     private final ChatGames plugin;
 
+    @Override
+    public boolean canUse(@Nonnull CommandSender sender, @Nonnull String action) {
+        if (action.equals("start") || action.equals("stop")) return sender.hasPermission(PermissionKey.EVENT_MANAGE.getPermission());
+        return canUse(sender);
+    }
+
     public EventCommand(@Nonnull ChatGames plugin) {
         super("event", PermissionKey.EVENT.getPermission(), false, "events");
         this.plugin = plugin;

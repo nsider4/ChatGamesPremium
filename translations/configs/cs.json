@@ -1407,6 +1407,9 @@
     "or one of the language codes above": "nebo jeden z kódů jazyka výše",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "U chatových her drž goal x question-seconds v rámci duration-seconds, aby cíl zvládl i jediný hráč, který odpovídá sám.",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "Místo toho, když ještě běží jiná hra (např. globální hra); krok začne, jakmile skončí.",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- hra &e%step%/%steps% &fzačne, až skončí současná hra."
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- hra &e%step%/%steps% &fzačne, až skončí současná hra.",
+    "Fish": "Ryba",
+    "Furnace": "Pec",
+    "Tame": "Ochočení"
   }
 }

@@ -1407,6 +1407,9 @@
     "or one of the language codes above": "atau salah satu kode bahasa di atas",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "Untuk game chat, jaga goal x question-seconds tidak melebihi duration-seconds, agar satu pemain yang menjawab sendirian pun bisa mencapai target.",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "Sebagai gantinya, saat game lain masih berjalan (mis. game global); langkah dimulai begitu game itu selesai.",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- game &e%step%/%steps% &fdimulai saat game yang sedang berjalan selesai."
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- game &e%step%/%steps% &fdimulai saat game yang sedang berjalan selesai.",
+    "Fish": "Ikan",
+    "Furnace": "Tungku",
+    "Tame": "Jinakkan"
   }
 }

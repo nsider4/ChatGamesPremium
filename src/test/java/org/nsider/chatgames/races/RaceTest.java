@@ -37,6 +37,17 @@ class RaceTest {
     }
 
     @Test
+    void theShippedTargetsAreKnownForEveryRace() throws Exception {
+        YamlConfiguration shipped = new YamlConfiguration();
+        try (Reader reader = new InputStreamReader(getClass().getResourceAsStream("/races.yml"), StandardCharsets.UTF_8)) {
+            shipped.load(reader);
+        }
+        // Both are listed so Tame works before and after 1.14; whichever is missing is skipped quietly
+        assertTrue(RaceManager.shippedTargets(shipped, GameType.TAME).containsAll(Arrays.asList("OCELOT", "CAT")));
+        assertTrue(RaceManager.shippedTargets(new YamlConfiguration(), GameType.TAME).isEmpty());
+    }
+
+    @Test
     void dataKeepsTargetsAmountsAndRewards() throws Exception {
         List<String> warnings = new ArrayList<>();
         RaceData data = data("mine:\n  data:\n    stone:\n      10:\n        rewards: [reward_1]\n      20:\n        rewards: [reward_1, reward_2]\n"

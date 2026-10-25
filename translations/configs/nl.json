@@ -1411,6 +1411,7 @@
     "or one of the language codes above": "of een van de taalcodes hierboven",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "Houd bij chatspellen goal x question-seconds binnen duration-seconds, zodat zelfs één speler die alleen antwoordt het doel kan halen.",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "In plaats daarvan, als er nog een ander spel bezig is (bv. een globaal spel); de stap begint zodra het afloopt.",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- spel &e%step%/%steps% &fbegint zodra het huidige spel afloopt."
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- spel &e%step%/%steps% &fbegint zodra het huidige spel afloopt.",
+    "&f  Top: &e%top_1% &7(%top_1_amount%)  &e%top_2% &7(%top_2_amount%)  &e%top_3% &7(%top_3_amount%)": "&f  Beste: &e%top_1% &7(%top_1_amount%)  &e%top_2% &7(%top_2_amount%)  &e%top_3% &7(%top_3_amount%)"
   }
 }

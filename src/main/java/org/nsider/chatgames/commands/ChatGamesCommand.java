@@ -56,7 +56,7 @@ public class ChatGamesCommand implements TabExecutor {
 
     public ChatGamesCommand(@Nonnull ChatGames plugin) {
         this.plugin = plugin;
-        register(new HelpCommand());
+        register(new HelpCommand(this::helpAccess));
         register(MenuCommand.main(plugin));
         register(new ProfileCommand(plugin));
         register(TopCommand.points());
@@ -105,6 +105,20 @@ public class ChatGamesCommand implements TabExecutor {
         if (!(command instanceof StartGameCommand)) return;
         commands.remove(type.getConfigKey());
         registered.remove(command);
+    }
+
+    /** What a sender can use, for the help list. "(game)" there stands for any start command. */
+    private HelpFilter.Access helpAccess(CommandSender sender) {
+        return (name, action) -> {
+            if (name.equals("(game)") || name.equals("<game>")) {
+                for (GameType type : GameType.values()) {
+                    if (CommandSupport.canStart(sender, type)) return true;
+                }
+                return false;
+            }
+            SubCommand sub = commands.get(name);
+            return sub == null ? null : sub.canUse(sender) && sub.canUse(sender, action);
+        };
     }
 
     /** @return true if a sub-command (or alias) already uses this name */

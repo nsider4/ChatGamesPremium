@@ -5,7 +5,9 @@ import com.cryptomorin.xseries.messages.Titles;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.ConfigManager;
@@ -32,11 +34,18 @@ import org.nsider.chatgames.utils.messages.Msg;
 import org.nsider.inventorymanager.extras.Nonnull;
 import org.nsider.inventorymanager.extras.Nullable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Runs races: start, the winner, time running out and stopping. Shares the game
@@ -64,12 +73,16 @@ public final class RaceManager {
     /** Reads every race's targets and amounts from races.yml. */
     public void load() {
         Map<GameType, RaceData> loaded = new LinkedHashMap<>();
+        ConfigurationSection shipped = shippedRaces();
         for (GameType type : GameType.values()) {
             if (!type.isRace()) continue;
             RaceData races = RaceData.load(section(type).getConfigurationSection("data"),
                     problem -> plugin.getLogger().warning("races.yml: " + problem));
+            Set<String> ours = shippedTargets(shipped, type);
             for (String target : races.getTargets()) {
                 if (RaceTarget.resolve(type, target) != null) continue;
+                // The shipped file names targets for every version on purpose (OCELOT up to 1.13, CAT from 1.14)
+                if (type.isBuiltIn() && ours.contains(target.toUpperCase(Locale.ROOT))) continue;
                 plugin.getLogger().info("races.yml: " + type.getConfigKey() + " target " + target + (MythicHook.isMythicName(target)
                         ? " isn't a MythicMobs mob (or MythicMobs isn't installed) and will be skipped."
                         : type.isBuiltIn() ? " doesn't exist on this server version and will be skipped."
@@ -78,6 +91,33 @@ public final class RaceManager {
             loaded.put(type, races);
         }
         data = loaded;
+    }
+
+    /** @return the races.yml in the jar, or an empty section if it can't be read */
+    @Nonnull
+    private ConfigurationSection shippedRaces() {
+        YamlConfiguration yaml = new YamlConfiguration();
+        try (InputStream in = plugin.getResource("races.yml")) {
+            if (in == null) return yaml;
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            for (int read; (read = in.read(buffer)) != -1; ) bytes.write(buffer, 0, read);
+            // loadFromString, as 1.8 has no loadConfiguration(Reader)
+            yaml.loadFromString(new String(bytes.toByteArray(), StandardCharsets.UTF_8));
+        } catch (IOException | InvalidConfigurationException e) {
+            return new YamlConfiguration();
+        }
+        return yaml;
+    }
+
+    /** @return the targets the jar's races.yml lists for a race, upper case */
+    @Nonnull
+    static Set<String> shippedTargets(@Nonnull ConfigurationSection shipped, @Nonnull GameType type) {
+        Set<String> targets = new HashSet<>();
+        ConfigurationSection data = shipped.getConfigurationSection(type.getConfigKey() + ".data");
+        if (data == null) return targets;
+        for (String key : data.getKeys(false)) targets.add(key.toUpperCase(Locale.ROOT));
+        return targets;
     }
 
     @Nonnull

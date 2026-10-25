@@ -1,3 +1,12 @@
+# ChatGames-Premium 2.0.1
+
+A small update with fixes and improvements. Nothing to change in your config files.
+
+- **Help shows only what you can use:** `/chatgames help` hides the commands the sender has no permission for, along with the ADMIN header when none of its commands are left. Lines you added yourself are always shown.
+- **Global games and away players:** a question moves on once everyone who is playing has answered. A player who hasn't answered any question in that game no longer counts, so one player who is away doesn't make every question run its full time.
+- **Quieter console:** targets that the default races.yml lists for other versions (like OCELOT in the Tame race on 1.14+) are skipped without a console note. Targets you added yourself still get one.
+- **Translations:** the global game results line ("Top: ...") is now translated in German, Spanish, French, Italian, Dutch, Polish, Portuguese, Russian and Turkish. Fish, Furnace and Tame in the word lists are now translated in Chinese (Simplified and Traditional), Japanese, Korean, Ukrainian, Czech, Swedish, Hungarian, Vietnamese and Indonesian.
+
 # ChatGames-Premium 2.0.0
 
 A full recode. One jar runs on Spigot, Paper and their forks from 1.8.8 to 26.x, and on Folia.

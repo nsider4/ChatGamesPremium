@@ -1407,6 +1407,9 @@
     "or one of the language codes above": "または上の言語コードのいずれか",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "チャットゲームでは goal x question-seconds を duration-seconds 以内にしてください。1 人だけで答えても目標に届くようにするためです。",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "代わりに、別のゲーム（例：グローバルゲーム）がまだ進行中のとき。そのゲームが終わり次第、このステップが始まります。",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- ゲーム &e%step%/%steps% &fは、現在のゲームが終わると始まります。"
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- ゲーム &e%step%/%steps% &fは、現在のゲームが終わると始まります。",
+    "Fish": "魚",
+    "Furnace": "かまど",
+    "Tame": "飼いならす"
   }
 }

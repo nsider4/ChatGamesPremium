@@ -82,6 +82,12 @@ public class ChallengesCommand extends SubCommand {
         if (!any) CommandSupport.send(sender, MessageKey.CHALLENGES_NONE);
     }
 
+    @Override
+    public boolean canUse(@Nonnull CommandSender sender, @Nonnull String action) {
+        if (action.equals("reset")) return sender.hasPermission(PermissionKey.CHALLENGES_RESET.getPermission());
+        return canUse(sender);
+    }
+
     private void reset(CommandSender sender, String[] args) {
         if (!sender.hasPermission(PermissionKey.CHALLENGES_RESET.getPermission())) {
             CommandSupport.send(sender, MessageKey.NOT_ENOUGH_PERMISSIONS);

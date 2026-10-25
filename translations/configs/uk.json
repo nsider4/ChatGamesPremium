@@ -1407,6 +1407,9 @@
     "or one of the language codes above": "або один із кодів мови вище",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "Для чат-ігор тримайте goal x question-seconds у межах duration-seconds, щоб навіть один гравець, який відповідає сам, міг досягти мети.",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "Натомість, коли ще триває інша гра (наприклад, глобальна); етап почнеться, щойно вона закінчиться.",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- гра &e%step%/%steps% &fпочнеться, коли закінчиться поточна гра."
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- гра &e%step%/%steps% &fпочнеться, коли закінчиться поточна гра.",
+    "Fish": "Риба",
+    "Furnace": "Піч",
+    "Tame": "Приручення"
   }
 }

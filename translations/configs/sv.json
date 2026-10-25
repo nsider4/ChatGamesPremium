@@ -1407,6 +1407,9 @@
     "or one of the language codes above": "eller en av språkkoderna ovan",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "För chattspel: håll goal x question-seconds inom duration-seconds, så att även en ensam spelare som svarar kan nå målet.",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "I stället, när ett annat spel fortfarande pågår (t.ex. ett globalt spel); steget startar när det är slut.",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- spel &e%step%/%steps% &fstartar när det pågående spelet är slut."
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- spel &e%step%/%steps% &fstartar när det pågående spelet är slut.",
+    "Fish": "Fisk",
+    "Furnace": "Ugn",
+    "Tame": "Tämja"
   }
 }

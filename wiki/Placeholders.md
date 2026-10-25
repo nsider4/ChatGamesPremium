@@ -41,6 +41,17 @@ still works.
 | `%chatgames_next_game_in%` | seconds until the rotation's next game |
 | `%chatgames_race_target%`, `%chatgames_race_amount%`, `%chatgames_race_progress%` | the running race, and your progress in it |
 
+## Global games
+
+| Placeholder | Value |
+|---|---|
+| `%chatgames_global_running%` | whether a global game is running |
+| `%chatgames_global_progress%` / `%chatgames_global_goal%` | the server's progress / the goal |
+| `%chatgames_global_percent%` | the percent of the goal reached |
+| `%chatgames_global_contribution%` | what you have put into the running global game |
+| `%chatgames_global_time_left%` | seconds left |
+| `%chatgames_contributions%` | everything you have put into global games, all time |
+
 ## Challenges and streaks
 
 | Placeholder | Value |

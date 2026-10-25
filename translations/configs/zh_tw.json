@@ -1408,6 +1408,9 @@
     "or one of the language codes above": "或上方的其中一個語言代碼",
     "For chat games, keep goal x question-seconds within duration-seconds, so even one player answering alone can reach the goal.": "對於聊天遊戲，請讓 goal x question-seconds 不超過 duration-seconds，這樣即使只有一名玩家獨自作答也能達成目標。",
     "Instead, when another game (e.g. a global game) is still running; the step starts once it ends.": "改為在另一局遊戲（例如全服遊戲）仍在進行時發送；那局結束後這一步就會開始。",
-    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- 第 &e%step%/%steps% &f局將在目前遊戲結束後開始。"
+    "&6&l» %event% &f- game &e%step%/%steps% &fstarts when the current game ends.": "&6&l» %event% &f- 第 &e%step%/%steps% &f局將在目前遊戲結束後開始。",
+    "Fish": "魚",
+    "Furnace": "熔爐",
+    "Tame": "馴服"
   }
 }
