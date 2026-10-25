@@ -16,3 +16,7 @@ mvn clean package
 ```
 
 The plugin jar is `target/ChatGames-Premium-<version>.jar`. The `wiki/` folder is the source of the GitHub wiki.
+
+## License
+
+[GNU General Public License v3.0](LICENSE).
