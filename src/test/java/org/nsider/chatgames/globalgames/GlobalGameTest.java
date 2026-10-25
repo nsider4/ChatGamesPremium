@@ -76,11 +76,25 @@ class GlobalGameTest {
     }
 
     @Test
+    void aGoalOnePlayerCantReachIsReported() throws Exception {
+        List<String> warnings = new ArrayList<>();
+        // 1.x-era values: ten 10-second questions don't fit into 90 seconds
+        config("games:\n  reaction:\n    goal: 10\n    duration-seconds: 90\n    question-seconds: 10\n"
+                + "  unscramble:\n    goal: 10\n    duration-seconds: 150\n    question-seconds: 15\n"
+                + "  trivia:\n    enabled: false\n    goal: 50\n"
+                + "  mine:\n    goal: 500\n    duration-seconds: 60\n", warnings);
+        assertEquals(Collections.singletonList("games.reaction: a goal of 10 can be out of reach. One player answering alone gets at most"
+                + " 9 questions in 90s; raise duration-seconds to 100 or lower the goal."), warnings);
+    }
+
+    @Test
     void gamesThatCantBeSharedAreRefused() throws Exception {
         List<String> warnings = new ArrayList<>();
         GlobalGameConfig config = config("games:\n  memorize: {}\n  guess_the_number: {}\n  chess: {}\n"
                 + "  math:\n    duration-seconds: 1\n    points: -4\n    goal: 0\n", warnings);
-        assertEquals(3, warnings.size(), warnings.toString());
+        // The last one: 1 answer can't fit 15-second questions into the 5 seconds left after clamping
+        assertEquals(4, warnings.size(), warnings.toString());
+        assertTrue(warnings.get(3).startsWith("games.math: a goal of 1 can be out of reach"), warnings.get(3));
         assertEquals(Collections.singletonList(GameType.MATH), config.getEnabled());
         assertEquals(5, config.get(GameType.MATH).getDurationSeconds(), "at least 5 seconds");
         assertEquals(0, config.get(GameType.MATH).getPoints());

@@ -78,7 +78,15 @@ public final class GlobalGameConfig {
                     warn.accept("games." + key + " can't be played as a global game; skipped");
                     continue;
                 }
-                games.put(type, Entry.read(type, entry, defaults, warn));
+                Entry read = Entry.read(type, entry, defaults, warn);
+                if (read.enabled && !type.isRace() && !type.isGlobalOnly()
+                        && (long) read.goal * read.questionSeconds > read.durationSeconds) {
+                    // Questions nobody else answers run their full time, so one player alone gets this many at most
+                    warn.accept("games." + key + ": a goal of " + read.goal + " can be out of reach. One player answering alone gets at most "
+                            + read.durationSeconds / read.questionSeconds + " questions in " + read.durationSeconds
+                            + "s; raise duration-seconds to " + (long) read.goal * read.questionSeconds + " or lower the goal.");
+                }
+                games.put(type, read);
             }
         }
         List<Integer> announced = file.isList("progress-bar.announce-at")

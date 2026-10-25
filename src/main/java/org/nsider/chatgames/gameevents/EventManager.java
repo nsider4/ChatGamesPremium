@@ -46,8 +46,11 @@ public final class EventManager implements Listener {
 
     /** How often scheduled start times are checked. */
     private static final long CHECK_TICKS = 30 * 20L;
-    /** A step waits this many times, two seconds apart, for a game started by hand to end. */
-    private static final int BUSY_RETRIES = 15;
+    /**
+     * A step waits this many times, two seconds apart, for a game started by hand (or a
+     * global game) to end: ten minutes, longer than any game's own time limit.
+     */
+    private static final int BUSY_RETRIES = 300;
     private static final long FINISH_DELAY_TICKS = 3 * 20L;
 
     public enum StartResult { STARTED, UNKNOWN, ALREADY_RUNNING, NOT_ENOUGH_PLAYERS, CANCELLED }
@@ -169,6 +172,9 @@ public final class EventManager implements Listener {
         if (run != current) return;
         EventStep step = current.definition.getSteps().get(current.step);
         if (plugin.isInGame()) {
+            if (attempt == 0) {
+                broadcast(Msg.of(messages("waiting")).with("%game%", Menus.gameName(step.getType())), current);
+            }
             if (attempt < BUSY_RETRIES) {
                 current.pending = plugin.getScheduler().globalLater(() -> runStep(current, attempt + 1), 40L);
             } else {

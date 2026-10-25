@@ -21,8 +21,9 @@ import org.nsider.inventorymanager.extras.Nullable;
 
 /**
  * A chat game played globally: a stream of questions. Each player can answer each question
- * once; it moves on after {@code answers-per-question} correct answers or
- * {@code question-seconds}, so slower players still get to contribute. Every correct
+ * once; it moves on after {@code answers-per-question} correct answers, once everyone who
+ * can play has answered, or after {@code question-seconds}, so slower players still get to
+ * contribute and a small server isn't left waiting out every question. Every correct
  * answer is +1 for the server. Answers are always hidden, so they can't be copied.
  *
  * <p>Each question is a {@link Game} whose winners are its correct answers, which keeps
@@ -161,7 +162,17 @@ final class QuestionStream extends GlobalSession {
                     .with("%progress%", step.getAfter()).send(player);
             GameSoundManager.playGameSound(player, "win");
         }
-        if (game.isFull()) plugin.getScheduler().global(() -> filled(game));
+        plugin.getScheduler().global(() -> {
+            if (game.isFull() || everyoneAnswered(game)) filled(game);
+        });
+    }
+
+    /** Main/global thread. */
+    private boolean everyoneAnswered(Game game) {
+        for (Player player : manager.players()) {
+            if (!game.hasResult(player.getUniqueId())) return false;
+        }
+        return true;
     }
 
     @Override
