@@ -19,4 +19,5 @@ The plugin jar is `target/ChatGames-Premium-<version>.jar`. The `wiki/` folder i
 
 ## License
 
-[GNU General Public License v3.0](LICENSE).
+Source-available: you can copy, build and modify it for your own servers, but you can't share it
+without my written approval or a paid agreement. See [LICENSE](LICENSE).
