@@ -1,3 +1,12 @@
+# ChatGames-Premium 2.0.2
+
+A small update with fixes and improvements. Nothing to change in your config files.
+
+- **Accents don't matter:** answers ignore accents on letters, so `cafe` wins for `café` and `arana` for `araña`. Players don't need the accent keys of the config language. Marks that make a different word in other scripts (Japanese, Cyrillic) still count.
+- **Friendlier answers:** one trailing `!` or `?` is now allowed, as one trailing full stop already was.
+- **Better update notices:** the update check runs every 12 hours instead of only at startup. The join notice names the new version and the one you run, links the Spigot page, and goes to everyone with `chatgames.admin` (operators by default).
+- **Quieter console:** the "SLF4J: No SLF4J providers were found" lines on startup, and the Paper "Nag author" warning that came with them, are gone.
+
 # ChatGames-Premium 2.0.1
 
 A small update with fixes and improvements. Nothing to change in your config files.

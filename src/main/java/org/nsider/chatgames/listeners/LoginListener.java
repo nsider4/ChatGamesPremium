@@ -6,11 +6,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.nsider.chatgames.ChatGames;
+import org.nsider.chatgames.config.PermissionKey;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
 /**
- * Loads a player's data when they join (and tells operators about updates); saves and drops it when they leave.
+ * Loads a player's data when they join (and tells admins about updates); saves and drops it when they leave.
  */
 public class LoginListener implements Listener {
 
@@ -27,8 +28,11 @@ public class LoginListener implements Listener {
         // Loads (or creates) the player's data off the main thread
         ChatGamesPlayerManager.load(p);
 
-        if(p.isOp() && plugin.isUpdateNeeded()) {
-            MessageUtils.sendMessage(p, "&8[%prefix%&8] &fThere is a new update available on Spigot!");
+        // chatgames.admin defaults to op, and lets servers show it to staff without op too
+        if (plugin.isUpdateNeeded() && p.hasPermission(PermissionKey.ADMIN.getPermission())) {
+            MessageUtils.sendMessage(p, "&8[%prefix%&8] &fChatGames-Premium &e" + plugin.getLatestVersion()
+                    + " &fis available on Spigot &7(you have " + plugin.getDescription().getVersion() + ")&f: &e"
+                    + plugin.getUpdateChecker().getResourceUrl());
         }
     }
 

@@ -27,6 +27,26 @@ class AnswerCheckerTest {
     }
 
     @Test
+    void oneTrailingExclamationOrQuestionMarkIsIgnored() {
+        Round round = word("Creeper");
+        assertEquals(CORRECT, AnswerChecker.check(round, "creeper!", false));
+        assertEquals(CORRECT, AnswerChecker.check(round, "creeper?", false));
+        assertEquals(WRONG, AnswerChecker.check(round, "creeper!!", false));
+        assertEquals(CORRECT, AnswerChecker.check(word("-5"), "-5!", false));
+    }
+
+    @Test
+    void accentsOnLatinLettersAreIgnored() {
+        assertEquals(CORRECT, AnswerChecker.check(word("Café"), "cafe", false));
+        assertEquals(CORRECT, AnswerChecker.check(word("Araña"), "arana", false));
+        assertEquals(CORRECT, AnswerChecker.check(word("Spinne"), "Spínne", true));
+        assertEquals(WRONG_CASE, AnswerChecker.check(word("Électricité"), "electricite", true));
+        // Elsewhere the marks change the word
+        assertEquals(WRONG, AnswerChecker.check(word("が"), "か", false));
+        assertEquals(WRONG, AnswerChecker.check(word("йод"), "иод", false));
+    }
+
+    @Test
     void capitalisationOnlyCountsInCaseSensitiveGames() {
         Round round = word("Creeper");
         assertEquals(WRONG_CASE, AnswerChecker.check(round, "creeper", true));

@@ -61,6 +61,8 @@ public final class ChatGames extends JavaPlugin {
     private static final int SPIGOT_RESOURCE_ID = 107781;
     /** Cached player data is written back every 5 minutes, so a crash loses little. */
     private static final long AUTOSAVE_TICKS = 5 * 60 * 20L;
+    // Servers stay up for weeks, so one check at startup isn't enough
+    private static final long UPDATE_CHECK_TICKS = 12 * 60 * 60 * 20L;
 
     private final Random random = new Random();
 
@@ -88,6 +90,9 @@ public final class ChatGames extends JavaPlugin {
     private ChatGamesExpansion placeholderExpansion;
     private boolean isPlaceHolderAPIEnabled = false;
     private volatile boolean updateNeeded = false;
+    // Set by the update check (async), read on join
+    @Nullable private volatile String latestVersion;
+    private UpdateChecker updateChecker;
     // Set on the main thread, read by async chat threads
     @Setter private volatile boolean inGame = false;
 
@@ -301,11 +306,17 @@ public final class ChatGames extends JavaPlugin {
     private void checkForUpdate() {
         if (!ConfigValue.getBoolean(ConfigPaths.CHECK_UPDATE)) return;
 
-        new UpdateChecker(this, SPIGOT_RESOURCE_ID).getVersion(version -> {
-            this.updateNeeded = UpdateChecker.isNewer(version, getDescription().getVersion());
-            if (updateNeeded) {
-                getLogger().info("There is a new update available on Spigot: " + version);
+        updateChecker = new UpdateChecker(this, SPIGOT_RESOURCE_ID);
+        scheduler.asyncTimer(() -> {
+            String version = updateChecker.fetchVersion();
+            if (version == null || !UpdateChecker.isNewer(version, getDescription().getVersion())) return;
+            // Logged once per new version, not on every check
+            if (!version.equals(latestVersion)) {
+                getLogger().info("ChatGames-Premium " + version + " is available on Spigot (this server runs "
+                        + getDescription().getVersion() + "): " + updateChecker.getResourceUrl());
             }
-        });
+            latestVersion = version;
+            updateNeeded = true;
+        }, 1L, UPDATE_CHECK_TICKS);
     }
 }

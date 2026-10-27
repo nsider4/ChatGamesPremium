@@ -2,6 +2,7 @@ package org.nsider.chatgames.other;
 
 import org.nsider.chatgames.ChatGames;
 import org.nsider.inventorymanager.extras.Nonnull;
+import org.nsider.inventorymanager.extras.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +10,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 
 /**
@@ -39,29 +39,33 @@ public final class UpdateChecker {
     }
 
     /**
-     * Retrieves the latest version of the plugin from SpigotMC asynchronously.
-     * If successful, the version is passed to the provided consumer.
+     * Asks SpigotMC for the latest version. Blocks for up to the timeout, so call it off the main thread.
      *
-     * @param consumer A consumer to handle the retrieved version string.
+     * @return the latest version, or null if SpigotMC couldn't be reached
      */
-    public void getVersion(@Nonnull final Consumer<String> consumer) {
-        plugin.getScheduler().async(() -> {
-            try {
-                URLConnection connection = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId).openConnection();
-                // Without timeouts an unresponsive site would hold an async thread forever
-                connection.setConnectTimeout(TIMEOUT_MILLIS);
-                connection.setReadTimeout(TIMEOUT_MILLIS);
-                try (InputStream inputStream = connection.getInputStream();
-                     Scanner scanner = new Scanner(inputStream, "UTF-8")) {
-
-                    if (scanner.hasNext()) {
-                        consumer.accept(scanner.next());
-                    }
-                }
-            } catch (IOException exception) {
-                plugin.getLogger().log(Level.INFO, "Unable to check for updates: {0}", exception.getMessage());
+    @Nullable
+    public String fetchVersion() {
+        try {
+            URLConnection connection = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId).openConnection();
+            // Without timeouts an unresponsive site would hold an async thread forever
+            connection.setConnectTimeout(TIMEOUT_MILLIS);
+            connection.setReadTimeout(TIMEOUT_MILLIS);
+            try (InputStream inputStream = connection.getInputStream();
+                 Scanner scanner = new Scanner(inputStream, "UTF-8")) {
+                return scanner.hasNext() ? scanner.next() : null;
             }
-        });
+        } catch (IOException exception) {
+            plugin.getLogger().log(Level.INFO, "Unable to check for updates: {0}", exception.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * The page players download the plugin from.
+     */
+    @Nonnull
+    public String getResourceUrl() {
+        return "https://www.spigotmc.org/resources/" + resourceId + "/";
     }
 
     /**
