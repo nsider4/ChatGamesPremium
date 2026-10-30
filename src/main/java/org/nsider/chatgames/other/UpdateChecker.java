@@ -85,6 +85,19 @@ public final class UpdateChecker {
         return false;
     }
 
+    /**
+     * Packs the first three numbers of a version into one long ("2.0.3" is 2_000000_000003), so the
+     * version an admin was last told about fits in a player stat.
+     */
+    public static long versionKey(@Nonnull String version) {
+        int[] parts = numbers(version);
+        long key = 0;
+        for (int i = 0; i < 3; i++) {
+            key = key * 1_000_000L + (i < parts.length ? Math.min(parts[i], 999_999) : 0);
+        }
+        return key;
+    }
+
     private static int[] numbers(String version) {
         String[] parts = version.trim().split("[^0-9]+");
         int count = 0;

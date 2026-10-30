@@ -260,6 +260,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &cPerintah tidak dikenal. Coba yang lain!",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &fFile konfigurasi telah dimuat ulang!",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &cBeberapa file tidak termuat; periksa konsol. File tersebut tetap memakai nilai sebelumnya.",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: baris %line%, kolom %column%",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: file tidak dapat dibaca",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cKamu tidak punya cukup izin untuk perintah ini!",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cHanya pemain yang bisa menjalankan perintah ini!",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &cPemain &f%player% &ctelah dihapus dari database!",

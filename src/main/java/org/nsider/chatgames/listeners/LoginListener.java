@@ -7,7 +7,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.nsider.chatgames.ChatGames;
 import org.nsider.chatgames.config.PermissionKey;
+import org.nsider.chatgames.model.player.ChatGamesPlayer;
 import org.nsider.chatgames.model.player.ChatGamesPlayerManager;
+import org.nsider.chatgames.model.player.Stat;
+import org.nsider.chatgames.other.UpdateChecker;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 
 /**
@@ -30,10 +33,24 @@ public class LoginListener implements Listener {
 
         // chatgames.admin defaults to op, and lets servers show it to staff without op too
         if (plugin.isUpdateNeeded() && p.hasPermission(PermissionKey.ADMIN.getPermission())) {
-            MessageUtils.sendMessage(p, "&8[%prefix%&8] &fChatGames-Premium &e" + plugin.getLatestVersion()
-                    + " &fis available on Spigot &7(you have " + plugin.getDescription().getVersion() + ")&f: &e"
-                    + plugin.getUpdateChecker().getResourceUrl());
+            notifyUpdateOnce(p, plugin.getLatestVersion());
         }
+    }
+
+    /**
+     * Tells an admin about a new version the first time they join after it came out, not on every join.
+     * Queued after their data load on the same thread, so the stored mark is there to check.
+     */
+    private void notifyUpdateOnce(Player p, String version) {
+        long key = UpdateChecker.versionKey(version);
+        ChatGamesPlayerManager.runAfterSaves(() -> {
+            ChatGamesPlayer data = ChatGamesPlayerManager.get(p.getUniqueId());
+            if (data == null || data.getStat(Stat.UPDATE_NOTICE) == key) return;
+            data.setStat(Stat.UPDATE_NOTICE, key);
+            plugin.getScheduler().onPlayer(p, () -> MessageUtils.sendMessage(p, "&8[%prefix%&8] &fChatGames-Premium &e"
+                    + version + " &fis available on Spigot &7(you have " + plugin.getDescription().getVersion()
+                    + ")&f: &e" + plugin.getUpdateChecker().getResourceUrl()));
+        });
     }
 
     @EventHandler

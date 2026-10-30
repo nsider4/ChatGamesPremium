@@ -1,6 +1,6 @@
 name: ChatGames-Premium
 author: Nsider
-version: 2.0.2
+version: 2.0.3
 main: org.nsider.chatgames.ChatGames
 api-version: '1.13'
 # All scheduling goes through ChatGamesScheduler, which uses Folia's region schedulers there

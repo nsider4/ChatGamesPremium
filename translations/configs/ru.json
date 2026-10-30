@@ -260,6 +260,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &cНеизвестная команда. Попробуй что-нибудь другое!",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &fФайлы конфигурации перезагружены!",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &cНекоторые файлы не загрузились; проверь консоль. Эти файлы сохраняют прежние значения.",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: строка %line%, столбец %column%",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: не удалось прочитать файл",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cУ тебя недостаточно прав для этой команды!",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cЭту команду могут выполнять только игроки!",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &cИгрок &f%player% &cудалён из базы данных!",

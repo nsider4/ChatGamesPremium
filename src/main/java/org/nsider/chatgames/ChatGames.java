@@ -9,6 +9,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.nsider.chatgames.api.ChatGamesAPI;
 import org.nsider.chatgames.commands.ChatGamesCommand;
+import org.nsider.chatgames.config.ConfigLoadError;
 import org.nsider.chatgames.config.ConfigManager;
 import org.nsider.chatgames.config.settings.ConfigPaths;
 import org.nsider.chatgames.config.settings.ConfigValue;
@@ -49,6 +50,7 @@ import org.nsider.chatgames.utils.management.LogUtils;
 import org.nsider.chatgames.utils.messages.MessageUtils;
 import org.nsider.inventorymanager.extras.Nullable;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -233,13 +235,13 @@ public final class ChatGames extends JavaPlugin {
      * messages, the enabled games, race targets, the game rotation timer and the translation language.
      * Database settings and table names only change on restart.
      *
-     * @return false if any file failed to load (those files keep their previous values)
+     * @return the files that failed to load (they keep their previous values); empty if all loaded
      */
-    public boolean reloadAll() {
+    public List<ConfigLoadError> reloadAll() {
         String oldLanguage = ConfigValue.getString(ConfigPaths.LANGUAGE);
 
         mainTask.cancel();
-        boolean success = ConfigManager.reload();
+        List<ConfigLoadError> errors = ConfigManager.reload();
 
         String newLanguage = ConfigValue.getString(ConfigPaths.LANGUAGE);
         if (newLanguage != null && !newLanguage.equalsIgnoreCase(oldLanguage)) {
@@ -257,7 +259,7 @@ public final class ChatGames extends JavaPlugin {
         mainTask.reloadEnabledGames();
         startGameRotation();
         leaderboardCache.start();
-        return success;
+        return errors;
     }
 
     private void startGameRotation() {

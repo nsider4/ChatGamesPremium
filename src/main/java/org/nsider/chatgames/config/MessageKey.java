@@ -16,6 +16,16 @@ public enum MessageKey {
             "config_reload_failed",
             "&cSome files failed to load; check the console. Those files keep their previous values."
     ),
+    CONFIG_RELOAD_FAILED_FILE(
+            "messages",
+            "config_reload_failed_file",
+            "&8- &e%file%&7: line %line%, column %column%"
+    ),
+    CONFIG_RELOAD_FAILED_UNREADABLE(
+            "messages",
+            "config_reload_failed_unreadable",
+            "&8- &e%file%&7: the file could not be read"
+    ),
     UNKNOWN_COMMAND(
             "messages",
             "unknown_command",

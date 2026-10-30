@@ -260,6 +260,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &c未知命令。换一个试试吧！",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &f配置文件已重新加载！",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &c部分文件加载失败，请查看控制台。这些文件保留之前的值。",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: 第 %line% 行，第 %column% 列",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: 无法读取该文件",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &c你没有足够的权限执行此命令！",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &c此命令只能由玩家执行！",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &c玩家 &f%player% &c已从数据库中删除！",

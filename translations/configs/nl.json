@@ -261,6 +261,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &cOnbekend commando. Probeer iets anders!",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &fDe configuratiebestanden zijn herladen!",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &cSommige bestanden konden niet laden; kijk in de console. Die bestanden houden hun vorige waarden.",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: regel %line%, kolom %column%",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: het bestand kon niet worden gelezen",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cJe hebt niet genoeg rechten om dit commando uit te voeren!",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cDit commando kan alleen door spelers worden uitgevoerd!",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &cDe speler &f%player% &cis uit de database verwijderd!",

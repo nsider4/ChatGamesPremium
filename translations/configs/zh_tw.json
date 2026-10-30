@@ -261,6 +261,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &c未知命令。換一個試試吧！",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &f配置檔案已重新載入！",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &c部分檔案載入失敗，請檢視控制檯。這些檔案保留之前的值。",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: 第 %line% 行，第 %column% 欄",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: 無法讀取該檔案",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &c你沒有足夠的許可權執行此命令！",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &c此命令只能由玩家執行！",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &c玩家 &f%player% &c已從資料庫中刪除！",

@@ -260,6 +260,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &c不明なコマンドです。別のものを試してください！",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &f設定ファイルを再読み込みしました！",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &c一部のファイルを読み込めませんでした。コンソールを確認してください。それらのファイルは前の値のままです。",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: %line%行目、%column%列目",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: ファイルを読み込めませんでした",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cこのコマンドを実行する権限がありません！",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cこのコマンドはプレイヤーしか実行できません！",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &cプレイヤー &f%player% &cをデータベースから削除しました！",

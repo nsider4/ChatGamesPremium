@@ -261,6 +261,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &cComando desconhecido. Tente outra coisa!",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &fOs arquivos de configuração foram recarregados!",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &cAlguns arquivos não carregaram; veja o console. Esses arquivos mantêm os valores anteriores.",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: linha %line%, coluna %column%",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: não foi possível ler o arquivo",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cVocê não tem permissão para executar este comando!",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cEste comando só pode ser executado por jogadores!",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &cO jogador &f%player% &cfoi removido do banco de dados!",

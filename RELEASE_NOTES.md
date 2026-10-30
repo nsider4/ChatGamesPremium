@@ -1,3 +1,11 @@
+# ChatGames-Premium 2.0.3
+
+A small update with fixes and improvements. Nothing to change in your config files.
+
+- **Reload names the broken file:** when `/chatgames reload` fails, the reply now lists each file that didn't load and the line and column where the YAML breaks, so staff in game can fix it without opening the console.
+- **A broken config.yml no longer resets your settings:** before, a typo in config.yml made a reload quietly fall back to every default setting while saying it worked. Now config.yml keeps its previous values and is listed with the other broken files, the same as the rest.
+- **Update notice once per version:** an admin is told about a new version the first time they join after it comes out, not every time they join. The mark is saved with their data, so a restart doesn't bring it back. The console still logs it.
+
 # ChatGames-Premium 2.0.2
 
 A small update with fixes and improvements. Nothing to change in your config files.

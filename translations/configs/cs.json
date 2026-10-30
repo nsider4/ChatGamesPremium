@@ -260,6 +260,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &cNeznámý příkaz. Zkus něco jiného!",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &fKonfigurační soubory byly znovu načteny!",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &cNěkteré soubory se nenačetly; podívej se do konzole. Tyto soubory si ponechají předchozí hodnoty.",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: řádek %line%, sloupec %column%",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: soubor nelze přečíst",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cNemáš dostatečná oprávnění pro tento příkaz!",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cTento příkaz mohou použít jen hráči!",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &cHráč &f%player% &cbyl odstraněn z databáze!",

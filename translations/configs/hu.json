@@ -260,6 +260,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &cIsmeretlen parancs. Próbálj valami mást!",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &fA konfigurációs fájlok újratöltve!",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &cNéhány fájl nem töltődött be; nézd meg a konzolt. Ezek a fájlok megtartják korábbi értékeiket.",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: %line%. sor, %column%. oszlop",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: a fájl nem olvasható",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cNincs elég jogod ehhez a parancshoz!",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cEzt a parancsot csak játékosok futtathatják!",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&c&8[%prefix%&8] &f%player% &cjátékos törölve az adatbázisból!",

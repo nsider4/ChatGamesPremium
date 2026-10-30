@@ -24,6 +24,8 @@ public class YamlConfig extends YamlConfiguration {
     @Getter private final File file;
     private final String path;
     private final ChatGames plugin;
+    /** Why the last {@link #reload()} failed, or null if it worked. */
+    @Getter private ConfigLoadError lastError;
 
     /**
      * Constructs a new YamlConfig instance.
@@ -51,8 +53,10 @@ public class YamlConfig extends YamlConfiguration {
         } catch (IOException | InvalidConfigurationException e) {
             // The message says where the YAML is broken (line and column)
             this.plugin.getLogger().log(Level.SEVERE, "Failed to load configuration file " + this.path + "! " + e.getMessage());
+            this.lastError = ConfigLoadError.of(this.path, e);
             return false;
         }
+        this.lastError = null;
         return true;
     }
 

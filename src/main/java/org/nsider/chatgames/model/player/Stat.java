@@ -35,6 +35,9 @@ public final class Stat {
     /** Milestones reached but not yet paid out, as "milestone_pending.<points>" = 1. */
     public static final String MILESTONE_PENDING_PREFIX = "milestone_pending.";
 
+    /** The newest version this admin was told about on join, as an {@code UpdateChecker.versionKey}. */
+    public static final String UPDATE_NOTICE = "update_notice";
+
     private Stat() {}
 
     public static String milestonePending(int points) {

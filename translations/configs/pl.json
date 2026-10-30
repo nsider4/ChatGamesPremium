@@ -260,6 +260,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &cNieznana komenda. Spróbuj czegoś innego!",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &fPliki konfiguracyjne zostały przeładowane!",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &cNiektóre pliki nie załadowały się; sprawdź konsolę. Te pliki zachowują poprzednie wartości.",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: wiersz %line%, kolumna %column%",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: nie można odczytać pliku",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cNie masz wystarczających uprawnień, aby użyć tej komendy!",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cTej komendy mogą używać tylko gracze!",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &cGracz &f%player% &czostał usunięty z bazy danych!",

@@ -1,10 +1,18 @@
 package org.nsider.chatgames.config;
 
 import lombok.Getter;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.nsider.chatgames.ChatGames;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -107,31 +115,44 @@ public class ConfigManager {
     /**
      * Reloads all configuration files and the messages built from them.
      *
-     * @return true if all configurations were reloaded successfully, false otherwise.
+     * @return the files that failed to load (they keep their previous values); empty if all loaded
      */
-    public static boolean reload() {
-        plugin.reloadConfig();
-        // reloadConfig() replaces the FileConfiguration instance
-        config = plugin.getConfig();
+    public static List<ConfigLoadError> reload() {
+        List<ConfigLoadError> errors = new ArrayList<>();
+        ConfigLoadError configError = checkConfigYml();
+        if (configError == null) {
+            plugin.reloadConfig();
+            // reloadConfig() replaces the FileConfiguration instance
+            config = plugin.getConfig();
+        } else {
+            errors.add(configError);
+        }
 
-        // Non-short-circuiting so one broken file doesn't stop the others reloading
-        boolean success = messagesConfig.reload()
-                & games.reload()
-                & addons.reload()
-                & words.reload()
-                & rewards.reload()
-                & races.reload()
-                & milestones.reload()
-                & globalGames.reload()
-                & presets.reload()
-                & challenges.reload()
-                & streaks.reload()
-                & events.reload()
-                & menus.reload()
-                & discord.reload();
+        // Every file is tried, so one broken file doesn't stop the others reloading
+        for (YamlConfig file : new YamlConfig[]{messagesConfig, games, addons, words, rewards, races, milestones,
+                globalGames, presets, challenges, streaks, events, menus, discord}) {
+            if (!file.reload()) errors.add(file.getLastError());
+        }
 
         messages = new Messages();
-        return success;
+        return errors;
+    }
+
+    /**
+     * Bukkit's reloadConfig() swallows a broken config.yml and carries on with every setting at its
+     * default, so it is parsed here first and only reloaded if it is valid.
+     *
+     * @return why config.yml can't be loaded, or null if it can
+     */
+    private static ConfigLoadError checkConfigYml() {
+        File file = new File(plugin.getDataFolder(), "config.yml");
+        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+            new YamlConfiguration().load(reader);
+            return null;
+        } catch (IOException | InvalidConfigurationException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to load configuration file config.yml! " + e.getMessage());
+            return ConfigLoadError.of("config.yml", e);
+        }
     }
 
 

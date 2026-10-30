@@ -260,6 +260,8 @@
     "&8[%prefix%&8] &cUnknown command. Try something else!": "&8[%prefix%&8] &cOkänt kommando. Prova något annat!",
     "&8[%prefix%&8] &fThe configuration files have been reloaded!": "&8[%prefix%&8] &fKonfigurationsfilerna har laddats om!",
     "&8[%prefix%&8] &cSome files failed to load; check the console. Those files keep their previous values.": "&8[%prefix%&8] &cVissa filer laddades inte; kolla konsolen. De filerna behåller sina tidigare värden.",
+    "&8- &e%file%&7: line %line%, column %column%": "&8- &e%file%&7: rad %line%, kolumn %column%",
+    "&8- &e%file%&7: the file could not be read": "&8- &e%file%&7: filen kunde inte läsas",
     "&8[%prefix%&8] &cYou don`t have enough permissions to execute this command!": "&8[%prefix%&8] &cDu har inte tillräckliga behörigheter för detta kommando!",
     "&8[%prefix%&8] &cThis command can only be executed by players!": "&8[%prefix%&8] &cBara spelare kan köra detta kommando!",
     "&8[%prefix%&8] &cThe player &f%player% &chas been removed from the database!": "&8[%prefix%&8] &cSpelaren &f%player% &char tagits bort från databasen!",
