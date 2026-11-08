@@ -82,4 +82,31 @@ class AnswerCheckerTest {
         assertEquals(CORRECT, AnswerChecker.check(round, "Red, Blue", true));
         assertEquals(WRONG_CASE, AnswerChecker.check(round, "red, blue", true));
     }
+
+    @Test
+    void colourAddedByChatPluginsIsIgnored() {
+        Round round = word("Diamond Sword");
+        // ColorChat / EssentialsX turn the message into coloured text before other plugins see it
+        assertEquals(CORRECT, AnswerChecker.check(round, "§bDiamond Sword", true));
+        assertEquals(CORRECT, AnswerChecker.check(round, "§l§aDiamond §cSword§r", true));
+        assertEquals(CORRECT, AnswerChecker.check(round, "§x§f§f§5§7§3§3Diamond Sword", true));
+        // Codes the player typed themselves
+        assertEquals(CORRECT, AnswerChecker.check(round, "&bDiamond Sword", true));
+        assertEquals(CORRECT, AnswerChecker.check(round, "&#FF5733Diamond Sword", true));
+        assertEquals(WRONG_CASE, AnswerChecker.check(round, "§bdiamond sword", true));
+    }
+
+    @Test
+    void anAmpersandInTheAnswerStillCounts() {
+        assertEquals(CORRECT, AnswerChecker.check(word("R&B"), "R&B", true));
+        assertEquals(CORRECT, AnswerChecker.check(word("R&B"), "§aR&B", true));
+        assertEquals(WRONG, AnswerChecker.check(word("R&B"), "R", true));
+    }
+
+    @Test
+    void invisibleCharactersAreIgnored() {
+        // Anti-spam and chat plugins slip zero-width characters in; resource-pack glyph plugins too
+        assertEquals(CORRECT, AnswerChecker.check(word("Creeper"), "Cre​eper", true));
+        assertEquals(CORRECT, AnswerChecker.check(word("Creeper"), "﻿Creeper‍", true));
+    }
 }

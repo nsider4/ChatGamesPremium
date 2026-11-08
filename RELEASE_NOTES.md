@@ -1,3 +1,9 @@
+# ChatGames-Premium 2.0.4
+
+A small update with a fix for chat plugins. Nothing to change in your config files.
+
+- **Answers work with chat plugins:** with chat plugins that colour or decorate messages (EssentialsX Chat, chat-colour plugins, resource-pack glyph plugins like Nexo), right answers were sometimes not recognised, because the plugin had added colour codes to the message before ChatGames read it. ChatGames now reads chat before other plugins change it, and ignores colour codes and invisible characters in answers. A player who types colour codes (`&bdiamond`) also still wins, and an answer that really has a `&` in it (`R&B`) still matches as typed.
+
 # ChatGames-Premium 2.0.3
 
 A small update with fixes and improvements. Nothing to change in your config files.

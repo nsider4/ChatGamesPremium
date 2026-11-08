@@ -34,6 +34,8 @@ let bot = null;
 let autoplay = false;
 // Answer like a person: well after the 400 ms anti-macro limit
 const ANSWER_DELAY_MS = 900;
+// Typed before every autoplay answer, e.g. "&b" to answer in colour through a chat plugin
+const ANSWER_PREFIX = process.env.BOT_ANSWER_PREFIX || '';
 
 function connect() {
   return new Promise((resolve, reject) => {
@@ -287,8 +289,8 @@ let rememberedList = null;
 function answer(text, delay = ANSWER_DELAY_MS) {
   setTimeout(() => {
     if (!autoplay) return;
-    console.log(`[BOT ${username}] >> ${text}`);
-    bot.chat(text);
+    console.log(`[BOT ${username}] >> ${ANSWER_PREFIX}${text}`);
+    bot.chat(ANSWER_PREFIX + text);
   }, delay);
 }
 
